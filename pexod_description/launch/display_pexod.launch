@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+	<include file="$(find pexod_description)/launch/pexod.launch" />
+	<arg name="model" />
+	<arg name="gui" default="true" />
+	<param name="use_gui" value="$(arg gui)" />
+	<!-- Start state publishers -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+	<!-- Start RVIZ -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find pexod_description)/config/pexod_description.rviz" />
+</launch>
