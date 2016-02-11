@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hexapod_driver)
 
+# Tell CMake where to find "FindXXX.cmake"
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   dynamixel_control_hw
 )
+
+find_package(HexapodController QUIET COMPONENTS hexapod_controller_simple)
 
 ##Needed for ros packages
 catkin_package(CATKIN_DEPENDS roscpp rospy dynamixel_control_hw)
