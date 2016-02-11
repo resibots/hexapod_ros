@@ -33,15 +33,15 @@
 	<xacro:property name="joint_vel" value="7.0"/>
 	<xacro:property name="joint_dmp" value="0.0"/>
 
-	<xacro:include filename="$(find pexod_description)/urdf/pexod_visuals_collisions.xacro" />
+	<xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
 	<xacro:if value="${use_gazebo}">
-		<!-- <xacro:include filename="$(find pexod_description)/urdf/pexod_gazebo.xacro" /> -->
+		<!-- <xacro:include filename="$(find hexapod_description)/urdf/pexod_gazebo.xacro" /> -->
 	</xacro:if>
 
 	<!-- Load xacro modules/parts of the robot -->
-	<xacro:include filename="$(find pexod_description)/urdf/modules/body.xacro" />
-	<xacro:include filename="$(find pexod_description)/urdf/modules/leg.xacro" />
-	<xacro:include filename="$(find pexod_description)/urdf/modules/legs.xacro" />
-	<!-- <xacro:include filename="$(find pexod_description)/urdf/modules/imu.xacro" /> -->
-	<!-- <xacro:include filename="$(find pexod_description)/urdf/modules/cameras.xacro" /> -->
+	<xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
+	<xacro:include filename="$(find hexapod_description)/urdf/modules/leg.xacro" />
+	<xacro:include filename="$(find hexapod_description)/urdf/modules/legs.xacro" />
+	<!-- <xacro:include filename="$(find hexapod_description)/urdf/modules/imu.xacro" /> -->
+	<!-- <xacro:include filename="$(find hexapod_description)/urdf/modules/cameras.xacro" /> -->
 </robot>

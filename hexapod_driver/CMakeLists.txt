@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(pexod_driver)
+project(hexapod_driver)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
@@ -12,11 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(CATKIN_DEPENDS roscpp rospy dynamixel_control_hw)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
-add_executable(pexod_driver src/pexod_driver.cpp)
-target_link_libraries(pexod_driver ${catkin_LIBRARIES})
-add_dependencies(pexod_driver ${catkin_EXPORTED_TARGETS})
+add_executable(hexapod_driver src/hexapod_driver.cpp)
+target_link_libraries(hexapod_driver ${catkin_LIBRARIES})
+add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS pexod_driver
+install(TARGETS hexapod_driver
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
