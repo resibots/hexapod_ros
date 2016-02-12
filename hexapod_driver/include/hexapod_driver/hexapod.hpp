@@ -16,7 +16,6 @@ namespace hexapod_ros {
 
         void init();
         void reset();
-        void position_zero();
         void move(std::vector<double> ctrl, double duration);
 
     protected:

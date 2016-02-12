@@ -49,40 +49,6 @@ void Hexapod::reset()
     //TO-DO: Raise hexapod softly
 }
 
-// void Hexapod::position_zero()
-// {
-//     for (size_t i = 0; i < 6; i++) {
-//         if (!_traj_clients[i]->isServerConnected()) {
-//             ROS_WARN_STREAM("leg_" << i << " actionlib server is not connected!");
-//             continue;
-//         }
-//
-//         _traj_msgs[i].points.clear();
-//
-//         trajectory_msgs::JointTrajectoryPoint point;
-//         point.positions.clear();
-//
-//         point.positions.push_back(0.0);
-//         point.positions.push_back(0.0);
-//         point.positions.push_back(0.0);
-//
-//         point.time_from_start = ros::Duration(0.2);
-//
-//         _traj_msgs[i].points.push_back(point);
-//
-//         _traj_msgs[i].header.stamp = ros::Time::now();
-//
-//         control_msgs::FollowJointTrajectoryGoal goal;
-//         goal.trajectory = _traj_msgs[i];
-//         _traj_clients[i]->sendGoal(goal);
-//
-//         // TO-DO: blocking duration in params
-//         _traj_clients[i]->waitForResult(ros::Duration(1.0));
-//         if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
-//             ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
-//     }
-// }
-
 void Hexapod::move(std::vector<double> ctrl, double duration)
 {
     // time step for trajectory
