@@ -70,6 +70,7 @@ void Hexapod::move(std::vector<double> ctrl, double duration)
             trajectory_msgs::JointTrajectoryPoint point;
             point.positions.clear();
 
+            // Should update HexapodControllerSimple to output proper angles
             point.positions.push_back(-pos[i * 3]);
             point.positions.push_back(pos[i * 3 + 1]);
             point.positions.push_back(-pos[i * 3 + 2]);
