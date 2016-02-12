@@ -5,7 +5,7 @@
   <!-- URDF robot description -->
   <include file="$(find hexapod_description)/launch/pexod.launch" />
   <!-- Publish robot's state in the tf tree -->
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
   <!-- Parameters for the hardware interface and controllers -->
   <rosparam file="$(find hexapod_driver)/config/pexod.yaml"/>
