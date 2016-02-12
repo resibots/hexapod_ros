@@ -20,7 +20,7 @@
                 <axis xyz="0 0 1"/>
             </xacro:if>
             <xacro:if value="${index == 2 or index == 1 or index == 0}"> -->
-                <axis xyz="0 0 -1"/>
+                <axis xyz="0 0 1"/>
             <!-- </xacro:if> -->
             <dynamics damping="${joint_dmp}"/>
         </joint>
@@ -40,10 +40,10 @@
             <limit effort="${joint_eff}" lower="${-joint_lim2}" upper="${joint_lim2}" velocity="${joint_vel}"/>
             <origin rpy="0 0 0" xyz="0 ${sign*leg1_length} 0"/>
             <xacro:if value="${index == 5 or index == 4 or index == 3}">
-                <axis xyz="1 0 0"/>
+                <axis xyz="-1 0 0"/>
             </xacro:if>
             <xacro:if value="${index == 2 or index == 1 or index == 0}">
-                <axis xyz="-1 0 0"/>
+                <axis xyz="1 0 0"/>
             </xacro:if>
             <dynamics damping="${joint_dmp}"/>
         </joint>
