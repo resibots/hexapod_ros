@@ -3,6 +3,7 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <std_srvs/Empty.h>
+#include <thread>
 
 using namespace hexapod_ros;
 
@@ -68,7 +69,7 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
         reset_odom();
     }
     // time step for trajectory
-    double step = 0.0005;
+    double step = 0.03;
 
     // Initialize controller
     hexapod_controller::HexapodControllerSimple controller(ctrl, std::vector<int>());
@@ -91,12 +92,13 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
             point.positions.push_back(pos[i * 3 + 1]);
             point.positions.push_back(-pos[i * 3 + 2]);
 
-            point.time_from_start = ros::Duration(t);
+            point.time_from_start = ros::Duration(t + 0.5);
 
             _traj_msgs[i].points.push_back(point);
         }
     }
 
+    std::vector<std::thread> threads;
     // Send messages/goals
     for (size_t i = 0; i < 6; i++) {
         if (!_traj_clients[i]->isServerConnected()) {
@@ -104,11 +106,16 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
             continue;
         }
 
-        _traj_msgs[i].header.stamp = ros::Time::now();
+        threads.push_back(std::thread(&Hexapod::_test, *this, i, duration));
 
-        control_msgs::FollowJointTrajectoryGoal goal;
-        goal.trajectory = _traj_msgs[i];
-        _traj_clients[i]->sendGoal(goal);
+        // _traj_msgs[i].header.stamp = ros::Time::now();
+        //
+        // control_msgs::FollowJointTrajectoryGoal goal;
+        // goal.trajectory = _traj_msgs[i];
+        // _traj_clients[i]->sendGoal(goal);
+    }
+    for (size_t i = 0; i < threads.size(); i++) {
+        threads[i].join();
     }
 
     // for (size_t i = 0; i < 6; i++) {
@@ -121,6 +128,19 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     //     if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
     //         ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
     // }
+}
+
+void Hexapod::_test(size_t i, double duration)
+{
+    _traj_msgs[i].header.stamp = ros::Time::now();
+
+    control_msgs::FollowJointTrajectoryGoal goal;
+    goal.trajectory = _traj_msgs[i];
+    _traj_clients[i]->sendGoal(goal);
+
+    _traj_clients[i]->waitForResult(ros::Duration(duration + 0.5));
+    if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
+        ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
 }
 
 void Hexapod::reset_odom()

@@ -24,6 +24,7 @@ namespace hexapod_ros {
         tf::Transform transform();
 
     protected:
+        void _test(size_t i, double duration);
         // ROS node handle
         ros::NodeHandle _nh;
         // Store the values of parameters for this ROS node
