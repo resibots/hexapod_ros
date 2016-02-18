@@ -21,7 +21,6 @@ namespace hexapod_ros {
         void zero();
         void move(std::vector<double> ctrl, double duration, bool reset = true);
         void reset_odom();
-        tf::Vector3 position();
         tf::Transform transform();
 
     protected:

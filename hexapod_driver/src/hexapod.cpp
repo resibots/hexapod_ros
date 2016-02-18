@@ -28,7 +28,7 @@ void Hexapod::init()
     n_p.param("Odom", _odom_frame, std::string("/odom"));
     n_p.param("BaseLink", _base_link_frame, std::string("/base_link"));
     n_p.param("OdomEnable", _odom_enable, false);
-    n_p.param("MoCapOdomEnable", _mocap_odom_enable, false);
+    n_p.param("MoCapOdomEnable", _mocap_odom_enable, true);
 
     if (_odom_enable && _mocap_odom_enable) {
         ROS_WARN_STREAM("You have enabled both the motion capture and the visual odometry! Using visual odometry for measuring..");
@@ -294,20 +294,10 @@ void Hexapod::reset_odom()
     }
 }
 
-tf::Vector3 Hexapod::position()
-{
-    _pos_update();
-    auto p = _pos.getOrigin() - _init_pos.getOrigin();
-    p[2] = _pos.getOrigin()[2];
-    return p;
-}
-
 tf::Transform Hexapod::transform()
 {
     _pos_update();
-    auto p = _pos.getOrigin() - _init_pos.getOrigin();
-    p[2] = _pos.getOrigin()[2];
-    return tf::Transform(_pos.getRotation(), p);
+    return _init_pos.inverse() * _pos;
 }
 
 void Hexapod::_pos_update()
@@ -316,7 +306,7 @@ void Hexapod::_pos_update()
     ros::Time start_t = ros::Time::now();
     while (_nh.ok()) {
         try {
-            listener.lookupTransform(_base_link_frame, _odom_frame, ros::Time(0), _pos);
+            listener.lookupTransform(_odom_frame, _base_link_frame, ros::Time(0), _pos);
             break;
         }
         catch (tf::TransformException ex) {
