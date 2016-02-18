@@ -46,7 +46,7 @@ dynamixel_controllers:
       - leg_5_2_3
 
 dynamixel_control_hw:
-  loop_frequency: 1000
+  loop_frequency: 50
   cycle_time_error_threshold: 0.05
   serial_interface: /dev/ttyACM0
   baudrate: 1000000 # in bauds

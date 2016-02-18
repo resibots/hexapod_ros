@@ -13,18 +13,21 @@ namespace hexapod_ros {
         using trajectory_client = actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction>;
 
         Hexapod(ros::NodeHandle nh, std::string ns = "/dynamixel_controllers");
-        ~Hexapod() {}
+        ~Hexapod();
 
         void init();
+        void relax();
         void reset();
+        void zero();
         void move(std::vector<double> ctrl, double duration, bool reset = true);
         void reset_odom();
-        void pos_update();
         tf::Vector3 position();
         tf::Transform transform();
 
     protected:
-        void _test(size_t i, double duration);
+        void _pos_update();
+        void _send_trajectories(double duration);
+        void _send_trajectory(size_t i, double duration);
         // ROS node handle
         ros::NodeHandle _nh;
         // Store the values of parameters for this ROS node
