@@ -85,7 +85,7 @@ void Hexapod::relax()
             point.positions.push_back(0.0);
             double a = (duration - t) / duration;
             double b = t / duration;
-            point.positions.push_back(a * M_PI_4 / 6.0 + b * M_PI_2);
+            point.positions.push_back(a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.3));
             point.positions.push_back(0.0);
 
             point.time_from_start = ros::Duration(t);
