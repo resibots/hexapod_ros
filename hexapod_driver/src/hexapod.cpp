@@ -57,7 +57,6 @@ void Hexapod::init()
     ROS_INFO_STREAM("Trajectory actionlib controllers initialized!");
 
     // Init ROS related
-
     if (_odom_enable) {
         // create publisher to reset UKF filter (robot_localization)
         _reset_filter_pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/set_pose", 1000);
@@ -66,6 +65,11 @@ void Hexapod::init()
     // Reset
     ROS_INFO_STREAM("Reset...");
     reset();
+
+    // Get odom transformation
+    if (_odom_enable || _mocap_odom_enable) {
+        reset_odom();
+    }
 }
 
 void Hexapod::relax()
@@ -81,7 +85,6 @@ void Hexapod::relax()
             trajectory_msgs::JointTrajectoryPoint point;
             point.positions.clear();
 
-            // Should update HexapodControllerSimple to output proper angles
             point.positions.push_back(0.0);
             double a = (duration - t) / duration;
             double b = t / duration;
@@ -111,7 +114,6 @@ void Hexapod::reset()
         trajectory_msgs::JointTrajectoryPoint point;
         point.positions.clear();
 
-        // Should update HexapodControllerSimple to output proper angles
         point.positions.push_back(0.0);
         point.positions.push_back(M_PI_2);
         point.positions.push_back(256 * M_PI / 2048.0);
@@ -134,7 +136,6 @@ void Hexapod::reset()
         trajectory_msgs::JointTrajectoryPoint point;
         point.positions.clear();
 
-        // Should update HexapodControllerSimple to output proper angles
         point.positions.push_back(0.0);
         point.positions.push_back(0.0);
         point.positions.push_back(256 * M_PI / 2048.0);
@@ -157,7 +158,6 @@ void Hexapod::reset()
         trajectory_msgs::JointTrajectoryPoint point;
         point.positions.clear();
 
-        // Should update HexapodControllerSimple to output proper angles
         point.positions.push_back(0.0);
         point.positions.push_back(0.0);
         point.positions.push_back(0.0);
@@ -182,7 +182,6 @@ void Hexapod::zero()
         trajectory_msgs::JointTrajectoryPoint point;
         point.positions.clear();
 
-        // Should update HexapodControllerSimple to output proper angles
         point.positions.push_back(0.0);
         point.positions.push_back(0.0);
         point.positions.push_back(0.0);
@@ -199,7 +198,6 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
 {
     // Start from zero
     zero();
-    ros::Duration(0.5).sleep();
 
     if (reset && (_odom_enable || _mocap_odom_enable)) {
         reset_odom();
@@ -237,7 +235,6 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     _send_trajectories(duration);
 
     // Go back to zero
-    ros::Duration(0.5).sleep();
     zero();
 }
 
@@ -251,7 +248,7 @@ void Hexapod::reset_odom()
             ROS_INFO_STREAM("reset_odom sent");
         }
         else {
-            ROS_INFO_STREAM("Failed to reset odometry");
+            ROS_ERROR_STREAM("Failed to reset odometry");
         }
         // reset UKF filter (robot_localization)
         // by publishing a PoseWithCovarianceStamped message
@@ -282,7 +279,7 @@ void Hexapod::reset_odom()
             ROS_INFO_STREAM("odom_transform_restart sent");
         }
         else {
-            ROS_INFO_STREAM("Failed to call odom_transform_restart");
+            ROS_ERROR_STREAM("Failed to call odom_transform_restart");
         }
     }
 
@@ -310,7 +307,7 @@ void Hexapod::_pos_update()
             break;
         }
         catch (tf::TransformException ex) {
-            ROS_WARN_STREAM("Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
+            ROS_DEBUG_STREAM("Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
         }
         ros::Duration(0.001).sleep();
         if ((ros::Time::now() - start_t) > ros::Duration(1.0)) {

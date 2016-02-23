@@ -1,7 +1,7 @@
 dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
-    publish_rate: 1000
+    publish_rate: 50
 
   leg_0_controller:
     type: position_controllers/JointTrajectoryController
@@ -47,7 +47,7 @@ dynamixel_controllers:
 
 dynamixel_control_hw:
   loop_frequency: 50
-  cycle_time_error_threshold: 0.05
+  cycle_time_error_threshold: 0.1
   serial_interface: /dev/ttyACM0
   baudrate: 1000000 # in bauds
   dynamixel_timeout: 0.005 # in seconds
@@ -73,24 +73,43 @@ dynamixel_control_hw:
     leg_5_2_3: 26
 
   hardware_corrections:
-    "1": -256
-    "11": 0
-    "21": 1024
-    "2": 0
-    "12": 0
-    "22": 1024
-    "3": 256
-    "13": 0
-    "23": 1024
-    "4": -256
-    "14": 0
-    "24": 1024
-    "5": 0
-    "15": 0
-    "25": 1024
-    "6": 256
-    "16": 0
-    "26": 1024
+    "1": 2.74889357189
+    "11": 3.14159265359
+    "21": 4.71238898038
+    "2": 3.14159265359
+    "12": 3.14159265359
+    "22": 4.71238898038
+    "3": 3.53429173529
+    "13": 3.14159265359
+    "23": 4.71238898038
+    "4": 2.74889357189
+    "14": 3.14159265359
+    "24": 4.71238898038
+    "5": 3.14159265359
+    "15": 3.14159265359
+    "25": 4.71238898038
+    "6": 3.53429173529
+    "16": 3.14159265359
+    "26": 4.71238898038
+
+    # "1": -256
+    # "11": 0
+    # "21": 1024
+    # "2": 0
+    # "12": 0
+    # "22": 1024
+    # "3": 256
+    # "13": 0
+    # "23": 1024
+    # "4": -256
+    # "14": 0
+    # "24": 1024
+    # "5": 0
+    # "15": 0
+    # "25": 1024
+    # "6": 256
+    # "16": 0
+    # "26": 1024
 
     # "1": 0.27941900115
     # "11": 0.0

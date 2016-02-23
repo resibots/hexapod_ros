@@ -31,8 +31,16 @@ add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp)
 target_link_libraries(hexapod_driver ${catkin_LIBRARIES} ${HexapodController_LIBRARIES})
 add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
+add_library(hexapod_control src/hexapod.cpp)
+target_link_libraries(hexapod_control ${catkin_LIBRARIES} ${HexapodController_LIBRARIES})
+add_dependencies(hexapod_control ${catkin_EXPORTED_TARGETS})
+
 install(TARGETS hexapod_driver
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS hexapod_control
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 # install(DIRECTORY launch
