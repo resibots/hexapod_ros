@@ -21,18 +21,18 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
-find_package(HexapodController QUIET COMPONENTS hexapod_controller_simple)
+find_package(HexapodController QUIET) # COMPONENTS hexapod_controller_simple)
 
 ##Needed for ros packages
 catkin_package(CATKIN_DEPENDS roscpp rospy dynamixel_control_hw std_msgs std_srvs trajectory_msgs control_msgs actionlib_msgs actionlib tf geometry_msgs)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${HexapodController_INCLUDE_DIRS})
 add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp)
-target_link_libraries(hexapod_driver ${catkin_LIBRARIES} ${HexapodController_LIBRARIES})
+target_link_libraries(hexapod_driver ${catkin_LIBRARIES}) # ${HexapodController_LIBRARIES})
 add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
 add_library(hexapod_control src/hexapod.cpp)
-target_link_libraries(hexapod_control ${catkin_LIBRARIES} ${HexapodController_LIBRARIES})
+target_link_libraries(hexapod_control ${catkin_LIBRARIES}) # ${HexapodController_LIBRARIES})
 add_dependencies(hexapod_control ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS hexapod_driver
