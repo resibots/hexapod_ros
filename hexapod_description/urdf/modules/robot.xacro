@@ -10,6 +10,7 @@
 	<xacro:property name="body_mass" value="1.031"/>
 	<xacro:property name="body_length" value="0.24"/>
 	<xacro:property name="body_width" value="0.2"/>
+	<xacro:property name="front_back_legs_space" value="0.12"/>
 	<xacro:property name="body_height" value="0.04"/>
 
 	<xacro:property name="leg1_width" value="0.02"/>
