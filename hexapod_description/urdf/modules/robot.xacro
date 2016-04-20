@@ -6,7 +6,6 @@
   <xacro:property name="PI_2" value="1.57079632679" />
   <xacro:property name="PI_4" value="0.78539816339" />
   <xacro:property name="scale" value="0.001" />
-  <xacro:property name="use_gazebo" value="true" />
   <xacro:property name="body_mass" value="1.031"/>
   <xacro:property name="body_length" value="0.24"/>
   <xacro:property name="body_width" value="0.2"/>
@@ -34,14 +33,9 @@
   <xacro:property name="joint_dmp" value="0.0"/>
 
   <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
-  <xacro:if value="${use_gazebo}">
-    <!-- <xacro:include filename="$(find hexapod_description)/urdf/pexod_gazebo.xacro" /> -->
-  </xacro:if>
 
   <!-- Load xacro modules/parts of the robot -->
   <xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
   <xacro:include filename="$(find hexapod_description)/urdf/modules/leg.xacro" />
   <xacro:include filename="$(find hexapod_description)/urdf/modules/legs.xacro" />
-  <!-- <xacro:include filename="$(find hexapod_description)/urdf/modules/imu.xacro" /> -->
-  <!-- <xacro:include filename="$(find hexapod_description)/urdf/modules/cameras.xacro" /> -->
 </robot>
