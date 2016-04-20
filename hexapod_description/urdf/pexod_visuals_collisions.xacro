@@ -54,7 +54,7 @@
 		<collision>
 			<origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg1_width}" length="${leg1_length}"/>
+                <box size="${1.5*leg1_width} ${1.5*leg1_width} ${leg1_length}"/>
             </geometry>
 		</collision>
 	</xacro:macro>
@@ -70,7 +70,7 @@
 		<collision>
 			<origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg2_width}" length="${leg2_length}"/>
+                <box size="${1.5*leg2_width} ${1.5*leg2_width} ${leg2_length}"/>
             </geometry>
 		</collision>
 	</xacro:macro>
@@ -79,7 +79,7 @@
 		<visual>
 			<origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg3_width}" length="${leg3_length-leg3_width}"/>
+              <cylinder radius="${leg3_width}" length="${leg3_length}"/>
             </geometry>
 			<material name="Red"/>
 		</visual>
@@ -93,7 +93,7 @@
 		<collision>
 			<origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg3_width}" length="${leg3_length-leg3_width}"/>
+                <box size="${1.5*leg3_width} ${1.5*leg3_width} ${leg3_length}"/>
             </geometry>
 		</collision>
 		<collision>
