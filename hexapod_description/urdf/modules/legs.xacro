@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-	<!-- LEGS LINKS/JOINTS -->
+  <!-- LEGS LINKS/JOINTS -->
     <!-- <xacro:leg index="5" xPos="${body_length/2}" yPos="${body_width/2}" sign="1"/>
     <xacro:leg index="0" xPos="${body_length/2}" yPos="${-body_width/2}" sign="-1"/>
 
@@ -19,5 +19,5 @@
 
     <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
     <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/>
-    <!-- END OF LEG LINKS/JOINTS -->
+  <!-- END OF LEG LINKS/JOINTS -->
 </robot>

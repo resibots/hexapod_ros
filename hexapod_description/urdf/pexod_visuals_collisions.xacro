@@ -2,108 +2,108 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-	<!-- MATERIALS -->
-	<material name="Blue">
-		<color rgba="0 0 1 1"/>
+  <!-- MATERIALS -->
+  <material name="Blue">
+    <color rgba="0 0 1 1"/>
     </material>
 
     <material name="Red">
-    	<color rgba="1 0 0 1"/>
-  	</material>
+      <color rgba="1 0 0 1"/>
+    </material>
 
-  	<material name="Green">
+    <material name="Green">
         <color rgba="0 1 0 1"/>
-	</material>
+  </material>
 
-	<material name="Yellow">
-		<color rgba="1 1 0 1"/>
+  <material name="Yellow">
+    <color rgba="1 1 0 1"/>
     </material>
 
     <material name="LightGrey">
-    	<color rgba="0.6 0.6 0.6 1.0"/>
-	</material>
+      <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
 
     <!-- END OF MATERIALS -->
 
     <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
 
     <xacro:macro name="visuals_collisions_body" params="">
-		<visual>
-			<origin xyz="0 0 0" rpy="0 0 0"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <box size="${body_length} ${body_width} ${body_height}"/>
             </geometry>
-			<material name="Blue"/>
-		</visual>
-		<collision>
-			<origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <box size="${body_length} ${body_width} ${body_height}"/>
             </geometry>
-		</collision>
-	</xacro:macro>
+    </collision>
+  </xacro:macro>
 
-	<xacro:macro name="visuals_collisions_leg_1" params="revert">
-		<visual>
-			<origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+  <xacro:macro name="visuals_collisions_leg_1" params="revert">
+    <visual>
+      <origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <cylinder radius="${leg1_width}" length="${leg1_length}"/>
             </geometry>
-			<material name="Red"/>
-		</visual>
-		<collision>
-			<origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+      <material name="Red"/>
+    </visual>
+    <collision>
+      <origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${1.5*leg1_width} ${1.5*leg1_width} ${leg1_length}"/>
             </geometry>
-		</collision>
-	</xacro:macro>
+    </collision>
+  </xacro:macro>
 
-	<xacro:macro name="visuals_collisions_leg_2" params="revert">
-		<visual>
-			<origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+  <xacro:macro name="visuals_collisions_leg_2" params="revert">
+    <visual>
+      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <cylinder radius="${leg2_width}" length="${leg2_length}"/>
             </geometry>
-			<material name="Blue"/>
-		</visual>
-		<collision>
-			<origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${1.5*leg2_width} ${1.5*leg2_width} ${leg2_length}"/>
             </geometry>
-		</collision>
-	</xacro:macro>
+    </collision>
+  </xacro:macro>
 
-	<xacro:macro name="visuals_collisions_leg_3" params="revert">
-		<visual>
-			<origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+  <xacro:macro name="visuals_collisions_leg_3" params="revert">
+    <visual>
+      <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
               <cylinder radius="${leg3_width}" length="${leg3_length}"/>
             </geometry>
-			<material name="Red"/>
-		</visual>
-		<visual>
-			<origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
+      <material name="Red"/>
+    </visual>
+    <visual>
+      <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
             </geometry>
-			<material name="Red"/>
-		</visual>
-		<collision>
-			<origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+      <material name="Red"/>
+    </visual>
+    <collision>
+      <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${1.5*leg3_width} ${1.5*leg3_width} ${leg3_length}"/>
             </geometry>
-		</collision>
-		<collision>
-			<origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
+    </collision>
+    <collision>
+      <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
             </geometry>
-			<material name="Red"/>
-		</collision>
-	</xacro:macro>
-	<!-- END OF XACRO MACROS -->
+      <material name="Red"/>
+    </collision>
+  </xacro:macro>
+  <!-- END OF XACRO MACROS -->
 
 </robot>
