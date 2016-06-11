@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-	<!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
+  <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
 
     <xacro:macro name="leg" params="index xPos yPos sign">
         <joint name="body_leg_${index}" type="revolute">
@@ -30,8 +30,8 @@
                 <!-- CENTER OF MASS -->
                 <origin rpy="${PI_2} 0 0" xyz="${leg1_width/2} ${sign*leg1_length/2} 0"/>
                 <mass value="${leg1_mass}"/>
-                <!-- Cylinder inertia: 1/12*m*(3*r^2+h^2), 1/12*m*(3*r^2+h^2), 1/12*m*r^2 -->
-                <inertia ixx="${1/12*leg1_mass*(3*leg1_width*leg1_width+leg1_length*leg1_length)}" ixy="0" ixz="0" iyy="${1/12*leg1_mass*(3*leg1_width*leg1_width+leg1_length*leg1_length)}" iyz="0" izz="${1/12*leg1_mass*leg1_width*leg1_width}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg1_mass*(leg1_width*leg1_width+leg1_length*leg1_length)}" ixy="0" ixz="0" iyy="${1/12*leg1_mass*(leg1_width*leg1_width+leg1_length*leg1_length)}" iyz="0" izz="${1/12*leg1_mass*(2*leg1_width*leg1_width)}"/>
             </inertial>
         </link>
         <joint name="leg_${index}_1_2" type="revolute">
@@ -53,8 +53,8 @@
                 <!-- CENTER OF MASS -->
                 <origin rpy="${PI_2} 0 0" xyz="${leg2_width/2} ${sign*leg2_length/2} 0"/>
                 <mass value="${leg2_mass}"/>
-                <!-- Cylinder inertia: 1/12*m*(3*r^2+h^2), 1/12*m*(3*r^2+h^2), 1/12*m*r^2 -->
-                <inertia ixx="${1/12*leg2_mass*(3*leg2_width*leg2_width+leg2_length*leg2_length)}" ixy="0" ixz="0" iyy="${1/12*leg2_mass*(3*leg2_width*leg2_width+leg2_length*leg2_length)}" iyz="0" izz="${1/12*leg2_mass*leg2_width*leg2_width}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg2_mass*(leg2_width*leg2_width+leg2_length*leg2_length)}" ixy="0" ixz="0" iyy="${1/12*leg2_mass*(leg2_width*leg2_width+leg2_length*leg2_length)}" iyz="0" izz="${1/12*leg2_mass*(2*leg2_width*leg2_width)}"/>
             </inertial>
         </link>
         <joint name="leg_${index}_2_3" type="revolute">
@@ -75,11 +75,11 @@
             <inertial>
                 <!-- CENTER OF MASS -->
                 <origin rpy="${PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length/2} 0"/>
-                <mass value="${leg2_mass}"/>
-                <!-- Cylinder inertia: 1/12*m*(3*r^2+h^2), 1/12*m*(3*r^2+h^2), 1/12*m*r^2 -->
-                <inertia ixx="${1/12*leg2_mass*(3*leg2_width*leg2_width+leg2_length*leg2_length)}" ixy="0" ixz="0" iyy="${1/12*leg2_mass*(3*leg2_width*leg2_width+leg2_length*leg2_length)}" iyz="0" izz="${1/12*leg2_mass*leg2_width*leg2_width}"/>
+                <mass value="${leg3_mass}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" ixy="0" ixz="0" iyy="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" iyz="0" izz="${1/12*leg3_mass*(2*leg3_width*leg3_width)}"/>
             </inertial>
         </link>
     </xacro:macro>
-    <!-- END OF LEG LINKS/JOINTS -->
+  <!-- END OF LEG LINKS/JOINTS -->
 </robot>
