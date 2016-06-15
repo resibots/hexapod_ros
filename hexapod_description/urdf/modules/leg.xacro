@@ -80,6 +80,17 @@
                 <inertia ixx="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" ixy="0" ixz="0" iyy="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" iyz="0" izz="${1/12*leg3_mass*(2*leg3_width*leg3_width)}"/>
             </inertial>
         </link>
+        <joint name="sensor_${index}_fix" type="fixed">
+            <parent link="leg_${index}_3"/>
+            <child link="sensor_${index}"/>
+            <origin rpy="0 0 -0.3" xyz="-0.14 -0.08 0"/>
+        </joint>
+        <link name="sensor_${index}"/>
+        <dart_sensor type="force">
+          <link>sensor_${index}</link>
+          <frequency>1000</frequency>
+          <topic>optoforce_${index}</topic>
+        </dart_sensor>
     </xacro:macro>
   <!-- END OF LEG LINKS/JOINTS -->
 </robot>

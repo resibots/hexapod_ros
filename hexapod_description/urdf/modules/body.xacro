@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <!-- TORSO -->
+    <link name = "dummy_link"/>
+    <joint name="dummy_link_fix" type="fixed">
+        <parent link="dummy_link"/>
+        <child link="base_link"/>
+        <origin rpy="0 0 -0.3" xyz="-0.14 -0.08 0"/>
+    </joint>
     <link name="base_link">
         <xacro:visuals_collisions_body/>
         <inertial>
