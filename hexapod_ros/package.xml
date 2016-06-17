@@ -20,8 +20,9 @@ This software is governed by the CeCILL license under French law and abiding by 
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>dynamixel_control_hw</run_depend>
-  <run_depend>pexod_description</run_depend>
-  <run_depend>pexod_driver</run_depend>
+  <run_depend>hexapod_bringup</run_depend>
+  <run_depend>hexapod_description</run_depend>
+  <run_depend>hexapod_driver</run_depend>
 
   <export>
     <metapackage/>
