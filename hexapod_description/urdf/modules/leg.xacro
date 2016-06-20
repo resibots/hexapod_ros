@@ -83,7 +83,7 @@
         <joint name="sensor_${index}_fix" type="fixed">
             <parent link="leg_${index}_3"/>
             <child link="sensor_${index}"/>
-            <origin rpy="0 0 -0.3" xyz="-0.14 -0.08 0"/>
+            <origin rpy="${-sign*PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length} 0"/>
         </joint>
         <link name="sensor_${index}"/>
         <dart_sensor type="force">
