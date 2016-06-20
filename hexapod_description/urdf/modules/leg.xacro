@@ -91,6 +91,36 @@
           <frequency>1000</frequency>
           <topic>optoforce_${index}</topic>
         </dart_sensor>
+        <transmission name="tran${index}1">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="body_leg_${index}">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}1">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+        <transmission name="tran${index}2">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="leg_${index}_1_2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+        <transmission name="tran${index}3">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="leg_${index}_2_3">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
     </xacro:macro>
   <!-- END OF LEG LINKS/JOINTS -->
 </robot>
