@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="link0_broadcaster" args="0 0 0 0 0 0 1 base_link optoforce_0 1" />
+  <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1 0 0 0 0 0 1 base_link optoforce_1 1" />
+  <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="2 0 0 0 0 0 1 base_link optoforce_2 1" />
+  <node pkg="tf" type="static_transform_publisher" name="link3_broadcaster" args="3 0 0 0 0 0 1 base_link optoforce_3 1" />
+  <node pkg="tf" type="static_transform_publisher" name="link4_broadcaster" args="4 0 0 0 0 0 1 base_link optoforce_4 1" />
+  <node pkg="tf" type="static_transform_publisher" name="link5_broadcaster" args="5 0 0 0 0 0 1 base_link optoforce_5 1" />
+</launch>
