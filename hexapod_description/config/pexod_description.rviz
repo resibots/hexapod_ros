@@ -3,13 +3,9 @@ Panels:
     Help Height: 81
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
-        - /RobotModel1
-        - /TF1
+      Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 720
+    Tree Height: 744
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -64,16 +60,125 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        body:
+          Value: true
+        dummy_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
         leg_0_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
+        leg_0_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_0_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_1_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_1_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_1_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_2_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_2_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_2_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_3_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_3_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_4_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_4_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_4_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_5_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_5_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leg_5_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        optoforce_ISE173_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        optoforce_ISE174_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        optoforce_ISE175_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        optoforce_ISE177_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        optoforce_ISE182_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        optoforce_ISE184_0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -94,6 +199,84 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE173_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE174_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE175_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE177_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE182_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
+    - Alpha: 0.7
+      Arrow Width: 0.1
+      Class: rviz/WrenchStamped
+      Enabled: true
+      Force Arrow Scale: 0.05
+      Force Color: 0; 170; 127
+      History Length: 1
+      Name: WrenchStamped
+      Topic: /optoforce_ISE184_0
+      Torque Arrow Scale: 2
+      Torque Color: 204; 204; 51
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -149,7 +332,7 @@ Window Geometry:
   Tool Properties:
     collapsed: false
   Views:
-    collapsed: false
-  Width: 1918
-  X: 0
-  Y: 60
+    collapsed: true
+  Width: 1255
+  X: 55
+  Y: 29
