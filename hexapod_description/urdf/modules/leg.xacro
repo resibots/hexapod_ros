@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
 
-    <xacro:macro name="leg" params="index xPos yPos sign">
+    <xacro:macro name="leg" params="index xPos yPos sign serial_number">
         <joint name="body_leg_${index}" type="revolute">
             <parent link="base_link"/>
             <child link="leg_${index}_1"/>
@@ -80,14 +80,14 @@
                 <inertia ixx="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" ixy="0" ixz="0" iyy="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" iyz="0" izz="${1/12*leg3_mass*(2*leg3_width*leg3_width)}"/>
             </inertial>
         </link>
-        <joint name="sensor_${index}_fix" type="fixed">
+        <joint name="optoforce_${serial_number}_0_fix" type="fixed">
             <parent link="leg_${index}_3"/>
-            <child link="sensor_${index}"/>
+            <child link="optoforce_${serial_number}_0"/>
             <origin rpy="${-sign*PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length} 0"/>
         </joint>
-        <link name="sensor_${index}"/>
+        <link name="optoforce_${serial_number}_0"/>
         <dart_sensor type="force">
-          <link>sensor_${index}</link>
+          <link>optoforce_${serial_number}_0</link>
           <frequency>1000</frequency>
           <topic>optoforce_${index}</topic>
         </dart_sensor>

@@ -10,14 +10,14 @@
 
     <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
     <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/> -->
-    <xacro:leg index="2" xPos="${body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
-    <xacro:leg index="3" xPos="${body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
+    <xacro:leg index="2" serial_number="ISE175" xPos="${body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
+    <xacro:leg index="3" serial_number="ISE177" xPos="${body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
 
 
-    <xacro:leg index="0" xPos="${-body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
-    <xacro:leg index="5" xPos="${-body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
+    <xacro:leg index="0" serial_number="ISE182" xPos="${-body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
+    <xacro:leg index="5" serial_number="ISE173" xPos="${-body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
 
-    <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
-    <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/>
+    <xacro:leg index="1" serial_number="ISE174" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
+    <xacro:leg index="4" serial_number="ISE184" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/>
   <!-- END OF LEG LINKS/JOINTS -->
 </robot>
