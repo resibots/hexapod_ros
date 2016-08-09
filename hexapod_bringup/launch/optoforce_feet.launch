@@ -1,5 +1,5 @@
 <launch>
-  <!-- Serial port for the optoforce sensor -->
+  <!-- Base path for the serial port for the optoforce sensor. -->
   <arg name="port" default="/dev/optoforce"/>
   <!-- Update speed. Available values:
         "Stop"
@@ -22,11 +22,7 @@
   <arg name="filter" default="15Hz"/>
   <!-- Clear the sensors offset -->
   <arg name="zero" default="true"/>
-  <!-- DAQ (Data Acquisition) Type. It can be single or multiple channel, and have 3 or 6 axis. Available values:
-        "s-ch/3-axis"
-        "m-ch/3-axis"
-        "s-ch/6-axis"
-        -->
+  <!-- DAQ (Data Acquisition) type: single channel and 3 axes (force only). -->
   <arg name="type" default="s-ch/3-axis"/>
   <!-- Direction of scaling file -->
   <arg name="scaling_file" default="$(find optoforce)/config/single_channel_3_axis_generic_scale.yaml"/>
@@ -37,8 +33,7 @@
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <!-- Numerical index of the sensor. -->
-    <param name="starting_index" value="0"/>
+    <param name="append_serial_number" value="true"/>
     <rosparam command="load" file="$(arg scaling_file)"/>
   </node>
   <node name="optoforce1" pkg="optoforce" type="optoforce.py" output="screen">
@@ -47,8 +42,7 @@
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <!-- Numerical index of the sensor. -->
-    <param name="starting_index" value="1"/>
+    <param name="append_serial_number" value="true"/>
     <rosparam command="load" file="$(arg scaling_file)"/>
   </node>
   <node name="optoforce2" pkg="optoforce" type="optoforce.py" output="screen">
@@ -57,8 +51,34 @@
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <!-- Numerical index of the sensor. -->
-    <param name="starting_index" value="2"/>
+    <param name="append_serial_number" value="true"/>
     <rosparam command="load" file="$(arg scaling_file)"/>
   </node>
+    <node name="optoforce3" pkg="optoforce" type="optoforce.py" output="screen">
+      <param name="port" value="$(arg port)3"/>
+      <param name="speed" value="$(arg speed)"/>
+      <param name="filter" value="$(arg filter)"/>
+      <param name="zero" value="$(arg zero)"/>
+      <param name="type" value="$(arg type)"/>
+      <param name="append_serial_number" value="true"/>
+      <rosparam command="load" file="$(arg scaling_file)"/>
+    </node>
+    <node name="optoforce4" pkg="optoforce" type="optoforce.py" output="screen">
+      <param name="port" value="$(arg port)4"/>
+      <param name="speed" value="$(arg speed)"/>
+      <param name="filter" value="$(arg filter)"/>
+      <param name="zero" value="$(arg zero)"/>
+      <param name="type" value="$(arg type)"/>
+      <param name="append_serial_number" value="true"/>
+      <rosparam command="load" file="$(arg scaling_file)"/>
+    </node>
+    <node name="optoforce5" pkg="optoforce" type="optoforce.py" output="screen">
+      <param name="port" value="$(arg port)5"/>
+      <param name="speed" value="$(arg speed)"/>
+      <param name="filter" value="$(arg filter)"/>
+      <param name="zero" value="$(arg zero)"/>
+      <param name="type" value="$(arg type)"/>
+      <param name="append_serial_number" value="true"/>
+      <rosparam command="load" file="$(arg scaling_file)"/>
+    </node>
 </launch>
