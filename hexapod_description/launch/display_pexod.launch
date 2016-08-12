@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<launch
+<launch>
   <!-- Load the URDF -->
   <include file="$(find hexapod_description)/launch/pexod.launch" />
 
