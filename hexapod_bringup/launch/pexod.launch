@@ -8,6 +8,7 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
   <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find hexapod_bringup)/config/common.yaml"/>
   <rosparam file="$(find hexapod_bringup)/config/pexod.yaml"/>
 
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
