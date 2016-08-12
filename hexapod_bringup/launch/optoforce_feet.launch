@@ -27,6 +27,7 @@
   <!-- Direction of scaling file -->
   <arg name="scaling_file" default="$(find optoforce)/config/single_channel_3_axis_generic_scale.yaml"/>
 
+  <!-- Starting the nodes for all force sensors -->
   <node name="optoforce0" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)0"/>
     <param name="speed" value="$(arg speed)"/>
@@ -81,4 +82,19 @@
       <param name="append_serial_number" value="true"/>
       <rosparam command="load" file="$(arg scaling_file)"/>
     </node>
+
+    <!-- Defining static transformations to attach the force sensors to the
+    hexapod's feet. -->
+    <node pkg="tf" type="static_transform_publisher" name="link0_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_0 optoforce_ISE175_0 1" />
+    <node pkg="tf" type="static_transform_publisher" name="link4_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_1 optoforce_ISE173_0 1" />
+    <node pkg="tf" type="static_transform_publisher" name="link3_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_2 optoforce_ISE174_0 1" />
+    <node pkg="tf" type="static_transform_publisher" name="link5_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_3 optoforce_ISE184_0 1" />
+    <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_4 optoforce_ISE182_0 1" />
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster"
+      args="0 0 0 0 0 0 1 force_sensor_5 optoforce_ISE177_0 1" />
 </launch>
