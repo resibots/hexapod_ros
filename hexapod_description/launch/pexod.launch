@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Load Nao Robot parameter file -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find hexapod_description)/urdf/pexod.xacro" />
+  <!-- Load Marta's URDF -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro.py $(find hexapod_description)/urdf/pexod.xacro" />
 </launch>
