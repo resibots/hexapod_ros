@@ -3,8 +3,8 @@
 <launch>
 
   <!-- URDF robot description -->
-  <!-- <include file="$(find hexapod_description)/launch/marta.launch" /> -->
-  <param name="robot_description" command="cat $(find hexapod_bringup)/marta.urdf"/>
+  <include file="$(find hexapod_description)/launch/marta.launch" />
+  <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/marta.urdf"/> -->
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher"
     name="robot_state_publisher" />
