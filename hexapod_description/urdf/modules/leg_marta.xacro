@@ -8,13 +8,13 @@
             <child link="leg_${index}_1"/>
             <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <xacro:if value="${index == 5 or index == 2}">
-                <origin rpy="0 0 -0.3" xyz="${xPos} ${yPos-sign*leg1_width} 0"/>
+                <origin rpy="0 0 -0.3" xyz="${xPos} ${yPos} 0"/>
             </xacro:if>
             <xacro:if value="${index == 0 or index == 3}">
-                <origin rpy="0 0 0.3" xyz="${xPos} ${yPos-sign*leg1_width} 0"/>
+                <origin rpy="0 0 0.3" xyz="${xPos} ${yPos} 0"/>
             </xacro:if>
             <xacro:if value="${index == 1 or index == 4}">
-                <origin rpy="0 0 0" xyz="${xPos} ${yPos-sign*leg1_width} 0"/>
+                <origin rpy="0 0 0" xyz="${xPos} ${yPos} 0"/>
             </xacro:if>
             <!-- <xacro:if value="${index == 5 or index == 4 or index == 3}">
                 <axis xyz="0 0 1"/>
@@ -37,7 +37,7 @@
         <joint name="leg_${index}_1_2" type="revolute">
             <parent link="leg_${index}_1"/>
             <child link="leg_${index}_2"/>
-            <limit effort="${joint_eff}" lower="${-joint_lim2}" upper="${joint_lim2}" velocity="${joint_vel}"/>
+            <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <origin rpy="0 0 0" xyz="0 ${sign*leg1_length} 0"/>
             <xacro:if value="${index == 5 or index == 4 or index == 3}">
                 <axis xyz="-1 0 0"/>
@@ -60,7 +60,7 @@
         <joint name="leg_${index}_2_3" type="revolute">
             <parent link="leg_${index}_2"/>
             <child link="leg_${index}_3"/>
-            <limit effort="${joint_eff}" lower="${-joint_lim2}" upper="${joint_lim2}" velocity="${joint_vel}"/>
+            <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <origin rpy="${-sign*PI_2} 0 0" xyz="0 ${sign*leg2_length} 0"/>
             <xacro:if value="${index == 5 or index == 4 or index == 3}">
                 <axis xyz="1 0 0"/>
@@ -74,7 +74,7 @@
             <xacro:visuals_collisions_leg_3 revert="${sign}"/>
             <inertial>
                 <!-- CENTER OF MASS -->
-                <origin rpy="${PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length/2} 0"/>
+                <origin rpy="${PI_2} 0 0" xyz="0 ${sign*leg3_length/2} 0"/>
                 <mass value="${leg3_mass}"/>
                 <!-- box inertia: 1/12*m(y^2+z^2), ... -->
                 <inertia ixx="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" ixy="0" ixz="0" iyy="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" iyz="0" izz="${1/12*leg3_mass*(2*leg3_width*leg3_width)}"/>
@@ -83,7 +83,7 @@
         <joint name="force_sensor_${index}_fix" type="fixed">
             <parent link="leg_${index}_3"/>
             <child link="force_sensor_${index}"/>
-            <origin rpy="${-sign*PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length} 0"/>
+            <origin rpy="${-sign*PI_2} 0 0" xyz="0 ${sign*leg3_length} ${leg3_dist}"/>
         </joint>
         <link name="force_sensor_${index}"/>
         <dart_sensor type="force">
