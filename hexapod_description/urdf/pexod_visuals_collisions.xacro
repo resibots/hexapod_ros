@@ -35,6 +35,13 @@
             </geometry>
       <material name="Blue"/>
     </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
+            </geometry>
+      <material name="Blue"/>
+    </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
@@ -45,14 +52,14 @@
 
   <xacro:macro name="visuals_collisions_leg_1" params="revert">
     <visual>
-      <origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <cylinder radius="${leg1_width}" length="${leg1_length}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="${leg1_width/2} ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${leg1_width} ${leg1_width} ${leg1_length}"/>
             </geometry>
@@ -61,14 +68,14 @@
 
   <xacro:macro name="visuals_collisions_leg_2" params="revert">
     <visual>
-      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <cylinder radius="${leg2_width}" length="${leg2_length}"/>
             </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
             </geometry>
@@ -77,27 +84,27 @@
 
   <xacro:macro name="visuals_collisions_leg_3" params="revert">
     <visual>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
               <cylinder radius="${leg3_width}" length="${leg3_length}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
             </geometry>
     </collision>
     <collision>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
             </geometry>
