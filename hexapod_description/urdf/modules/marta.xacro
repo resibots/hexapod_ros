@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- XACRO PROPERTIES -->
+  <xacro:property name="PI" value="3.14159265359" />
+  <xacro:property name="PI_2" value="1.57079632679" />
+  <xacro:property name="PI_4" value="0.78539816339" />
+  <xacro:property name="scale" value="0.001" />
+  <xacro:property name="body_mass" value="1.031"/>
+  <xacro:property name="body_length" value="0.24"/>
+  <xacro:property name="body_width" value="0.2"/>
+  <xacro:property name="body_height" value="0.04"/>
+
+  <xacro:property name="leg1_width" value="0.02"/>
+  <xacro:property name="leg1_length" value="0.06"/>
+  <xacro:property name="leg1_dist" value="0.2"/>
+  <xacro:property name="leg1_mass" value="0.02"/>
+
+  <xacro:property name="leg2_width" value="0.02"/>
+  <xacro:property name="leg2_length" value="0.085"/>
+  <xacro:property name="leg2_dist" value="0.2"/>
+  <xacro:property name="leg2_mass" value="0.184"/>
+
+  <xacro:property name="leg3_width" value="0.025"/>
+  <xacro:property name="leg3_length" value="0.140"/>
+  <xacro:property name="leg3_dist" value="0.2"/>
+  <xacro:property name="leg3_mass" value="0.04"/>
+
+  <xacro:property name="joint_lim" value="${PI_2}"/>
+  <xacro:property name="joint_lim2" value="${PI_4}"/>
+  <xacro:property name="joint_eff" value="30.0"/>
+  <xacro:property name="joint_vel" value="7.0"/>
+  <xacro:property name="joint_dmp" value="0.0"/>
+
+  <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
+
+  <!-- Load xacro modules/parts of the robot -->
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_marta.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_marta.xacro" />
+</robot>
