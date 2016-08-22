@@ -36,6 +36,6 @@
 
   <!-- Load xacro modules/parts of the robot -->
   <xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_pexod.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_pexod.xacro" />
 </robot>
