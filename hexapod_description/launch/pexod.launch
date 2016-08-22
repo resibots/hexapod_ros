@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Load Marta's URDF -->
+  <!-- Load Pexod's URDF -->
   <param name="robot_description"
     command="$(find xacro)/xacro.py $(find hexapod_description)/urdf/pexod.xacro" />
 </launch>
