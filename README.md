@@ -18,6 +18,7 @@ These packages are for ROS integration for our [hexapods].
 ## Dependencies
 
 - [dynamixel_control_hw]: Hardware interface for ros_control and the Dynamixels actuators
+- [hexapod_common]: Its controllers are used by the `hexapod_driver` package
 
 ## Authors
 
@@ -31,3 +32,4 @@ These packages are for ROS integration for our [hexapods].
 [hexapods]: http://www.resibots.eu/photos.html#robots
 [CeCILL]: http://www.cecill.info/index.en.html
 [dynamixel_control_hw]: https://github.com/resibots/dynamixel_control_hw
+[hexapod_common]: https://github.com/resibots/hexapod_common
