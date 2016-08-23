@@ -48,6 +48,12 @@
                 <box size="${body_length} ${body_width} ${body_height}"/>
             </geometry>
     </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
+            </geometry>
+    </collision>
   </xacro:macro>
 
   <xacro:macro name="visuals_collisions_leg_1" params="revert">

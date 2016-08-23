@@ -48,6 +48,12 @@
                 <box size="${body_length} ${body_width} ${body_height}"/>
             </geometry>
     </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
+            </geometry>
+    </collision>
   </xacro:macro>
 
   <xacro:macro name="visuals_collisions_leg_1" params="revert">
@@ -114,13 +120,22 @@
       <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="0 ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="0 0 ${leg3_dist/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
+              <box size="${leg3_width} ${leg3_width} ${leg3_dist}"/>
             </geometry>
+      <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} 0"
+      <origin xyz="0 ${revert*leg3_length/2} ${leg3_dist}"
+        rpy="${PI_2} 0 0"/>
+            <geometry>
+              <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
+            </geometry>
+      <material name="Red"/>
+    </collision>
+    <collision>
+      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} ${leg3_dist}"
         rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
