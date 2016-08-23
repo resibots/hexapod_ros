@@ -25,7 +25,7 @@
   <!-- DAQ (Data Acquisition) type: single channel and 3 axes (force only). -->
   <arg name="type" default="s-ch/3-axis"/>
   <!-- Direction of scaling file -->
-  <arg name="scaling_file" default="$(find optoforce)/config/single_channel_3_axis_generic_scale.yaml"/>
+  <arg name="scaling_folder" default="$(find hexapod_bringup)/config"/>
 
   <!-- Starting the nodes for all force sensors -->
   <node name="optoforce0" pkg="optoforce" type="optoforce.py" output="screen">
@@ -35,7 +35,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_175.yaml"/>
   </node>
   <node name="optoforce1" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)1"/>
@@ -44,7 +44,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_173.yaml"/>
   </node>
   <node name="optoforce2" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)2"/>
@@ -53,7 +53,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_174.yaml"/>
   </node>
   <node name="optoforce3" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)3"/>
@@ -62,7 +62,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_184.yaml"/>
   </node>
   <node name="optoforce4" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)4"/>
@@ -71,7 +71,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_182.yaml"/>
   </node>
   <node name="optoforce5" pkg="optoforce" type="optoforce.py" output="screen">
     <param name="port" value="$(arg port)5"/>
@@ -80,7 +80,7 @@
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
     <param name="append_serial_number" value="true"/>
-    <rosparam command="load" file="$(arg scaling_file)"/>
+    <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_177.yaml"/>
   </node>
 
     <!-- Defining static transformations to attach the force sensors to the
