@@ -20,7 +20,7 @@
     </material>
 
     <material name="LightGrey">
-      <color rgba="0.6 0.6 0.6 1.0"/>
+      <color rgba="0.5 0.5 0.85 1.0"/>
   </material>
 
     <!-- END OF MATERIALS -->
@@ -33,14 +33,14 @@
             <geometry>
                 <box size="${body_length} ${body_width} ${body_height}"/>
             </geometry>
-      <material name="Blue"/>
+      <material name="LightGrey"/>
     </visual>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
             </geometry>
-      <material name="Blue"/>
+      <material name="LightGrey"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
