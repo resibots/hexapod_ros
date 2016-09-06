@@ -10,6 +10,10 @@ launch file for the hardware interface of Pexod
 ### hexpoad_description
 Xacro for Pexod, as well as relevant launch files for the description
 
+> **Important:** When this repository is updated, URDF files must be generated and pushed to [hexapod_common]/hexapod_models.
+
+[hexapod_common]:https://github.com/resibots/hexapod_common
+
 ### hexapod_driver
 C++ API to control our hexapods (talks to dynamixel_control_hw through trajectory messages)
 
