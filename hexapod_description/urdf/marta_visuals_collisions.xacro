@@ -60,7 +60,7 @@
     <visual>
       <origin xyz="0 ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg1_width}" length="${leg1_length}"/>
+                <cylinder radius="${leg1_width/2}" length="${leg1_length}"/>
             </geometry>
       <material name="Red"/>
     </visual>
@@ -76,7 +76,7 @@
     <visual>
       <origin xyz="0 ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg2_width}" length="${leg2_length}"/>
+                <cylinder radius="${leg2_width/2}" length="${leg2_length}"/>
             </geometry>
       <material name="Blue"/>
     </visual>
@@ -92,14 +92,14 @@
     <visual>
       <origin xyz="0 0 ${leg3_dist/2}" rpy="0 0 0"/>
             <geometry>
-              <cylinder radius="${leg3_width}" length="${leg3_dist}"/>
+              <cylinder radius="${leg3_width/2}" length="${leg3_dist}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <visual>
       <origin xyz="0 0 ${leg3_dist}" rpy="0 0 0"/>
             <geometry>
-              <sphere radius="${leg3_width}"/>
+              <sphere radius="${leg3_width/2}"/>
             </geometry>
       <material name="Red"/>
     </visual>
@@ -107,22 +107,22 @@
       <origin xyz="0 ${revert*leg3_length/2} ${leg3_dist}"
         rpy="${PI_2} 0 0"/>
             <geometry>
-              <cylinder radius="${leg3_width}" length="${leg3_length}"/>
+              <cylinder radius="${leg3_width/2}" length="${leg3_length-leg3_tip_radius}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} ${leg3_dist}"
+      <origin xyz="0 ${revert*leg3_length-revert*leg3_tip_radius} ${leg3_dist}"
         rpy="${PI_2} 0 0"/>
             <geometry>
-                <sphere radius="${leg3_width}"/>
+                <sphere radius="${leg3_tip_radius}"/>
             </geometry>
       <material name="Red"/>
     </visual>
     <collision>
       <origin xyz="0 0 ${leg3_dist/2}" rpy="0 0 0"/>
             <geometry>
-              <box size="${leg3_width} ${leg3_width} ${leg3_dist}"/>
+              <box size="${leg3_width} ${leg3_width} ${leg3_dist+leg3_width}"/>
             </geometry>
       <material name="Red"/>
     </collision>
@@ -130,15 +130,15 @@
       <origin xyz="0 ${revert*leg3_length/2} ${leg3_dist}"
         rpy="${PI_2} 0 0"/>
             <geometry>
-              <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
+              <box size="${leg3_width} ${leg3_width} ${leg3_length-leg3_tip_radius}"/>
             </geometry>
       <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${revert*leg3_length-revert*leg3_width/2} ${leg3_dist}"
+      <origin xyz="0 ${revert*leg3_length-revert*leg3_tip_radius} ${leg3_dist}"
         rpy="${PI_2} 0 0"/>
             <geometry>
-                <sphere radius="${leg3_width}"/>
+                <sphere radius="${leg3_tip_radius}"/>
             </geometry>
       <material name="Red"/>
     </collision>
