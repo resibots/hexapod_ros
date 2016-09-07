@@ -29,7 +29,7 @@
 
   <!-- Starting the nodes for all force sensors -->
   <node name="optoforce0" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)0"/>
+    <param name="port" value="$(arg port)_ISE175"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
@@ -38,7 +38,7 @@
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_175.yaml"/>
   </node>
   <node name="optoforce1" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)1"/>
+    <param name="port" value="$(arg port)_ISE173"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
@@ -47,7 +47,7 @@
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_173.yaml"/>
   </node>
   <node name="optoforce2" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)2"/>
+    <param name="port" value="$(arg port)_ISE173"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
@@ -56,7 +56,7 @@
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_174.yaml"/>
   </node>
   <node name="optoforce3" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)3"/>
+    <param name="port" value="$(arg port)_ISE184"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
@@ -65,7 +65,7 @@
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_184.yaml"/>
   </node>
   <node name="optoforce4" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)4"/>
+    <param name="port" value="$(arg port)_ISE182"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
@@ -74,7 +74,7 @@
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_182.yaml"/>
   </node>
   <node name="optoforce5" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)5"/>
+    <param name="port" value="$(arg port)_ISE177"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
