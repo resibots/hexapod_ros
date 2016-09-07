@@ -28,73 +28,73 @@
   <arg name="scaling_folder" default="$(find hexapod_bringup)/config"/>
 
   <!-- Starting the nodes for all force sensors -->
-  <node name="optoforce0" pkg="optoforce" type="optoforce.py" output="screen">
+  <node name="optoforce0" pkg="optoforce" type="optoforce_node.py" output="screen">
     <param name="port" value="$(arg port)_ISE175"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="1"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_175.yaml"/>
   </node>
-  <node name="optoforce1" pkg="optoforce" type="optoforce.py" output="screen">
+  <node name="optoforce1" pkg="optoforce" type="optoforce_node.py" output="screen">
     <param name="port" value="$(arg port)_ISE173"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="2"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_173.yaml"/>
   </node>
-  <node name="optoforce2" pkg="optoforce" type="optoforce.py" output="screen">
-    <param name="port" value="$(arg port)_ISE173"/>
+  <node name="optoforce2" pkg="optoforce" type="optoforce_node.py" output="screen">
+    <param name="port" value="$(arg port)_ISE174"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="3"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_174.yaml"/>
   </node>
-  <node name="optoforce3" pkg="optoforce" type="optoforce.py" output="screen">
+  <node name="optoforce3" pkg="optoforce" type="optoforce_node.py" output="screen">
     <param name="port" value="$(arg port)_ISE184"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="4"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_184.yaml"/>
   </node>
-  <node name="optoforce4" pkg="optoforce" type="optoforce.py" output="screen">
+  <node name="optoforce4" pkg="optoforce" type="optoforce_node.py" output="screen">
     <param name="port" value="$(arg port)_ISE182"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="5"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_182.yaml"/>
   </node>
-  <node name="optoforce5" pkg="optoforce" type="optoforce.py" output="screen">
+  <node name="optoforce5" pkg="optoforce" type="optoforce_node.py" output="screen">
     <param name="port" value="$(arg port)_ISE177"/>
     <param name="speed" value="$(arg speed)"/>
     <param name="filter" value="$(arg filter)"/>
     <param name="zero" value="$(arg zero)"/>
     <param name="type" value="$(arg type)"/>
-    <param name="append_serial_number" value="true"/>
+    <param name="starting_index" value="6"/>
     <rosparam command="load" file="$(arg scaling_folder)/optoforce_ISE_177.yaml"/>
   </node>
 
     <!-- Defining static transformations to attach the force sensors to the
     hexapod's feet. -->
     <node pkg="tf" type="static_transform_publisher" name="link0_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_0 optoforce_ISE175_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_0 optoforce_1 1" />
     <node pkg="tf" type="static_transform_publisher" name="link4_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_1 optoforce_ISE173_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_1 optoforce_2 1" />
     <node pkg="tf" type="static_transform_publisher" name="link3_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_2 optoforce_ISE174_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_2 optoforce_3 1" />
     <node pkg="tf" type="static_transform_publisher" name="link5_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_3 optoforce_ISE184_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_3 optoforce_4 1" />
     <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_4 optoforce_ISE182_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_4 optoforce_5 1" />
     <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster"
-      args="0 0 0 0 0 0 1 force_sensor_5 optoforce_ISE177_0 1" />
+      args="0 0 0 0 0 0 1 force_sensor_5 optoforce_6 1" />
 </launch>
