@@ -3,6 +3,7 @@
     <!-- TORSO -->
     <link name="base_link">
         <xacro:visuals_collisions_body/>
+        <xacro:visuals_head/>
         <inertial>
             <!-- CENTER OF MASS -->
             <origin rpy="0 0 0" xyz="0 0 0"/>
