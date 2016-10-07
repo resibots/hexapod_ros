@@ -37,10 +37,10 @@
   <xacro:property name="joint_vel" value="7.0"/>
   <xacro:property name="joint_dmp" value="0.0"/>
 
-  <xacro:include filename="$(find hexapod_description)/urdf/marta_visuals_collisions.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/hexaforce_visuals_collisions.xacro" />
 
   <!-- Load xacro modules/parts of the robot -->
   <xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_marta.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_marta.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_hexaforce.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_hexaforce.xacro" />
 </robot>

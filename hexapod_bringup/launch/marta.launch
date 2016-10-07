@@ -3,15 +3,15 @@
 <launch>
 
   <!-- URDF robot description -->
-  <include file="$(find hexapod_description)/launch/marta.launch" />
-  <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/marta.urdf"/> -->
+  <include file="$(find hexapod_description)/launch/hexaforce.launch" />
+  <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/hexaforce.urdf"/> -->
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher"
     name="robot_state_publisher" />
 
   <!-- Parameters for the hardware interface and controllers -->
   <rosparam file="$(find hexapod_bringup)/config/common.yaml"/>
-  <rosparam file="$(find hexapod_bringup)/config/marta.yaml"/>
+  <rosparam file="$(find hexapod_bringup)/config/hexaforce.yaml"/>
 
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
   <!-- <param name="use_gui" value="true"/>

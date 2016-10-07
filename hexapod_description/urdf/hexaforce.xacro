@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="pexod" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/marta.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/hexaforce.xacro" />
 
 </robot>

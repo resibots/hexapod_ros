@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Load the URDF -->
-  <include file="$(find hexapod_description)/launch/marta.launch" />
+  <include file="$(find hexapod_description)/launch/hexaforce.launch" />
 
   <arg name="model" />
   <arg name="gui" default="true" />
@@ -15,5 +15,5 @@
 
   <!-- Start RVIZ -->
   <node name="rviz" pkg="rviz" type="rviz"
-    args="-d $(find hexapod_description)/config/marta.rviz" />
+    args="-d $(find hexapod_description)/config/hexaforce.rviz" />
 </launch>
