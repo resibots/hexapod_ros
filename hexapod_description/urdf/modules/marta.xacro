@@ -9,7 +9,7 @@
   <xacro:property name="body_mass" value="1.031"/>
   <xacro:property name="body_length" value="0.24"/>
   <xacro:property name="body_width" value="0.119"/>
-  <xacro:property name="body_width_extra" value="0.190"/>
+  <xacro:property name="body_width_extra" value="0.199"/>
   <xacro:property name="body_height" value="0.04"/>
 
   <xacro:property name="leg1_width" value="0.05"/>
@@ -23,10 +23,14 @@
   <xacro:property name="leg2_mass" value="0.184"/>
 
   <xacro:property name="leg3_width" value="0.054"/>
-  <xacro:property name="leg3_length" value="0.12"/>
-  <xacro:property name="leg3_dist" value="0.038"/>
+  <xacro:property name="leg3_length" value="0.065"/>
+  <xacro:property name="leg3_dist" value="0.032"/>
+  <xacro:property name="leg3_height" value="0.10"/>
   <xacro:property name="leg3_tip_radius" value="0.02"/>
   <xacro:property name="leg3_mass" value="0.04"/>
+
+  <xacro:property name="force_y_offset" value="${(11.25+27)*0.001}"/>
+  <xacro:property name="force_z_offset" value="0.115"/>
 
   <xacro:property name="joint_lim" value="${PI_2}"/>
   <xacro:property name="joint_eff" value="30.0"/>

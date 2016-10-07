@@ -29,18 +29,11 @@
 
     <xacro:macro name="visuals_collisions_body" params="">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="${body_length} ${body_width} ${body_height}"/>
-            </geometry>
+      <origin xyz="0 0 0" rpy="${PI_2} 0 ${PI_2}"/>
+        <geometry>
+          <mesh filename="package://hexapod_description/stl/chassis.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
       <material name="Yellow"/>
-    </visual>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
-            </geometry>
-      <material name="Blue"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -58,94 +51,71 @@
 
   <xacro:macro name="visuals_head" params="">
     <visual>
-      <origin xyz="${body_length/2.} 0 ${body_height*0.7}" rpy="0 0 ${PI/4}"/>
+      <origin xyz="${body_length/2.} 0 0" rpy="0 0 ${PI/4}"/>
       <geometry>
-        <box size="${body_width/2.} ${body_width/2.} ${body_height*0.7}"/>
+        <box size="${body_width/3.} ${body_width/3.} ${body_height*0.6}"/>
       </geometry>
       <material name="Yellow"/>
     </visual>
   </xacro:macro>
 
-  <xacro:macro name="visuals_collisions_leg_1" params="revert">
+  <xacro:macro name="visuals_collisions_leg_1">
     <visual>
-      <origin xyz="0 ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
-            <geometry>
-                <cylinder radius="${leg1_width/2}" length="${leg1_length}"/>
-            </geometry>
+      <origin xyz="0 0 0" rpy="0 ${PI_2} 0"/>
+        <geometry>
+          <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="0 ${revert*leg1_length/2} 0" rpy="${PI_2} 0 0"/>
-            <geometry>
-                <box size="${leg1_width} ${leg1_width} ${leg1_length}"/>
-            </geometry>
+      <origin xyz="0 ${leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg1_width} ${leg1_width} ${leg1_length}"/>
+        </geometry>
     </collision>
   </xacro:macro>
 
-  <xacro:macro name="visuals_collisions_leg_2" params="revert">
+  <xacro:macro name="visuals_collisions_leg_2">
     <visual>
-      <origin xyz="0 ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
-            <geometry>
-                <cylinder radius="${leg2_width/2}" length="${leg2_length}"/>
-            </geometry>
+      <origin xyz="0 0 0" rpy="0 -${PI_2} 0"/>
+        <geometry>
+          <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin xyz="0 ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
-            <geometry>
-                <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
-            </geometry>
+      <origin xyz="0 ${leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
+        </geometry>
     </collision>
   </xacro:macro>
 
-  <xacro:macro name="visuals_collisions_leg_3" params="revert">
+  <xacro:macro name="visuals_collisions_leg_3">
     <visual>
-      <origin xyz="0 0 ${leg3_dist/2}" rpy="0 0 0"/>
-            <geometry>
-              <cylinder radius="${leg3_width/2}" length="${leg3_dist}"/>
-            </geometry>
-      <material name="Red"/>
-    </visual>
-    <visual>
-      <origin xyz="0 0 ${leg3_dist}" rpy="0 0 0"/>
-            <geometry>
-              <sphere radius="${leg3_width/2}"/>
-            </geometry>
-      <material name="Red"/>
-    </visual>
-    <visual>
-      <origin xyz="0 ${revert*leg3_length/2} ${leg3_dist}"
-        rpy="${PI_2} 0 0"/>
-            <geometry>
-              <cylinder radius="${leg3_width/2}" length="${leg3_length-leg3_tip_radius}"/>
-            </geometry>
-      <material name="Red"/>
-    </visual>
-    <visual>
-      <origin xyz="0 ${revert*leg3_length-revert*leg3_tip_radius} ${leg3_dist}"
-        rpy="${PI_2} 0 0"/>
-            <geometry>
-                <sphere radius="${leg3_tip_radius}"/>
-            </geometry>
-      <material name="Red"/>
+      <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
+      <geometry>
+        <mesh filename="package://hexapod_description/stl/third_link.stl" scale="0.001 0.001 0.001"/>
+        <material name="Red"/>
+      </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 ${leg3_dist/2}" rpy="0 0 0"/>
-            <geometry>
-              <box size="${leg3_width} ${leg3_width} ${leg3_dist+leg3_width}"/>
-            </geometry>
+      <origin xyz="0 ${leg3_dist} 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${leg3_width} ${leg3_length} ${leg3_width}"/>
+        </geometry>
       <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${revert*leg3_length/2} ${leg3_dist}"
-        rpy="${PI_2} 0 0"/>
-            <geometry>
-              <box size="${leg3_width} ${leg3_width} ${leg3_length-leg3_tip_radius}"/>
-            </geometry>
+      <origin xyz="0 ${leg3_length-leg3_width/2} ${-(leg3_width+leg3_height-leg3_tip_radius)/2}"
+        rpy="0 0 0"/>
+        <geometry>
+          <box size="${leg3_width} ${leg3_width} ${leg3_height-leg3_tip_radius}"/>
+        </geometry>
       <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${revert*leg3_length-revert*leg3_tip_radius} ${leg3_dist}"
+      <origin xyz="0 ${leg3_length-leg3_width/2} -${leg3_height}"
         rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_tip_radius}"/>
