@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
 
-    <xacro:macro name="leg" params="index xPos yPos sign">
+    <xacro:macro name="leg" params="index xPos yPos">
         <joint name="body_leg_${index}" type="revolute">
             <parent link="base_link"/>
             <child link="leg_${index}_1"/>

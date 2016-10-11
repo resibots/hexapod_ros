@@ -24,7 +24,6 @@
 
   <xacro:property name="leg3_width" value="0.054"/>
   <xacro:property name="leg3_length" value="0.065"/>
-  <xacro:property name="leg3_dist" value="0.032"/>
   <xacro:property name="leg3_height" value="0.10"/>
   <xacro:property name="leg3_tip_radius" value="0.02"/>
   <xacro:property name="leg3_mass" value="0.04"/>

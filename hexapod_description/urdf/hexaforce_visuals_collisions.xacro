@@ -95,12 +95,12 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
         <material name="Red"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 ${leg3_dist} 0" rpy="0 0 0"/>
+      <origin xyz="0 ${leg3_length/2} 0" rpy="0 0 0"/>
         <geometry>
           <box size="${leg3_width} ${leg3_length} ${leg3_width}"/>
         </geometry>

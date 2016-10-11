@@ -13,8 +13,6 @@ These packages are for ROS integration for our [hexapods].
 
 > **Important:** When this repository is updated, URDF files must be generated and pushed to [hexapod_common]/hexapod_models.
 
-[hexapod_common]:https://github.com/resibots/hexapod_common
-
 ## Dependencies
 
 - [dynamixel_control_hw]: Hardware interface for ros_control and the Dynamixels actuators
@@ -24,6 +22,14 @@ These packages are for ROS integration for our [hexapods].
 
 - Author/Maintainer: Konstantinos Chatzilygeroudis
 - Other contributors: Dorian Goepp
+
+## Packages
+
+### `hexapod_description`
+
+Contains the URDF models of our hexapods. Its launch files take care of generating the URDF from Xacro files and loading it in ROS.
+
+The visuals of these models are made with STL files taken from our CAD designs (see [pexod_mechanical_design](https://github.com/resibots/pexod-mechanical-design)) and generated from Robotis' models of their own parts (dynamixel actuators and frames).
 
 ## LICENSE
 
