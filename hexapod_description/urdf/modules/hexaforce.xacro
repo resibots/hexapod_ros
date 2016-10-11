@@ -12,12 +12,12 @@
   <xacro:property name="body_width_extra" value="0.199"/>
   <xacro:property name="body_height" value="0.04"/>
 
-  <xacro:property name="leg1_width" value="0.05"/>
+  <xacro:property name="leg1_width" value="0.044"/>
   <xacro:property name="leg1_length" value="0.06"/>
   <xacro:property name="leg1_dist" value="0.2"/>
   <xacro:property name="leg1_mass" value="0.02"/>
 
-  <xacro:property name="leg2_width" value="0.05"/>
+  <xacro:property name="leg2_width" value="0.038"/>
   <xacro:property name="leg2_length" value="0.0835"/>
   <xacro:property name="leg2_dist" value="0.2"/>
   <xacro:property name="leg2_mass" value="0.184"/>
