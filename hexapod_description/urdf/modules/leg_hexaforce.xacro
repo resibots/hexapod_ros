@@ -63,7 +63,7 @@
             <child link="leg_${index}_3"/>
             <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <origin rpy="0 0 0" xyz="0 ${leg2_length} 0"/>
-            <axis xyz="1 0 0"/>
+            <axis xyz="-1 0 0"/>
             <dynamics damping="${joint_dmp}"/>
         </joint>
         <link name="leg_${index}_3">
