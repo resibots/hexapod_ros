@@ -96,8 +96,8 @@
       <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
       <geometry>
         <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
-        <material name="Red"/>
       </geometry>
+      <material name="Red"/>
     </visual>
     <collision>
       <origin xyz="0 ${leg3_length/2} 0" rpy="0 0 0"/>
