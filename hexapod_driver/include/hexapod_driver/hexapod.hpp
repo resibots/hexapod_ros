@@ -16,10 +16,32 @@ namespace hexapod_ros {
         ~Hexapod();
 
         void init();
+
+        /** Put the robot to rest.
+            This method will have the robot gently rest its body on the floor.
+        **/
         void relax();
+
         void reset();
+
+        /** Put the hexapod in "neutral" pose.
+            Meaning that all joints are at the middle of their range and the
+            robot is standing straight.
+        **/
         void zero();
+
+        /** Make the hexapod move for some time, based on control parameters.
+
+            We generate the joint trajectories with the controller
+            https://github.com/resibots/hexapod_common/tree/master/hexapod_controller
+
+            @param ctrl vector of parameters for the controller (see
+                hexapod_common/hexapod_controller)
+            @param duration how much time the robot will move (s)
+            @param reset call reset_odom() at the beginning of the method
+        **/
         void move(std::vector<double> ctrl, double duration, bool reset = true);
+
         void reset_odom();
         tf::Transform transform();
 
@@ -40,6 +62,6 @@ namespace hexapod_ros {
         // TF position
         tf::StampedTransform _pos, _init_pos;
     };
-}
+} // namespace hexapod_ros
 
 #endif
