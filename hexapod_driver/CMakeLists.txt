@@ -19,8 +19,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   geometry_msgs
   dynamixel_control_hw
+  trac_ik_lib
+  hexapod_ik
 )
 
+find_package(orocos_kdl REQUIRED)
 find_package(HexapodController QUIET) # COMPONENTS hexapod_controller_simple)
 
 ##Needed for ros packages
@@ -37,16 +40,27 @@ catkin_package(
     actionlib
     tf
     geometry_msgs
+    trac_ik_lib
+    hexapod_ik
 )
 
-add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${HexapodController_INCLUDE_DIRS}
 )
+
+add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp src/hexapod_cartesian.cpp)
 target_link_libraries(hexapod_driver ${catkin_LIBRARIES})
 add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
+
+add_library(hexapod_driver_cartesian src/hexapod_cartesian.cpp)
+target_link_libraries(hexapod_driver_cartesian ${catkin_LIBRARIES})
+add_dependencies(hexapod_driver_cartesian ${catkin_EXPORTED_TARGETS})
+
+# add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp)
+# target_link_libraries(hexapod_driver ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
+# add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
 add_library(hexapod_control src/hexapod.cpp)
 target_link_libraries(hexapod_control ${catkin_LIBRARIES})

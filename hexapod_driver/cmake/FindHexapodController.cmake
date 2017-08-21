@@ -6,7 +6,7 @@ set(HexapodController_INCLUDE_HINTS
     "$ENV{RESIBOTS_DIR}/include" )
 
 # Find include directories
-find_path(HexapodController_INCLUDE_DIR hexapod_controller/hexapod_controller_simple.hpp HINTS ${HexapodController_INCLUDE_HINTS} )
+find_path(HexapodController_INCLUDE_DIR hexapod_controller/hexapod_controller_simple.hpp hexapod_controller/hexapod_controller_cartesian.hpp HINTS ${HexapodController_INCLUDE_HINTS} )
 
 
 # Handle the QUIET and REQUIRED arguments

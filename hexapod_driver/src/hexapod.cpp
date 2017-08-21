@@ -88,7 +88,7 @@ void Hexapod::relax()
             point.positions.push_back(0.0);
             double a = (duration - t) / duration;
             double b = t / duration;
-            point.positions.push_back(a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.3));
+            point.positions.push_back(a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.2));
             point.positions.push_back(0.0);
 
             point.time_from_start = ros::Duration(t);
@@ -293,6 +293,9 @@ void Hexapod::reset_odom()
 
 tf::Transform Hexapod::transform()
 {
+    if (!_odom_enable && !_mocap_odom_enable)
+        ROS_ERROR_STREAM("Mocap and odom are disabled so Hexapod::transform should not be called");
+
     _pos_update();
     return _init_pos.inverse() * _pos;
 }

@@ -40,7 +40,7 @@ namespace hexapod_ros {
             @param duration how much time the robot will move (s)
             @param reset call reset_odom() at the beginning of the method
         **/
-        void move(std::vector<double> ctrl, double duration, bool reset = true);
+        virtual void move(std::vector<double> ctrl, double duration, bool reset = true);
 
         void reset_odom();
         tf::Transform transform();
