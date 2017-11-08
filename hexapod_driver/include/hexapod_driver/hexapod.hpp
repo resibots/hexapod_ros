@@ -1,10 +1,12 @@
 #ifndef HEXAPOD_DRIVER_HEXAPOD_HPP
 #define HEXAPOD_DRIVER_HEXAPOD_HPP
 
-#include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
+#include <geometry_msgs/Twist.h>
+#include <ros/ros.h>
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 namespace hexapod_ros {
 
@@ -20,8 +22,36 @@ namespace hexapod_ros {
         void reset();
         void zero();
         void move(std::vector<double> ctrl, double duration, bool reset = true);
+        void move_legs(std::vector<double> ctrl, double t_init, double duration, bool reset = false);
+        void move_positions(std::vector<double> pos, double duration);
+        void move_leg(int leg, std::vector<double> joint_angles);
         void reset_odom();
+
+        void add_removed(int i)
+        {
+            if (i < 6 && i >= 0)
+                _removed.push_back(i);
+        }
+
+        void clear_removed()
+        {
+            _removed.clear();
+        }
+
+        void add_offseted(int i, double offset)
+        {
+            if (i < 6 && i >= 0)
+                _offseted[i] = offset;
+        }
+
+        void clear_offseted()
+        {
+            _offseted.clear();
+        }
+
         tf::Transform transform();
+        geometry_msgs::Twist twist();
+        tf::Transform pos() { return _pos; }
 
     protected:
         void _pos_update();
@@ -39,6 +69,12 @@ namespace hexapod_ros {
         ros::Publisher _reset_filter_pub;
         // TF position
         tf::StampedTransform _pos, _init_pos;
+        // TF listener
+        tf::TransformListener _listener;
+        // removed legs (in software)
+        std::vector<int> _removed;
+        // offset legs (in software)
+        std::map<int, double> _offseted;
     };
 }
 

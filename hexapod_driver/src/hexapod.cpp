@@ -1,8 +1,8 @@
-#include <hexapod_driver/hexapod.hpp>
-#include <hexapod_controller/hexapod_controller_simple.hpp>
-#include <tf/transform_listener.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <hexapod_controller/hexapod_controller_simple.hpp>
+#include <hexapod_driver/hexapod.hpp>
 #include <std_srvs/Empty.h>
+#include <tf/transform_listener.h>
 #include <thread>
 
 using namespace hexapod_ros;
@@ -12,6 +12,11 @@ Hexapod::Hexapod(ros::NodeHandle nh, std::string ns) : _nh(nh), _namespace(ns)
     if (_namespace[0] != '/')
         _namespace = "/" + _namespace;
     init();
+
+    // ros::console::shutdown();
+    if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) {
+        ros::console::notifyLoggerLevelsChanged();
+    }
 }
 
 Hexapod::~Hexapod()
@@ -199,11 +204,15 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     // Start from zero
     zero();
 
+    for (auto i : _removed) {
+        move_leg(i, {0.0, M_PI * 1.1 / 2.0, M_PI * 1.1 / 2.0});
+    }
+
     if (reset && (_odom_enable || _mocap_odom_enable)) {
         reset_odom();
     }
     // time step for trajectory
-    double step = 0.03;
+    double step = 0.1;
 
     // Initialize controller
     hexapod_controller::HexapodControllerSimple controller(ctrl, std::vector<int>());
@@ -218,12 +227,19 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
         std::vector<double> pos = controller.pos(t);
 
         for (size_t i = 0; i < 6; i++) {
+            std::vector<int>::iterator it = find(_removed.begin(), _removed.end(), (int)i);
+            if (it != _removed.end())
+                continue;
+            double angle = pos[i * 3 + 1];
+            std::map<int, double>::iterator it2 = _offseted.find(i);
+            if (it2 != _offseted.end())
+                angle = it2->second;
             trajectory_msgs::JointTrajectoryPoint point;
             point.positions.clear();
 
             // Should update HexapodControllerSimple to output proper angles
             point.positions.push_back(-pos[i * 3]);
-            point.positions.push_back(pos[i * 3 + 1]);
+            point.positions.push_back(angle);
             point.positions.push_back(-pos[i * 3 + 2]);
 
             point.time_from_start = ros::Duration(t);
@@ -236,6 +252,85 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
 
     // Go back to zero
     zero();
+}
+
+void Hexapod::move_legs(std::vector<double> ctrl, double t_init, double duration, bool reset)
+{
+    // time step for trajectory
+    double step = 0.03;
+
+    // Initialize controller
+    hexapod_controller::HexapodControllerSimple controller(ctrl, std::vector<int>());
+
+    // Clear message points
+    for (size_t i = 0; i < 6; i++) {
+        _traj_msgs[i].points.clear();
+    }
+
+    // Calculate points of trajectory
+    for (double t = t_init; t <= t_init + duration; t += step) {
+        std::vector<double> pos = controller.pos(t);
+
+        for (size_t i = 0; i < 6; i++) {
+            trajectory_msgs::JointTrajectoryPoint point;
+            point.positions.clear();
+            // Should update HexapodControllerSimple to output proper angles
+            point.positions.push_back(-pos[i * 3]);
+            point.positions.push_back(pos[i * 3 + 1]);
+            point.positions.push_back(-pos[i * 3 + 2]);
+
+            point.time_from_start = ros::Duration(t - t_init);
+
+            _traj_msgs[i].points.push_back(point);
+        }
+    }
+
+    _send_trajectories(duration);
+}
+
+void Hexapod::move_positions(std::vector<double> pos, double duration)
+{
+    // Clear message points
+    for (size_t i = 0; i < 6; i++) {
+        _traj_msgs[i].points.clear();
+    }
+    for (size_t i = 0; i < 6; i++) {
+        trajectory_msgs::JointTrajectoryPoint point;
+        point.positions.clear();
+        // Should update HexapodControllerSimple to output proper angles
+        point.positions.push_back(-pos[i * 3]);
+        point.positions.push_back(pos[i * 3 + 1]);
+        point.positions.push_back(-pos[i * 3 + 2]);
+
+        point.time_from_start = ros::Duration(duration);
+
+        _traj_msgs[i].points.push_back(point);
+    }
+
+    _send_trajectories(duration);
+}
+
+void Hexapod::move_leg(int leg, std::vector<double> joint_angles)
+{
+    assert(leg < 6);
+    double duration = 1.0;
+    // Clear message points
+    _traj_msgs[leg].points.clear();
+
+    trajectory_msgs::JointTrajectoryPoint point;
+    point.positions.clear();
+
+    point.positions.push_back(joint_angles[0]);
+    point.positions.push_back(joint_angles[1]);
+    point.positions.push_back(joint_angles[2]);
+
+    point.time_from_start = ros::Duration(duration);
+
+    _traj_msgs[leg].points.push_back(point);
+
+    _send_trajectories(duration);
+
+    ros::Duration(0.5).sleep();
 }
 
 void Hexapod::reset_odom()
@@ -297,21 +392,41 @@ tf::Transform Hexapod::transform()
     return _init_pos.inverse() * _pos;
 }
 
-void Hexapod::_pos_update()
+geometry_msgs::Twist Hexapod::twist()
 {
-    tf::TransformListener listener;
+    geometry_msgs::Twist _twist;
+    // tf::TransformListener listener;
     ros::Time start_t = ros::Time::now();
     while (_nh.ok()) {
         try {
-            listener.lookupTransform(_odom_frame, _base_link_frame, ros::Time(0), _pos);
+            _listener.lookupTwist(_odom_frame, _base_link_frame, ros::Time(0), ros::Duration(0.00001), _twist);
             break;
         }
         catch (tf::TransformException ex) {
-            ROS_DEBUG_STREAM("Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
+            ROS_DEBUG_STREAM("Failed to get twist from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
         }
         ros::Duration(0.001).sleep();
         if ((ros::Time::now() - start_t) > ros::Duration(1.0)) {
-            ROS_ERROR_STREAM("Timeout error: Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame);
+            ROS_ERROR_STREAM("Timeout error: Failed to get twist from '" << _base_link_frame << "' to '" << _odom_frame);
+            break;
+        }
+    }
+}
+
+void Hexapod::_pos_update()
+{
+    ros::Time start_t = ros::Time::now();
+    while (_nh.ok()) {
+        try {
+            _listener.lookupTransform(_odom_frame, _base_link_frame, ros::Time(0), _pos);
+            break;
+        }
+        catch (tf::TransformException ex) {
+            ROS_ERROR_STREAM("Failed to get transformation from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
+        }
+        ros::Duration(0.001).sleep();
+        if ((ros::Time::now() - start_t) > ros::Duration(1.0)) {
+            ROS_ERROR_STREAM("Timeout error: Failed to get transformation from '" << _base_link_frame << "' to '" << _odom_frame);
             break;
         }
     }
@@ -334,7 +449,14 @@ void Hexapod::_send_trajectories(double duration)
         }
 
         threads.push_back(std::thread(&Hexapod::_send_trajectory, this, i, duration));
+        // _send_trajectory(i, duration);
     }
+
+    // for (size_t i = 0; i < 6; i++) {
+    // size_t i = 0;
+    // _traj_clients[i]->waitForResult(ros::Duration(duration));
+    // if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
+    //     ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
 
     for (size_t i = 0; i < threads.size(); i++) {
         threads[i].join();
@@ -349,7 +471,7 @@ void Hexapod::_send_trajectory(size_t i, double duration)
     goal.trajectory = _traj_msgs[i];
     _traj_clients[i]->sendGoal(goal);
 
-    _traj_clients[i]->waitForResult(ros::Duration(duration + 0.5));
+    _traj_clients[i]->waitForResult(ros::Duration(duration));
     if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
         ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
 }

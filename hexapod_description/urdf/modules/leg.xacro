@@ -71,7 +71,7 @@
             <dynamics damping="${joint_dmp}"/>
         </joint>
         <link name="leg_${index}_3">
-            <xacro:visuals_collisions_leg_3 revert="${sign}"/>
+            <xacro:visuals_collisions_leg_3 revert="${sign}" index="${index}"/>
             <inertial>
                 <!-- CENTER OF MASS -->
                 <origin rpy="${PI_2} 0 0" xyz="${leg3_width/2} ${sign*leg3_length/2} 0"/>
