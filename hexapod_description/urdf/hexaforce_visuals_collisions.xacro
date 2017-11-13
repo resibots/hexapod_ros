@@ -20,14 +20,14 @@
   </material>
 
   <material name="LightGrey">
-      <color rgba="0.6 0.6 0.6 1.0"/>
+    <color rgba="0.6 0.6 0.6 1.0"/>
   </material>
 
-    <!-- END OF MATERIALS -->
+  <!-- END OF MATERIALS -->
 
-    <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
+  <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
 
-    <xacro:macro name="visuals_collisions_body" params="">
+  <xacro:macro name="visuals_collisions_body" params="">
     <visual>
       <origin xyz="0 0 0" rpy="${PI_2} 0 ${PI_2}"/>
         <geometry>

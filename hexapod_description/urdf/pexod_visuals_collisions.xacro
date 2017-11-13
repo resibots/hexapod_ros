@@ -16,18 +16,18 @@
   </material>
 
   <material name="Yellow">
-    <color rgba="1 1 0 1"/>
-    </material>
-
-    <material name="LightGrey">
-      <color rgba="0.5 0.5 0.85 1.0"/>
+    <color rgba="0.8 0.9 0.3 1"/>
   </material>
 
-    <!-- END OF MATERIALS -->
+  <material name="LightGrey">
+    <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
 
-    <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
+  <!-- END OF MATERIALS -->
 
-    <xacro:macro name="visuals_collisions_body" params="">
+  <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
+
+  <xacro:macro name="visuals_collisions_body" params="">
     <visual>
       <origin xyz="0 0 0" rpy="${PI_2} 0 ${PI_2}"/>
         <geometry>
@@ -93,36 +93,29 @@
 
   <xacro:macro name="visuals_collisions_leg_3">
     <visual>
-      <origin xyz="0 0 0" rpy="${-PI_2} 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/FR07-H101-centered.stl" scale="0.001 0.001 0.001"/>
-        <material name="Red"/>
+        <mesh filename="package://hexapod_description/stl/third_link_v4.5.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-    </visual>
-    <visual>
-      <origin xyz="0 0 -0.03" rpy="0 0 ${PI}"/>
-      <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v4.stl" scale="0.001 0.001 0.001"/>
-        <material name="Red"/>
-      </geometry>
+      <material name="Red"/>
     </visual>
     <collision>
-      <origin xyz="0 0 -${leg3_length/2}" rpy="0 0 0"/>
+      <origin xyz="0 ${leg3_length/2} 0" rpy="0 0 0"/>
         <geometry>
-          <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
+          <box size="${leg3_width} ${leg3_length} ${leg3_width}"/>
         </geometry>
       <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${leg3_length-leg3_width/2} ${-(leg3_height-leg3_tip_radius)/2}"
+      <origin xyz="0 ${leg3_length-leg3_width/2} ${-(leg3_width+leg3_height-leg3_tip_radius)/2}"
         rpy="0 0 0"/>
         <geometry>
-          <box size="${leg3_width} ${leg3_width2} ${leg3_height-leg3_tip_radius}"/>
+          <box size="${leg3_width} ${leg3_width} ${leg3_height-leg3_tip_radius}"/>
         </geometry>
       <material name="Red"/>
     </collision>
     <collision>
-      <origin xyz="0 ${leg3_length-leg3_width/2} -${leg3_height-leg3_tip_radius}"
+      <origin xyz="0 ${leg3_length-leg3_width/2} -${leg3_height}"
         rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_tip_radius}"/>

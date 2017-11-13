@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
+    <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
 
     <xacro:macro name="leg" params="index xPos yPos">
         <joint name="body_leg_${index}" type="revolute">
