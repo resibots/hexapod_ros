@@ -68,15 +68,17 @@ add_dependencies(hexapod_control ${catkin_EXPORTED_TARGETS})
 
 # Add cartesian controllers if found
 if (${orocos_kdl_FOUND} AND ${trac_ik_lib_FOUND})
+  add_executable(hexapod_driver_cartesian
+    src/hexapod_driver_cartesian.cpp
+    src/hexapod.cpp
+    src/hexapod_cartesian.cpp
+  )
+  target_link_libraries(hexapod_driver_cartesian ${catkin_LIBRARIES})
+  add_dependencies(hexapod_driver_cartesian ${catkin_EXPORTED_TARGETS})
 
-add_executable(hexapod_driver_cartesian src/hexapod_driver_cartesian.cpp  src/hexapod.cpp src/hexapod_cartesian.cpp)
-target_link_libraries(hexapod_driver_cartesian ${catkin_LIBRARIES})
-add_dependencies(hexapod_driver_cartesian ${catkin_EXPORTED_TARGETS})
-
-add_library(hexapod_control_cartesian  src/hexapod.cpp src/hexapod_cartesian.cpp)
-target_link_libraries(hexapod_control_cartesian ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
-add_dependencies(hexapod_control_cartesian ${catkin_EXPORTED_TARGETS})
-
+  add_library(hexapod_control_cartesian  src/hexapod.cpp src/hexapod_cartesian.cpp)
+  target_link_libraries(hexapod_control_cartesian ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
+  add_dependencies(hexapod_control_cartesian ${catkin_EXPORTED_TARGETS})
 endif()
 
 install(TARGETS hexapod_driver
@@ -89,13 +91,13 @@ install(TARGETS hexapod_control
 
 # Install these files only if they were compiled
 if (${orocos_kdl_FOUND} AND ${trac_ik_lib_FOUND})
-install(TARGETS hexapod_driver_cartesian
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+  install(TARGETS hexapod_driver_cartesian
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
 
-install(TARGETS hexapod_control_cartesian
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+  install(TARGETS hexapod_control_cartesian
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  )
 endif()
 
 # install(DIRECTORY launch
