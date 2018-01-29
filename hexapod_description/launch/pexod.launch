@@ -2,5 +2,5 @@
 <launch>
   <!-- Load Pexod's URDF -->
   <param name="robot_description"
-    command="$(find xacro)/xacro.py $(find hexapod_description)/urdf/pexod.xacro" />
+    command="$(find xacro)/xacro --inorder $(find hexapod_description)/urdf/pexod.xacro" />
 </launch>
