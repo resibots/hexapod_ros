@@ -29,8 +29,8 @@
   <xacro:property name="leg3_mass" value="0.04"/>
 
   <xacro:property name="joint_lim" value="${PI_2}"/>
-  <xacro:property name="joint_eff" value="30.0"/>
-  <xacro:property name="joint_vel" value="7.0"/>
+  <xacro:property name="joint_eff" value="2.5"/>
+  <xacro:property name="joint_vel" value="${55*2*PI/60}"/>
   <xacro:property name="joint_dmp" value="0.0"/>
 
   <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
