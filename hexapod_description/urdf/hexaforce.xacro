@@ -1,6 +1,15 @@
 <?xml version="1.0"?>
 <robot name="pexod" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:property name="path_generation" value="relative" />
+
+  <xacro:if value="${'package' == path_generation}">
+    <xacro:property name="path_prefix" value="package://hexapod_description/" />
+  </xacro:if>
+  <xacro:if value="${'relative' == path_generation}">
+    <xacro:property name="path_prefix" value="" />
+  </xacro:if>
+
   <xacro:include filename="$(find hexapod_description)/urdf/modules/hexaforce.xacro" />
 
 </robot>

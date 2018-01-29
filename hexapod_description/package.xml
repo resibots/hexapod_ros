@@ -16,6 +16,7 @@ This software is governed by the CeCILL license under French law and abiding by 
   <author email="costashatz@gmail.com">Konstantinos Chatzilygeroudis</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>xacro</build_depend>
 
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>joint_state_publisher</run_depend>
