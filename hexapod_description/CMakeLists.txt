@@ -17,6 +17,8 @@ foreach(it ${xacro_files})
   string(REGEX REPLACE "(.*)[.]xacro$" "\\1_simulation.urdf" output_filename ${it})
 
   # create a rule to generate ${output_filename} from {it}
+  # path_generation:=relative makes the paths to the meshes be relative and not use the
+  # ros-dependant "package://" scheme
   xacro_add_xacro_file(${it} INORDER ${output_filename} REMAP path_generation:=relative)
   # xacro_add_xacro_file(${it} INORDER REMAP path_generation:=relative)
 

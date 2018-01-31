@@ -31,7 +31,6 @@
     <visual>
       <origin xyz="0 0 0" rpy="${PI_2} 0 ${PI_2}"/>
         <geometry>
-          <!-- <mesh filename="${path_prefix}" scale="0.001 0.001 0.001"/> -->
           <mesh filename="${path_prefix + 'stl/chassis.stl'}" scale="0.001 0.001 0.001"/>
         </geometry>
       <material name="Yellow"/>
@@ -64,7 +63,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 ${PI_2} 0"/>
         <geometry>
-          <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="${path_prefix + 'stl/first_link.stl'}" scale="0.001 0.001 0.001"/>
         </geometry>
       <material name="Red"/>
     </visual>
@@ -80,7 +79,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 -${PI_2} 0"/>
         <geometry>
-          <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="${path_prefix + 'stl/second_link.stl'}" scale="0.001 0.001 0.001"/>
         </geometry>
       <material name="Blue"/>
     </visual>
@@ -96,7 +95,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="${path_prefix + 'stl/third_link_v5.stl'}" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="Red"/>
     </visual>
