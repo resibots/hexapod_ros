@@ -34,7 +34,7 @@
   <xacro:property name="joint_lim" value="${PI_2}"/>
   <xacro:property name="joint_eff" value="2.5"/>
   <xacro:property name="joint_vel" value="${55*2*PI/60}"/>
-  <xacro:property name="joint_dmp" value="0.0"/>
+  <xacro:property name="joint_dmp" value="0.1"/>
 
   <xacro:include filename="$(find hexapod_description)/urdf/hexaforce_visuals_collisions.xacro" />
 
