@@ -14,7 +14,7 @@ list(APPEND xacro_files ${CMAKE_CURRENT_SOURCE_DIR}/urdf/pexod.xacro)
 
 foreach(it ${xacro_files})
   # remove .xacro extension
-  string(REGEX REPLACE "(.*)[.]xacro$" "\\1_simulation.urdf" output_filename ${it})
+  string(REGEX REPLACE "(.*)/(.*)[.]xacro$" "\\1/../\\2_simulation.urdf" output_filename ${it})
 
   # create a rule to generate ${output_filename} from {it}
   # path_generation:=relative makes the paths to the meshes be relative and not use the
