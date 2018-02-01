@@ -28,7 +28,7 @@
 
             <axis xyz="0 0 1"/>
 
-            <dynamics damping="${joint_dmp}"/>
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
         </joint>
         <link name="leg_${index}_1">
             <xacro:visuals_collisions_leg_1/>
@@ -46,7 +46,7 @@
             <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <origin rpy="0 0 0" xyz="0 ${leg1_length} 0"/>
             <axis xyz="1 0 0"/>
-            <dynamics damping="${joint_dmp}"/>
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
         </joint>
         <link name="leg_${index}_2">
             <xacro:visuals_collisions_leg_2/>
@@ -64,7 +64,7 @@
             <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
             <origin rpy="0 0 0" xyz="0 ${leg2_length} 0"/>
             <axis xyz="-1 0 0"/>
-            <dynamics damping="${joint_dmp}"/>
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
         </joint>
         <link name="leg_${index}_3">
             <xacro:visuals_collisions_leg_3/>
