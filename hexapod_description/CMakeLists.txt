@@ -26,7 +26,7 @@ foreach(it ${xacro_files})
 endforeach(it)
 
 # add an abstract target to actually trigger the builds
-add_custom_target(urdf_simulation DEPENDS ${urdf_files})
+add_custom_target(generate_urdfs DEPENDS ${urdf_files})
 
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

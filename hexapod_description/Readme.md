@@ -18,4 +18,4 @@ Replace "hexaforce" with "pexod" for the other hexapod.
 
 ## For simulators and others
 
-You can generate URDF models that do not depend on any ROS utilities. Just run `catkin_make urdf_simulation` and the files `pexod_simulation.urdf` and `hexaforce_simulation.urdf` will be generated in the `urdf` folder of this package.
+You can generate URDF models that do not depend on any ROS utilities. Just run `catkin_make generate_urdfs` and the files `pexod_simulation.urdf` and `hexaforce_simulation.urdf` will be generated in the `urdf` folder of this package.
