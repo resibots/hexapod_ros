@@ -8,7 +8,7 @@
     <xacro:property name="path_prefix" value="package://hexapod_description/" />
   </xacro:if>
   <xacro:if value="${'relative' == path_generation}">
-    <xacro:property name="path_prefix" value="" />
+    <xacro:property name="path_prefix" value="./" />
   </xacro:if>
 
   <xacro:include filename="$(find hexapod_description)/urdf/modules/pexod.xacro" />
