@@ -34,6 +34,7 @@
   <xacro:property name="joint_lim" value="${PI_2}"/>
   <xacro:property name="joint_eff" value="2.5"/>
   <xacro:property name="joint_vel" value="${55*2*PI/60}"/>
+  <!-- These values are set by intuition to around ~10% of the max torque -->
   <xacro:property name="joint_dmp" value="0.25"/>
   <xacro:property name="joint_friction" value="0.183333333"/>
 
