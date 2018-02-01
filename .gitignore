@@ -1,1 +1,5 @@
 *.pyc
+hexaforce_simulation.urdf
+hexaforce.urdf
+pexod_simulation.urdf
+pexod.urdf
