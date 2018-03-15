@@ -19,7 +19,7 @@
     name="dummy_robot" /> -->
 
   <!-- launch our hardware interface -->
-  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw"
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw_v1"
     name="dynamixel_control_hw" output="screen"/>
 
   <!-- Start a controller for our dummy robot -->
