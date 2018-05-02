@@ -45,7 +45,7 @@ dynamixel_controllers:
       - leg_5_1_2
       - leg_5_2_3
 
-dynamixel_control_hw:
+dynamixel_control:
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds

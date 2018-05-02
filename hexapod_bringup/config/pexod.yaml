@@ -1,4 +1,4 @@
-dynamixel_control_hw:
+dynamixel_control:
   serial_interface: /dev/ttyACM0
 
   servos:
