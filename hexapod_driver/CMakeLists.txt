@@ -18,7 +18,7 @@ find_package(catkin QUIET COMPONENTS
   actionlib
   tf
   geometry_msgs
-  dynamixel_control_hw
+  dynamixel_control
   trac_ik_lib
   hexapod_ik
 )
@@ -31,7 +31,7 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     rospy
-    dynamixel_control_hw
+    dynamixel_control
     std_msgs
     std_srvs
     trajectory_msgs

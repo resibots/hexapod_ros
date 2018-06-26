@@ -45,29 +45,49 @@ dynamixel_controllers:
       - leg_5_1_2
       - leg_5_2_3
 
-dynamixel_control_hw:
+dynamixel_control:
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds
-  dynamixel_timeout: 0.01 # in seconds
-  dynamixel_scanning: 0.01 # in seconds
+  read_timeout: 0.01 # in seconds
+  scan_timeout: 0.01 # in seconds
+
   # correspondance between hardware IDs of the actuators and their names in ROS
-  hardware_mapping:
-    body_leg_0: 1
-    leg_0_1_2: 11
-    leg_0_2_3: 21
-    body_leg_1: 2
-    leg_1_1_2: 12
-    leg_1_2_3: 22
-    body_leg_2: 3
-    leg_2_1_2: 13
-    leg_2_2_3: 23
-    body_leg_3: 4
-    leg_3_1_2: 14
-    leg_3_2_3: 24
-    body_leg_4: 5
-    leg_4_1_2: 15
-    leg_4_2_3: 25
-    body_leg_5: 6
-    leg_5_1_2: 16
-    leg_5_2_3: 26
+  default_command_interface: position
+  servos:
+    body_leg_0:
+      id: 1
+    leg_0_1_2:
+      id: 11
+    leg_0_2_3:
+      id: 21
+    body_leg_1:
+      id: 2
+    leg_1_1_2:
+      id: 12
+    leg_1_2_3:
+      id: 22
+    body_leg_2:
+      id: 3
+    leg_2_1_2:
+      id: 13
+    leg_2_2_3:
+      id: 23
+    body_leg_3:
+      id: 4
+    leg_3_1_2:
+      id: 14
+    leg_3_2_3:
+      id: 24
+    body_leg_4:
+      id: 5
+    leg_4_1_2:
+      id: 15
+    leg_4_2_3:
+      id: 25
+    body_leg_5:
+      id: 6
+    leg_5_1_2:
+      id: 16
+    leg_5_2_3:
+      id: 26

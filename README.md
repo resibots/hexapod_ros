@@ -8,14 +8,14 @@ These packages are for ROS integration for our [hexapods].
 |---------------------|--------------------------------------------------------|
 | hexapod_bringup     | launch file for the hardware interface of Pexod        |
 | hexapod_description | Xacro for Pexod, as well as relevant launch files for the description |
-| hexapod_driver      | C++ API to control our hexapods (talks to dynamixel_control_hw through trajectory messages) |
+| hexapod_driver      | C++ API to control our hexapods (talks to dynamixel_control through trajectory messages) |
 | hexapod_ros         | metapackage for the above packages                     |
 
 > **Important:** When this repository is updated, URDF files must be generated and pushed to [hexapod_common]/hexapod_models.
 
 ## Dependencies
 
-- [dynamixel_control_hw]: Hardware interface for ros_control and the Dynamixels actuators
+- [dynamixel_control]: Hardware interface for ros_control and the Dynamixels actuators
 - [hexapod_common]: Its controllers are used by the `hexapod_driver` package
 
 ## Authors
@@ -37,5 +37,5 @@ The visuals of these models are made with STL files taken from our CAD designs (
 
 [hexapods]: http://www.resibots.eu/photos.html#robots
 [CeCILL]: http://www.cecill.info/index.en.html
-[dynamixel_control_hw]: https://github.com/resibots/dynamixel_control_hw
+[dynamixel_control]: https://github.com/resibots/dynamixel_control
 [hexapod_common]: https://github.com/resibots/hexapod_common
