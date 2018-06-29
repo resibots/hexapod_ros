@@ -17,6 +17,7 @@ These packages are for ROS integration for our [hexapods].
 
 - [dynamixel_control]: Hardware interface for ros_control and the Dynamixels actuators
 - [hexapod_common]: Its controllers are used by the `hexapod_driver` package
+- [hexapod_ik]: inverse kinematics for the legs that allow to control the hexapods in cartesian space
 
 ## Authors
 
@@ -39,3 +40,4 @@ The visuals of these models are made with STL files taken from our CAD designs (
 [CeCILL]: http://www.cecill.info/index.en.html
 [dynamixel_control]: https://github.com/resibots/dynamixel_control
 [hexapod_common]: https://github.com/resibots/hexapod_common
+[hexapod_ik]: https://github.com/resibots/hexapod_ik
