@@ -1,6 +1,6 @@
 <launch>
   <!-- Base path for the serial port for the optoforce sensor. -->
-  <arg name="port" default="/dev/optoforce"/>
+  <arg name="port" default="/dev/optoforce/optoforce"/>
   <!-- Update speed. Available values:
         "Stop"
         "1000Hz"
