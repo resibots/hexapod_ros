@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="feet_force" default="true"
+      doc="set this value to false if you do not want the force sensors to 
+      be connected"/>
 
   <!-- URDF robot description -->
   <include file="$(find hexapod_description)/launch/hexaforce.launch" />
@@ -33,5 +36,5 @@
                           /dynamixel_controllers/leg_5_controller" />
 
     <!-- Static tf transform publishers that attach the force sensors to the legs' tips -->
-    <include file="$(find hexapod_bringup)/launch/feet_force_sensors.launch" />
+    <include if="$(arg feet_force)" file="$(find hexapod_bringup)/launch/feet_force_sensors.launch" />
 </launch>
