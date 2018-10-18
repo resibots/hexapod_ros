@@ -80,11 +80,11 @@ dynamixel_control:
     leg_3_2_3:
       id: 24
     body_leg_4:
-      id: 5
+     id: 5
     leg_4_1_2:
-      id: 15
+     id: 15
     leg_4_2_3:
-      id: 25
+     id: 25
     body_leg_5:
       id: 6
     leg_5_1_2:
