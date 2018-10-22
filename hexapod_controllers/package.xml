@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>hexapod_controllers</name>
+  <version>0.1.0</version>
+  <description>Controllers for our hexapods</description>
+
+  <maintainer email="eloise.dalin@inria.fr">Eloïse Dalin</maintainer>
+  <maintainer email="pierre.desreumaux@inria.fr">Pierre Desreumaux</maintainer>
+
+  <license>BSD</license>
+
+
+  <author>Eloïse Dalin</author>
+  <author>Pierre Desreumaux</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <depend>message_runtime</depend>
+  <depend>control_msgs</depend>
+  <depend>control_toolbox</depend>
+  <depend>controller_interface</depend>
+  <depend>hardware_interface</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>realtime_tools</depend>
+  <depend>velocity_controllers</depend>
+  <depend>geometry_msgs</depend>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+    <controller_interface plugin="${prefix}/hexapod_controllers_plugins.xml"/>
+  </export>
+</package>

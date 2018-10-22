@@ -1,0 +1,10 @@
+<library path="lib/libhexapod_controllers">
+
+  <class name="hexapod_controllers/OlCpgController"
+      type="open_loop_cpg_controller::OlCpgController"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller sends a CPG in open loop.
+    </description>
+  </class>
+</library>

@@ -23,6 +23,7 @@ This software is governed by the CeCILL license under French law and abiding by 
   <run_depend>hexapod_bringup</run_depend>
   <run_depend>hexapod_description</run_depend>
   <run_depend>hexapod_driver</run_depend>
+  <run_depend>hexapod_controllers</run_depend>
 
   <export>
     <metapackage/>
