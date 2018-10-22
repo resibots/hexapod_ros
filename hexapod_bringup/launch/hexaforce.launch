@@ -2,6 +2,8 @@
 
 <launch>
 
+  <arg name="force_sensors" default="true"/>
+
   <!-- URDF robot description -->
   <include file="$(find hexapod_description)/launch/hexaforce.launch" />
   <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/hexaforce.urdf"/> -->
@@ -33,5 +35,5 @@
                           /dynamixel_controllers/leg_5_controller" />
 
     <!-- Static tf transform publishers that attach the force sensors to the legs' tips -->
-    <include file="$(find hexapod_bringup)/launch/feet_force_sensors.launch" />
+    <include if="$(arg force_sensors)" file="$(find hexapod_bringup)/launch/feet_force_sensors.launch" />
 </launch>

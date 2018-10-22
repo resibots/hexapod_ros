@@ -1,6 +1,6 @@
 dynamixel_control:
-  # serial_interface: /dev/usb2ax6
-  serial_interface: /dev/ttyACM0
+  serial_interface: /dev/usb2ax0
+  #serial_interface: /dev/ttyACM0
 
   servos:
     body_leg_0:

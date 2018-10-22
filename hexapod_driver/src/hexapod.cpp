@@ -1,8 +1,8 @@
-#include <hexapod_driver/hexapod.hpp>
-#include <hexapod_controller/hexapod_controller_simple.hpp>
-#include <tf/transform_listener.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <hexapod_controller/hexapod_controller_simple.hpp>
+#include <hexapod_driver/hexapod.hpp>
 #include <std_srvs/Empty.h>
+#include <tf/transform_listener.h>
 #include <thread>
 
 using namespace hexapod_ros;
@@ -31,7 +31,8 @@ void Hexapod::init()
     n_p.param("mocap_odom_enable", _mocap_odom_enable, true);
 
     if (_odom_enable && _mocap_odom_enable) {
-        ROS_WARN_STREAM("You have enabled both the motion capture and the visual odometry! Using visual odometry for measuring..");
+        ROS_WARN_STREAM("You have enabled both the motion capture and the visual "
+                        "odometry! Using visual odometry for measuring..");
         _mocap_odom_enable = false;
     }
 
@@ -40,10 +41,13 @@ void Hexapod::init()
     _traj_msgs.clear();
     for (size_t i = 0; i < 6; i++) {
         std::string traj_topic = _namespace + "/leg_" + std::to_string(i) + "_controller/follow_joint_trajectory";
-        _traj_clients.push_back(std::make_shared<trajectory_client>(traj_topic, true));
+        _traj_clients.push_back(
+            std::make_shared<trajectory_client>(traj_topic, true));
         // TO-DO: blocking duration in params?
         if (!_traj_clients[i]->waitForServer(ros::Duration(1.0)))
-            ROS_ERROR_STREAM("leg_" << i << " actionlib server could not be found at: " << traj_topic);
+            ROS_ERROR_STREAM("leg_" << i
+                                    << " actionlib server could not be found at: "
+                                    << traj_topic);
 
         trajectory_msgs::JointTrajectory msg;
         msg.joint_names.clear();
@@ -59,7 +63,8 @@ void Hexapod::init()
     // Init ROS related
     if (_odom_enable) {
         // create publisher to reset UKF filter (robot_localization)
-        _reset_filter_pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/set_pose", 1000);
+        _reset_filter_pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
+            "/set_pose", 1000);
     }
 
     // Reset
@@ -294,7 +299,8 @@ void Hexapod::reset_odom()
 tf::Transform Hexapod::transform()
 {
     if (!_odom_enable && !_mocap_odom_enable)
-        ROS_ERROR_STREAM("Mocap and odom are disabled so Hexapod::transform should not be called");
+        ROS_ERROR_STREAM("Mocap and odom are disabled so Hexapod::transform should "
+                         "not be called");
 
     _pos_update();
     return _init_pos.inverse() * _pos;
@@ -306,15 +312,19 @@ void Hexapod::_pos_update()
     ros::Time start_t = ros::Time::now();
     while (_nh.ok()) {
         try {
-            listener.lookupTransform(_odom_frame, _base_link_frame, ros::Time(0), _pos);
+            listener.lookupTransform(_odom_frame, _base_link_frame, ros::Time(0),
+                _pos);
             break;
         }
         catch (tf::TransformException ex) {
-            ROS_DEBUG_STREAM("Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame << "': " << ex.what());
+            ROS_DEBUG_STREAM("Failed to get transfromation from '"
+                << _base_link_frame << "' to '" << _odom_frame
+                << "': " << ex.what());
         }
         ros::Duration(0.001).sleep();
         if ((ros::Time::now() - start_t) > ros::Duration(1.0)) {
-            ROS_ERROR_STREAM("Timeout error: Failed to get transfromation from '" << _base_link_frame << "' to '" << _odom_frame);
+            ROS_ERROR_STREAM("Timeout error: Failed to get transfromation from '"
+                << _base_link_frame << "' to '" << _odom_frame);
             break;
         }
     }
@@ -336,7 +346,8 @@ void Hexapod::_send_trajectories(double duration)
             continue;
         }
 
-        threads.push_back(std::thread(&Hexapod::_send_trajectory, this, i, duration));
+        threads.push_back(
+            std::thread(&Hexapod::_send_trajectory, this, i, duration));
     }
 
     for (size_t i = 0; i < threads.size(); i++) {
@@ -354,5 +365,7 @@ void Hexapod::_send_trajectory(size_t i, double duration)
 
     _traj_clients[i]->waitForResult(ros::Duration(duration + 0.5));
     if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
-        ROS_WARN_STREAM("Trajectory execution for leg_" << std::to_string(i) << " failed with status '" << _traj_clients[i]->getState().toString() << "'");
+        ROS_WARN_STREAM("Trajectory execution for leg_"
+            << std::to_string(i) << " failed with status '"
+            << _traj_clients[i]->getState().toString() << "'");
 }
