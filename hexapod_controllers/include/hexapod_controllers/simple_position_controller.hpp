@@ -37,10 +37,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef OPEN_LOOP_CPG_CONTROLLER_H
-#define OPEN_LOOP_CPG_CONTROLLER_H
+#ifndef SIMPLE_POSITION_CONTROLLER_H
+#define SIMPLE_POSITION_CONTROLLER_H
 
-#include "cpg.hpp"
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <realtime_tools/realtime_buffer.h>
@@ -49,7 +48,7 @@
 #include <string>
 #include <vector>
 
-namespace open_loop_cpg_controller {
+namespace simple_position_controller {
 
     struct NoSafetyConstraints;
 
@@ -70,14 +69,10 @@ namespace open_loop_cpg_controller {
      * - \b command (std_msgs::Float64MultiArray) : The joint commands to apply.
      */
     template <class SafetyConstraint = NoSafetyConstraints>
-    class OlCpgController : public controller_interface::Controller<hardware_interface::PositionJointInterface> {
+    class SimplePositionController : public controller_interface::Controller<hardware_interface::PositionJointInterface> {
     public:
-        OlCpgController()
-        {
-            e = 0.001;
-            has_init = false;
-        }
-        ~OlCpgController() {}
+        SimplePositionController() {}
+        ~SimplePositionController() { _sub_command.shutdown(); }
 
         bool init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& nh)
         {
@@ -105,65 +100,53 @@ namespace open_loop_cpg_controller {
                     return false;
                 }
             }
+
             // Safety Constraint
             if (!_constraint.init(joints, nh)) {
                 ROS_ERROR_STREAM("Initialisation of the safety contraint failed");
                 return false;
             }
 
+            commands_buffer.writeFromNonRT(std::vector<double>(n_joints, 0.0));
+
+            _sub_command = nh.subscribe<std_msgs::Float64MultiArray>("command", 1, &SimplePositionController::commandCB, this);
             return true;
         }
 
         void starting(const ros::Time& time)
         {
+            // Start controller with 0.0 velocities
+            commands_buffer.readFromRT()->assign(n_joints, 0.0);
         }
 
         void update(const ros::Time& /*time*/, const ros::Duration& period)
         {
+            std::vector<double>& commands = *commands_buffer.readFromRT();
 
-            if (has_init == false) {
-                initJointPosition();
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(commands[i]);
             }
-            else {
-                std::vector<double> states;
-                for (unsigned int i = 0; i < n_joints; i++) {
-                    states.push_back(joints[i]->getPosition());
-                    std::cout << joints[i]->getPosition() << std::endl;
-                }
-            }
+
             _constraint.enforce(period);
         }
 
         std::vector<std::string> joint_names;
         std::vector<std::shared_ptr<hardware_interface::JointHandle>> joints;
+        realtime_tools::RealtimeBuffer<std::vector<double>> commands_buffer;
         unsigned int n_joints;
-        bool has_init; // Is false if the joint
-        float e;
 
     private:
         SafetyConstraint _constraint;
-
-        /**
-         * \brief initialize K with default values from the paper
-         * \param std::vector<std::vector<float>> where a vector of lines
-         * \return void, K is passed by reference
-         */
-        void initJointPosition()
+        ros::Subscriber _sub_command;
+        void commandCB(const std_msgs::Float64MultiArrayConstPtr& msg)
         {
-
-            unsigned int count = 0;
-            for (unsigned int i = 0; i < n_joints; i++) {
-                joints[i]->setCommand(0);
-                if (abs(joints[i]->getPosition()) < e) {
-                    count++;
-                }
-                if (count == n_joints) {
-                    has_init = true;
-                }
+            if (msg->data.size() != n_joints) {
+                ROS_ERROR_STREAM("Dimension of command (" << msg->data.size() << ") does not match number of joints (" << n_joints << ")! Not executing!");
+                return;
             }
+            commands_buffer.writeFromNonRT(msg->data);
         }
-
-    }; // namespace open_loop_cpg_controller
+    };
 
     /** \cond HIDDEN_SYMBOLS */
     struct NoSafetyConstraints {
@@ -183,6 +166,6 @@ namespace open_loop_cpg_controller {
     };
     /** \endcond */
 
-} // namespace open_loop_cpg_controller
+} // namespace simple_position_controller
 
 #endif

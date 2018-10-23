@@ -1,0 +1,91 @@
+dynamixel_control:
+  serial_interface: /dev/usb2ax0
+  servos:
+    body_leg_0:
+      id: 1
+      offset: 2.74889357189
+    leg_0_1_2:
+      id: 11
+      offset: 3.14159265359
+    leg_0_2_3:
+      id: 21
+      offset: 3.14159265359
+    body_leg_1:
+      id: 2
+      offset: 3.14159265359
+    leg_1_1_2:
+      id: 12
+      offset: 3.14159265359
+    leg_1_2_3:
+      id: 22
+      offset: 3.14159265359
+    body_leg_2:
+      id: 3
+      offset: 3.53429173529
+    leg_2_1_2:
+      id: 13
+      offset: 3.14159265359
+    leg_2_2_3:
+      id: 23
+      offset: 3.14159265359
+    body_leg_3:
+      id: 4
+      offset: 2.74889357189
+    leg_3_1_2:
+      id: 14
+      offset: 3.14159265359
+    leg_3_2_3:
+      id: 24
+      offset: 3.14159265359
+    body_leg_4:
+      id: 5
+      offset: 3.14159265359
+    leg_4_1_2:
+      id: 15
+      offset: 3.14159265359
+    leg_4_2_3:
+      id: 25
+      offset: 3.14159265359
+    body_leg_5:
+      id: 6
+      offset: 3.53429173529
+    leg_5_1_2:
+      id: 16
+      offset: 3.14159265359
+    leg_5_2_3:
+      id: 26
+      offset: 3.14159265359
+
+  loop_frequency: 50
+  cycle_time_error_threshold: 0.1
+  baudrate: 1000000 # in bauds
+  read_timeout: 0.01 # in seconds
+  scan_timeout: 0.01 # in seconds
+  # correspondance between hardware IDs of the actuators and their names in ROS
+  default_command_interface: position
+
+dynamixel_controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+  hexapod_cpg_controller:
+    type: hexapod_controllers/HexapodOlCpgController
+    joints:
+      - body_leg_0
+      - leg_0_1_2
+      - leg_0_2_3
+      - body_leg_1
+      - leg_1_1_2
+      - leg_1_2_3
+      - body_leg_2
+      - leg_2_1_2
+      - leg_2_2_3
+      - body_leg_3
+      - leg_3_1_2
+      - leg_3_2_3
+      - body_leg_4
+      - leg_4_1_2
+      - leg_4_2_3
+      - body_leg_5
+      - leg_5_1_2
+      - leg_5_2_3

@@ -1,10 +1,17 @@
 <library path="lib/libhexapod_controllers">
 
-  <class name="hexapod_controllers/OlCpgController"
-      type="open_loop_cpg_controller::OlCpgController"
+  <class name="hexapod_controllers/HexapodOlCpgController"
+      type="open_loop_cpg_controller::HexapodOlCpgController"
       base_class_type="controller_interface::ControllerBase">
     <description>
       This controller sends a CPG in open loop.
     </description>
+  </class>
+  <class name="hexapod_controllers/HexapodSimplePositionController"
+       type="simple_position_controller::HexapodSimplePositionController"
+        base_class_type="controller_interface::ControllerBase">
+      <description>
+        This controller is looking at the command topic for position commands
+      </description>
   </class>
 </library>
