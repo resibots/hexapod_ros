@@ -36,17 +36,25 @@
  *********************************************************************/
 
 #include <hexapod_controllers/open_loop_cpg_controller.hpp>
+#include <hexapod_controllers/open_loop_cpg_controller_velocity.hpp>
 #include <hexapod_controllers/simple_position_controller.hpp>
 #include <pluginlib/class_list_macros.h>
 
 namespace open_loop_cpg_controller {
-    typedef open_loop_cpg_controller::OlCpgController<NoSafetyConstraints> HexapodOlCpgController;
+    typedef open_loop_cpg_controller::OlCpgController<NoSafetyConstraints, 6> HexapodOlCpgController;
 } // namespace open_loop_cpg_controller
+
+namespace open_loop_cpg_controller_velocity {
+    typedef open_loop_cpg_controller_velocity::OlCpgControllerV<NoSafetyConstraints, 6> HexapodOlCpgControllerV;
+}
 
 namespace simple_position_controller {
     typedef simple_position_controller::SimplePositionController<NoSafetyConstraints> HexapodSimplePositionController;
 }
 PLUGINLIB_EXPORT_CLASS(open_loop_cpg_controller::HexapodOlCpgController,
+    controller_interface::ControllerBase)
+
+PLUGINLIB_EXPORT_CLASS(open_loop_cpg_controller_velocity::HexapodOlCpgControllerV,
     controller_interface::ControllerBase)
 
 PLUGINLIB_EXPORT_CLASS(simple_position_controller::HexapodSimplePositionController,

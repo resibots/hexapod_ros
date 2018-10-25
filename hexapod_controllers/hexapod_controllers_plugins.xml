@@ -4,7 +4,14 @@
       type="open_loop_cpg_controller::HexapodOlCpgController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      This controller sends a CPG in open loop.
+      This controller sends a CPG in open loop. Position command
+    </description>
+  </class>
+  <class name="hexapod_controllers/HexapodOlCpgControllerV"
+      type="open_loop_cpg_controller_velocity::HexapodOlCpgControllerV"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller sends a CPG in open loop.Velocity command
     </description>
   </class>
   <class name="hexapod_controllers/HexapodSimplePositionController"

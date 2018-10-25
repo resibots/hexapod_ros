@@ -37,11 +37,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef OPEN_LOOP_CPG_CONTROLLER_H
-#define OPEN_LOOP_CPG_CONTROLLER_H
+#ifndef OPEN_LOOP_CPG_CONTROLLER_VELOCITY_H
+#define OPEN_LOOP_CPG_CONTROLLER_VELOCITY_H
 
 #include "cpg.hpp"
 #include <chrono>
+#include <cmath>
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <realtime_tools/realtime_buffer.h>
@@ -49,8 +50,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <string>
 #include <vector>
-
-namespace open_loop_cpg_controller {
+namespace open_loop_cpg_controller_velocity {
 
     struct NoSafetyConstraints;
 
@@ -71,15 +71,15 @@ namespace open_loop_cpg_controller {
      * - \b command (std_msgs::Float64MultiArray) : The joint commands to apply.
      */
     template <class SafetyConstraint = NoSafetyConstraints, int NLegs = 6>
-    class OlCpgController : public controller_interface::Controller<hardware_interface::PositionJointInterface> {
+    class OlCpgControllerV : public controller_interface::Controller<hardware_interface::VelocityJointInterface> {
     public:
-        OlCpgController();
-        ~OlCpgController(){};
+        OlCpgControllerV();
+        ~OlCpgControllerV(){};
 
         /**
          * \brief Tries to recover n_joints JointHandles
          */
-        bool init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& nh);
+        bool init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh);
         /**
          * \brief Starting is called one time after init and switch to update. It is enough  to read data but not to set servos position.
          * This needs to be done in update
@@ -106,12 +106,6 @@ namespace open_loop_cpg_controller {
         /*!    angles of the soulder joints in the sagittal plane at init*/
         std::vector<float> Y, Yprev, Ycommand;
 
-        std::chrono::steady_clock::time_point current_time;
-
-        std::chrono::steady_clock::time_point last_time;
-
-        bool integration_has_diverged;
-
     private:
         SafetyConstraint _constraint;
 
@@ -120,15 +114,15 @@ namespace open_loop_cpg_controller {
          */
         void initJointPosition();
 
-    }; // class OlCpgController
+    }; // class OlCpgControllerV
 
     /**
      * \brief Constructor
      */
     template <class SafetyConstraint, int NLegs>
-    OlCpgController<SafetyConstraint, NLegs>::OlCpgController()
+    OlCpgControllerV<SafetyConstraint, NLegs>::OlCpgControllerV()
     {
-        e = 0.001;
+        e = 0.05;
         has_init = false;
         X.resize(NLegs, 0.0);
         Xprev.resize(NLegs, 0.0);
@@ -136,14 +130,13 @@ namespace open_loop_cpg_controller {
         Y.resize(NLegs, 0.0);
         Yprev.resize(NLegs, 0.0);
         Ycommand.resize(NLegs, 0.0);
-        integration_has_diverged = false;
     }
 
     /**
      * \brief Tries to recover n_joints JointHandles
      */
     template <class SafetyConstraint, int NLegs>
-    bool OlCpgController<SafetyConstraint, NLegs>::init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& nh)
+    bool OlCpgControllerV<SafetyConstraint, NLegs>::init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh)
     {
         // List of controlled joints
         std::string param_name = "joints";
@@ -182,123 +175,92 @@ namespace open_loop_cpg_controller {
      * \brief This function is the control loop itself, called periodically by the controller_manager
      */
     template <class SafetyConstraint, int NLegs>
-    void OlCpgController<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
+    void OlCpgControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
     {
-        current_time = std::chrono::steady_clock::now();
-        //cpg_.set_rk_dt(period.toSec());
-
-        // std::cout << period.toSec() << std::endl;
-        // std::cout << period << std::endl;
 
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
         if (has_init == false) {
             initJointPosition();
-            // X = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
-            // Y = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+            X[1] = -joints[5]->getPosition();
+            Y[1] = joints[11]->getPosition();
+            std::cout << Y[1] << std::endl;
         }
         //Then carry on the cpg control
         else {
-            //
-            // for (unsigned int i = 0; i < n_joints; i++) {
-            //     std::cout << i << " jointpos " << joints[i]->getPosition() << std::endl;
-            // }
-            std::cout << "\n\n\n"
-                      << std::endl;
+
             X[0] = joints[0]->getPosition();
-            // std::cout << "X[0] " << X[0] << std::endl;
-            Y[0] = joints[12]->getPosition();
-
-            X[1] = joints[5]->getPosition();
-            Y[1] = -joints[17]->getPosition();
-
-            X[2] = -joints[1]->getPosition();
-            Y[2] = -joints[13]->getPosition();
-
-            X[3] = -joints[4]->getPosition();
-            Y[3] = joints[16]->getPosition();
+            Y[0] = joints[6]->getPosition();
 
             X[4] = joints[2]->getPosition();
-            Y[4] = joints[14]->getPosition();
+            Y[4] = joints[8]->getPosition();
 
-            X[5] = joints[3]->getPosition();
-            Y[5] = -joints[15]->getPosition();
+            X[3] = -joints[4]->getPosition();
+            Y[3] = joints[10]->getPosition();
 
-            std::chrono::duration<double> time_span
-                = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - last_time);
-            std::cout << time_span.count() << std::endl;
-            // cpg_.set_rk_dt(time_span.count());
+            X[1] = -joints[5]->getPosition();
+            Y[1] = joints[11]->getPosition();
+
+            X[2] = joints[1]->getPosition();
+            Y[2] = joints[7]->getPosition();
+
+            X[5] = -joints[3]->getPosition();
+            Y[5] = joints[9]->getPosition();
+
             /*compute X,Y derivatives*/
             std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(X, Y);
-            // std::cout << XYdot[0].first << std::endl;
-            // std::cout << "xdot " << XYdot[0].first << " ydot " << XYdot[0].second << std::endl;
 
-            for (int i = 0; i < XYdot.size(); i++) {
-                /*Integrate XYdot*/
-                std::pair<float, float> xy = cpg_.RK4(X[i], Y[i], XYdot[i]);
-                Xcommand[i] = xy.first;
-                Ycommand[i] = xy.second;
-                // X[i] = Xcommand[i];
-                // Y[i] = Ycommand[i];
+            std::cout << "Pates" << 0 << " X: " << X[0] << " Y: " << Y[0] << std::endl;
+            std::cout << "Xdot : " << XYdot[0].first << " Ydot : " << XYdot[0].second << std::endl;
+            std::cout << "Pates" << 1 << " X: " << X[2] << " Y: " << Y[2] << std::endl;
+            std::cout << "Xdot : " << XYdot[2].first << " Ydot : " << XYdot[2].second << std::endl;
+            std::cout << "Pates" << 2 << " X: " << X[4] << " Y: " << Y[4] << std::endl;
+            std::cout << "Xdot : " << XYdot[4].first << " Ydot : " << XYdot[4].second << std::endl;
+            std::cout << "Pates" << 3 << " X: " << X[5] << " Y: " << Y[5] << std::endl;
+            std::cout << "Xdot : " << XYdot[5].first << " Ydot : " << XYdot[5].second << std::endl;
+            std::cout << "Pates" << 4 << " X: " << X[3] << " Y: " << Y[3] << std::endl;
+            std::cout << "Xdot : " << XYdot[3].first << " Ydot : " << XYdot[3].second << std::endl;
+            std::cout << "Pates" << 5 << " X: " << X[1] << " Y: " << Y[1] << std::endl;
+            std::cout << "Xdot : " << XYdot[1].first << " Ydot : " << XYdot[1].second << std::endl;
 
-                /*Check if integration hasn't diverged*/
-                if (std::isnan(xy.first) || std::isnan(xy.second)) {
-                    std::cout << "INTEGRATION HAS DIVERGED : reboot the node and use a bigger loop rate"
-                              << std::endl;
-                    integration_has_diverged = true;
-                }
-            }
-            // std::cout << "Xcommand[0] " << Xcommand[0] << std::endl;
+            std::cout << "\n";
 
-            for (unsigned int i = 0; i < NLegs; i++) {
-                std::cout << "X" << i << "  Sensor value : " << X[i] << " Command value : " << Xcommand[i] << " error : " << Xcommand[i] - X[i] << std::endl;
-                std::cout << "Y" << i << "  Sensor value : " << Y[i] << " Command value : " << Ycommand[i] << " error : " << Ycommand[i] - Y[i] << std::endl;
-            }
+            joints[0]->setCommand(0.02 * XYdot[0].first);
+            joints[6]->setCommand(0.02 * XYdot[0].second);
+            joints[12]->setCommand(0.02 * XYdot[0].second);
 
-            if (integration_has_diverged == false) {
+            joints[3]->setCommand(0.02 * XYdot[5].first);
+            joints[9]->setCommand(-0.02 * XYdot[5].second);
+            joints[15]->setCommand(-0.02 * XYdot[5].second);
 
-                joints[0]->setCommand(Xcommand[0]);
-                joints[6]->setCommand(Ycommand[0]);
-                joints[12]->setCommand(Ycommand[0]);
+            joints[4]->setCommand(-0.02 * XYdot[3].first);
+            joints[10]->setCommand(0.02 * XYdot[3].second);
+            joints[16]->setCommand(0.02 * XYdot[3].second);
 
-                joints[1]->setCommand(-Xcommand[2]);
-                joints[7]->setCommand(-Ycommand[2]);
-                joints[13]->setCommand(-Ycommand[2]);
+            joints[1]->setCommand(-0.02 * XYdot[2].first);
+            joints[7]->setCommand(-0.02 * XYdot[2].second);
+            joints[13]->setCommand(-0.02 * XYdot[2].second);
 
-                joints[2]->setCommand(Xcommand[4]);
-                joints[8]->setCommand(Ycommand[4]);
-                joints[14]->setCommand(Ycommand[4]);
+            joints[2]->setCommand(0.02 * XYdot[4].first);
+            joints[8]->setCommand(0.02 * XYdot[4].second);
+            joints[14]->setCommand(0.02 * XYdot[4].second);
 
-                joints[3]->setCommand(Xcommand[5]);
-                joints[9]->setCommand(-Ycommand[5]);
-                joints[15]->setCommand(-Ycommand[5]);
-
-                joints[4]->setCommand(-Xcommand[3]);
-                joints[10]->setCommand(Ycommand[3]);
-                joints[16]->setCommand(Ycommand[3]);
-
-                joints[5]->setCommand(Xcommand[1]);
-                joints[11]->setCommand(-Ycommand[1]);
-                joints[17]->setCommand(-Ycommand[1]);
-
-                // std::cout << Xcommand[0] << " " << joints[0]->getPosition() << std::endl;
-                // std::cout << Xcommand[0] << " " << joints[0]->getCommand() << std::endl;
-                // std::cout << Xcommand[4] << " " << joints[2]->getPosition() << std::endl;
-            }
+            joints[5]->setCommand(0.02 * XYdot[1].first);
+            joints[11]->setCommand(-0.02 * XYdot[1].second);
+            joints[17]->setCommand(-0.02 * XYdot[1].second);
         }
         _constraint.enforce(period);
-        last_time = std::chrono::steady_clock::now();
     }
     /**
     * \brief Put the servos at the position 0 at init
     */
     template <class SafetyConstraint, int NLegs>
-    void OlCpgController<SafetyConstraint, NLegs>::initJointPosition()
+    void OlCpgControllerV<SafetyConstraint, NLegs>::initJointPosition()
     {
 
         unsigned int count = 0;
         for (unsigned int i = 0; i < n_joints; i++) {
-            joints[i]->setCommand(0); //send to the hardware inteface the position command 0
-            if (abs(joints[i]->getPosition()) < e) {
+            joints[i]->setCommand(-0.3 * (joints[i]->getPosition() - 0.1));
+            if (std::abs(joints[i]->getPosition() - 0.1) < e) {
                 count++; //when the position 0 is reached do count++
             }
             if (count == n_joints) {
@@ -306,21 +268,6 @@ namespace open_loop_cpg_controller {
             }
         }
     }
-
-    // bool OlCpgController<SafetyConstraint, NLegs>::goToJointPosition(float value)
-    // {
-    //
-    //     unsigned int count = 0;
-    //     for (unsigned int i = 0; i < n_joints; i++) {
-    //         joints[i]->setCommand(0); //send to the hardware inteface the position command 0
-    //         if (abs(joints[i]->getPosition()) < e) {
-    //             count++; //when the position 0 is reached do count++
-    //         }
-    //         if (count == n_joints) {
-    //             has_init = true; //When every servo is around the 0 position stop the init phase and go on with cpg control
-    //         }
-    //     }
-    // }
 
     /** \cond HIDDEN_SYMBOLS */
     struct NoSafetyConstraints {
@@ -340,6 +287,6 @@ namespace open_loop_cpg_controller {
     };
     /** \endcond */
 
-} // namespace open_loop_cpg_controller
+} // namespace open_loop_cpg_controller_velocity
 
 #endif
