@@ -193,8 +193,8 @@ namespace open_loop_cpg_controller {
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
         if (has_init == false) {
             initJointPosition();
-            // X = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
-            // Y = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+            Xcommand = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+            Ycommand = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
         }
         //Then carry on the cpg control
         else {
@@ -202,10 +202,8 @@ namespace open_loop_cpg_controller {
             // for (unsigned int i = 0; i < n_joints; i++) {
             //     std::cout << i << " jointpos " << joints[i]->getPosition() << std::endl;
             // }
-            std::cout << "\n\n\n"
-                      << std::endl;
+
             X[0] = joints[0]->getPosition();
-            // std::cout << "X[0] " << X[0] << std::endl;
             Y[0] = joints[12]->getPosition();
 
             X[1] = joints[5]->getPosition();
@@ -226,15 +224,13 @@ namespace open_loop_cpg_controller {
             std::chrono::duration<double> time_span
                 = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - last_time);
             std::cout << time_span.count() << std::endl;
-            // cpg_.set_rk_dt(time_span.count());
+
             /*compute X,Y derivatives*/
-            std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(X, Y);
-            // std::cout << XYdot[0].first << std::endl;
-            // std::cout << "xdot " << XYdot[0].first << " ydot " << XYdot[0].second << std::endl;
+            std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(Xcommand, Ycommand);
 
             for (int i = 0; i < XYdot.size(); i++) {
                 /*Integrate XYdot*/
-                std::pair<float, float> xy = cpg_.RK4(X[i], Y[i], XYdot[i]);
+                std::pair<float, float> xy = cpg_.RK4(Xcommand[i], Ycommand[i], XYdot[i]);
                 Xcommand[i] = xy.first;
                 Ycommand[i] = xy.second;
                 // X[i] = Xcommand[i];
@@ -247,7 +243,6 @@ namespace open_loop_cpg_controller {
                     integration_has_diverged = true;
                 }
             }
-            // std::cout << "Xcommand[0] " << Xcommand[0] << std::endl;
 
             for (unsigned int i = 0; i < NLegs; i++) {
                 std::cout << "X" << i << "  Sensor value : " << X[i] << " Command value : " << Xcommand[i] << " error : " << Xcommand[i] - X[i] << std::endl;
@@ -279,10 +274,6 @@ namespace open_loop_cpg_controller {
                 joints[5]->setCommand(Xcommand[1]);
                 joints[11]->setCommand(-Ycommand[1]);
                 joints[17]->setCommand(-Ycommand[1]);
-
-                // std::cout << Xcommand[0] << " " << joints[0]->getPosition() << std::endl;
-                // std::cout << Xcommand[0] << " " << joints[0]->getCommand() << std::endl;
-                // std::cout << Xcommand[4] << " " << joints[2]->getPosition() << std::endl;
             }
         }
         _constraint.enforce(period);
