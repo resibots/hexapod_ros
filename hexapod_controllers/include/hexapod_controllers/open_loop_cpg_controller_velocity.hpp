@@ -100,6 +100,7 @@ namespace open_loop_cpg_controller_velocity {
         bool has_init;
         float e;
         cpg::CPG cpg_;
+        bool first;
 
         /*!    angles of the soulder joints in the axial plane at init*/
         std::vector<float> X, Xprev, Xcommand;
@@ -181,33 +182,42 @@ namespace open_loop_cpg_controller_velocity {
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
         if (has_init == false) {
             initJointPosition();
-            X[1] = -joints[5]->getPosition();
-            Y[1] = joints[11]->getPosition();
-            std::cout << Y[1] << std::endl;
         }
         //Then carry on the cpg control
         else {
 
             X[0] = joints[0]->getPosition();
-            Y[0] = joints[6]->getPosition();
-
-            X[4] = joints[2]->getPosition();
-            Y[4] = joints[8]->getPosition();
-
-            X[3] = -joints[4]->getPosition();
-            Y[3] = joints[10]->getPosition();
+            Y[0] = joints[12]->getPosition();
 
             X[1] = -joints[5]->getPosition();
-            Y[1] = joints[11]->getPosition();
+            Y[1] = joints[17]->getPosition();
 
             X[2] = joints[1]->getPosition();
-            Y[2] = joints[7]->getPosition();
+            Y[2] = joints[13]->getPosition();
+
+            X[3] = -joints[4]->getPosition();
+            Y[3] = joints[16]->getPosition();
+
+            X[4] = joints[2]->getPosition();
+            Y[4] = joints[14]->getPosition();
 
             X[5] = -joints[3]->getPosition();
-            Y[5] = joints[9]->getPosition();
+            Y[5] = joints[15]->getPosition();
 
             /*compute X,Y derivatives*/
             std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(X, Y);
+
+            for (unsigned int i = 0; i < XYdot.size(); i++) {
+
+                if (std::abs(XYdot[i].first) > 0.5) {
+                    std::cout << (std::abs(XYdot[i].first) / XYdot[i].first) << std::endl;
+                    XYdot[i].first = 0.5 * (std::abs(XYdot[i].first) / XYdot[i].first);
+                }
+
+                if (std::abs(XYdot[i].second) > 0.5) {
+                    XYdot[i].second = 0.5 * (std::abs(XYdot[i].second) / XYdot[i].second);
+                }
+            }
 
             std::cout << "Pates" << 0 << " X: " << X[0] << " Y: " << Y[0] << std::endl;
             std::cout << "Xdot : " << XYdot[0].first << " Ydot : " << XYdot[0].second << std::endl;
@@ -224,29 +234,29 @@ namespace open_loop_cpg_controller_velocity {
 
             std::cout << "\n";
 
-            joints[0]->setCommand(0.02 * XYdot[0].first);
-            joints[6]->setCommand(0.02 * XYdot[0].second);
-            joints[12]->setCommand(0.02 * XYdot[0].second);
+            joints[0]->setCommand(1 * XYdot[0].first);
+            joints[6]->setCommand(1 * XYdot[0].second);
+            joints[12]->setCommand(1 * XYdot[0].second);
 
-            joints[3]->setCommand(0.02 * XYdot[5].first);
-            joints[9]->setCommand(-0.02 * XYdot[5].second);
-            joints[15]->setCommand(-0.02 * XYdot[5].second);
+            joints[5]->setCommand(-1 * XYdot[1].first);
+            joints[11]->setCommand(1 * XYdot[1].second);
+            joints[17]->setCommand(1 * XYdot[1].second);
 
-            joints[4]->setCommand(-0.02 * XYdot[3].first);
-            joints[10]->setCommand(0.02 * XYdot[3].second);
-            joints[16]->setCommand(0.02 * XYdot[3].second);
+            joints[4]->setCommand(-1 * XYdot[3].first);
+            joints[10]->setCommand(1 * XYdot[3].second);
+            joints[16]->setCommand(1 * XYdot[3].second);
 
-            joints[1]->setCommand(-0.02 * XYdot[2].first);
-            joints[7]->setCommand(-0.02 * XYdot[2].second);
-            joints[13]->setCommand(-0.02 * XYdot[2].second);
+            joints[1]->setCommand(1 * XYdot[2].first);
+            joints[7]->setCommand(1 * XYdot[2].second);
+            joints[13]->setCommand(1 * XYdot[2].second);
 
-            joints[2]->setCommand(0.02 * XYdot[4].first);
-            joints[8]->setCommand(0.02 * XYdot[4].second);
-            joints[14]->setCommand(0.02 * XYdot[4].second);
+            joints[2]->setCommand(1 * XYdot[4].first);
+            joints[8]->setCommand(1 * XYdot[4].second);
+            joints[14]->setCommand(1 * XYdot[4].second);
 
-            joints[5]->setCommand(0.02 * XYdot[1].first);
-            joints[11]->setCommand(-0.02 * XYdot[1].second);
-            joints[17]->setCommand(-0.02 * XYdot[1].second);
+            joints[3]->setCommand(-1 * XYdot[5].first);
+            joints[9]->setCommand(1 * XYdot[5].second);
+            joints[15]->setCommand(1 * XYdot[5].second);
         }
         _constraint.enforce(period);
     }
@@ -259,8 +269,8 @@ namespace open_loop_cpg_controller_velocity {
 
         unsigned int count = 0;
         for (unsigned int i = 0; i < n_joints; i++) {
-            joints[i]->setCommand(-0.3 * (joints[i]->getPosition() - 0.1));
-            if (std::abs(joints[i]->getPosition() - 0.1) < e) {
+            joints[i]->setCommand(-0.3 * (joints[i]->getPosition()));
+            if (std::abs(joints[i]->getPosition()) < e) {
                 count++; //when the position 0 is reached do count++
             }
             if (count == n_joints) {

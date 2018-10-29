@@ -102,8 +102,8 @@ namespace cpg {
         // std::vector<float> cy0 = {0, 0, 0, 0, 0, 0};
     };
 
-    CPG::CPG(int legs_number = 6, float w = 5, float gammacpg = 10, float lambda = 0.25, float a = 0.2,
-        float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
+    CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.07, float lambda = 0.1, float a = 0.2,
+        float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.001,
         std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0, 0, 0, 0, 0, 0},
         std::vector<float> cy0 = {M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16,
             M_PI / 16})
@@ -149,7 +149,8 @@ namespace cpg {
             dHy = d_ * pow((1 / b_), d_) * pow(y, d_ - 1); /* y derivative of Hcx*/
 
             Hc = Hcx + Hcy;
-
+            std::cout << -w_ * dHy << std::endl;
+            std::cout << gammacpg_ * (1 - Hc) * dHx << std::endl;
             xdot = -w_ * dHy + gammacpg_ * (1 - Hc) * dHx;
 
             ydot = w_ * dHx + gammacpg_ * (1 - Hc) * dHy;
