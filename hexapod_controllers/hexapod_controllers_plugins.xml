@@ -14,6 +14,13 @@
       This controller sends a CPG in open loop.Velocity command
     </description>
   </class>
+  <class name="hexapod_controllers/HexapodClCpgControllerV"
+      type="closed_loop_cpg_controller_velocity::HexapodClCpgControllerV"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller sends a CPG in closed loop.Velocity command
+    </description>
+  </class>
   <class name="hexapod_controllers/HexapodSimplePositionController"
        type="simple_position_controller::HexapodSimplePositionController"
         base_class_type="controller_interface::ControllerBase">

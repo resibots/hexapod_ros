@@ -149,8 +149,7 @@ namespace cpg {
             dHy = d_ * pow((1 / b_), d_) * pow(y, d_ - 1); /* y derivative of Hcx*/
 
             Hc = Hcx + Hcy;
-            std::cout << -w_ * dHy << std::endl;
-            std::cout << gammacpg_ * (1 - Hc) * dHx << std::endl;
+
             xdot = -w_ * dHy + gammacpg_ * (1 - Hc) * dHx;
 
             ydot = w_ * dHx + gammacpg_ * (1 - Hc) * dHy;
@@ -159,10 +158,10 @@ namespace cpg {
             for (int j = 0; j < K_[i].size(); j++) {
                 Kterm += K_[i][j] * (Y[j] - cy_[j]);
             }
-            // std::cout << " w * dHx    = " << w * dHx << '\n';
+            // std::cout << " w * dHx    = " << w_ * dHx << '\n';
             // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
             ydot += lambda_ * Kterm;
-            // std::cout << "lambda * Kterm    = " << lambda * Kterm << '\n';
+            // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
             // std::cout << " ydot   = " << ydot << '\n';
             XYdot.push_back(std::pair<float, float>(xdot, ydot));
         }

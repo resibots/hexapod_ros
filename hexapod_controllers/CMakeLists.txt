@@ -16,9 +16,12 @@ find_package(catkin REQUIRED COMPONENTS
   velocity_controllers
   message_generation
   geometry_msgs
+  trac_ik_lib
 )
+find_package(Boost REQUIRED COMPONENTS date_time)
+find_package(orocos_kdl REQUIRED)
 
-
+find_package(Eigen3 REQUIRED)
 # Declare catkin package
 catkin_package(
   CATKIN_DEPENDS
@@ -32,17 +35,24 @@ catkin_package(
     velocity_controllers
     message_runtime
     geometry_msgs
+    trac_ik_lib
+    DEPENDS
+    Boost
+    orocos_kdl
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-)
+LIBRARIES trac_ik)
 
-include_directories(include  ${catkin_INCLUDE_DIRS} )
+
+
+include_directories(include  ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/open_loop_cpg_controller.cpp
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${catkin_LIBRARIES})
 
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/

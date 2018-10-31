@@ -27,6 +27,7 @@
   <depend>realtime_tools</depend>
   <depend>velocity_controllers</depend>
   <depend>geometry_msgs</depend>
+  <depend>trac_ik_lib</depend>
 
   <export>
     <cpp cflags="-I${prefix}/include"/>

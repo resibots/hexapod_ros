@@ -35,6 +35,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <hexapod_controllers/closed_loop_cpg_controller_velocity.hpp>
 #include <hexapod_controllers/open_loop_cpg_controller.hpp>
 #include <hexapod_controllers/open_loop_cpg_controller_velocity.hpp>
 #include <hexapod_controllers/simple_position_controller.hpp>
@@ -48,6 +49,9 @@ namespace open_loop_cpg_controller_velocity {
     typedef open_loop_cpg_controller_velocity::OlCpgControllerV<NoSafetyConstraints, 6> HexapodOlCpgControllerV;
 }
 
+namespace closed_loop_cpg_controller_velocity {
+    typedef closed_loop_cpg_controller_velocity::ClCpgControllerV<NoSafetyConstraints, 6> HexapodClCpgControllerV;
+}
 namespace simple_position_controller {
     typedef simple_position_controller::SimplePositionController<NoSafetyConstraints> HexapodSimplePositionController;
 }
@@ -55,6 +59,9 @@ PLUGINLIB_EXPORT_CLASS(open_loop_cpg_controller::HexapodOlCpgController,
     controller_interface::ControllerBase)
 
 PLUGINLIB_EXPORT_CLASS(open_loop_cpg_controller_velocity::HexapodOlCpgControllerV,
+    controller_interface::ControllerBase)
+
+PLUGINLIB_EXPORT_CLASS(closed_loop_cpg_controller_velocity::HexapodClCpgControllerV,
     controller_interface::ControllerBase)
 
 PLUGINLIB_EXPORT_CLASS(simple_position_controller::HexapodSimplePositionController,
