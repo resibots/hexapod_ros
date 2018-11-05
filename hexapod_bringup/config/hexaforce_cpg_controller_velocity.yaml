@@ -61,14 +61,33 @@ dynamixel_control:
   read_timeout: 0.01 # in seconds
   scan_timeout: 0.01 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
-  default_command_interface: position
+  default_command_interface: velocity
 
 dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
     publish_rate: 50
+    joints:
+      - body_leg_0
+      - body_leg_1
+      - body_leg_2
+      - body_leg_3
+      - body_leg_4
+      - body_leg_5
+      - leg_0_1_2
+      - leg_1_1_2
+      - leg_2_1_2
+      - leg_3_1_2
+      - leg_4_1_2
+      - leg_5_1_2
+      - leg_0_2_3
+      - leg_1_2_3
+      - leg_2_2_3
+      - leg_3_2_3
+      - leg_4_2_3
+      - leg_5_2_3
   hexapod_cpg_controller:
-    type: hexapod_controllers/HexapodOlCpgController
+    type: hexapod_controllers/HexapodClCpgControllerV
     joints:
       - body_leg_0
       - body_leg_1

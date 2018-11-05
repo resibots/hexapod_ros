@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="force_sensors" default="false"/>
+  <!-- URDF robot description -->
+  <include file="$(find hexapod_description)/launch/hexaforce_with_trackIK_hack.launch" />
+  <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/hexaforce.urdf"/> -->
+  <!-- Publish robot's state in the tf tree -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+    name="robot_state_publisher" />
+
+  <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find hexapod_bringup)/config/hexaforce_cpg_controller_velocity.yaml"/>
+
+  <!-- To move the dummy robot with a gui, bypassing the controller manager -->
+  <!-- <param name="use_gui" value="true"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher"
+    name="dummy_robot" /> -->
+
+  <!-- launch our hardware interface -->
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_p1"
+    name="dynamixel_control" output="screen"/>
+
+  <!-- Start a controller for our dummy robot -->
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="/dynamixel_controllers/joint_state_controller
+                          /dynamixel_controllers/hexapod_cpg_controller" />
+
+    <!-- Static tf transform publishers that attach the force sensors to the legs' tips -->
+    <include if="$(arg force_sensors)" file="$(find hexapod_bringup)/launch/feet_force_sensors.launch" />
+
+
+</launch>

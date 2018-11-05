@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Load Hexaforce's URDF -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder $(find hexapod_description)/urdf/hexaforce_with_trackIK_hack.xacro path_generation:=package" />
+</launch>

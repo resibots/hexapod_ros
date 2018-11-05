@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- TORSO -->
+    <link name="base_link_without_inertia">
+   </link>
+   <joint name="base_link_without_inertia" type="fixed">
+       <parent link="base_link_without_inertia"/>
+       <child link="base_link"/>
+     </joint>
+        <link name="base_link">
+            <xacro:visuals_collisions_body/>
+            <xacro:visuals_head/>
+            <parent link="base_link_without_inertia"/>
+            <child link="base_link"/>
+            <inertial>
+                <!-- CENTER OF MASS -->
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <mass value="${body_mass}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*body_mass*(body_width*body_width+body_height*body_height)}" ixy="0" ixz="0" iyy="${1/12*body_mass*(body_length*body_length+body_height*body_height)}" iyz="0" izz="${1/12*body_mass*(body_length*body_length+body_width*body_width)}"/>
+            </inertial>
+        </link>
+</robot>
