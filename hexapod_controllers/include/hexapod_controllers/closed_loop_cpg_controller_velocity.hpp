@@ -74,6 +74,8 @@
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/velocityprofile_trap.hpp>
 
+#include <Eigen/Dense>
+
 namespace closed_loop_cpg_controller_velocity {
 
     struct NoSafetyConstraints;
@@ -143,10 +145,13 @@ namespace closed_loop_cpg_controller_velocity {
         tf::Quaternion quat;
         tf::Matrix3x3 P;
         tf::Matrix3x3 R;
+        Eigen::Matrix<float, 3, 3> _R_eigen;
+        Eigen::Matrix<float, 3, 3> _P_eigen;
+        Eigen::Matrix<float, 3, NLegs> _delta_theta_e;
         geometry_msgs::Vector3 rpy;
         tf::Vector3 x_robot_orientation;
         float theta_z;
-        std::vector<tf::Transform> end_effectors;
+        std::vector<tf::Transform> end_effectors_transform;
         tf::Transform leg_end_effector_static_transforms;
 
         std::array<std::shared_ptr<TRAC_IK::TRAC_IK>, NLegs> _tracik_solvers;
@@ -157,7 +162,13 @@ namespace closed_loop_cpg_controller_velocity {
         KDL::Twist _bounds;
 
         std::array<KDL::JntArray, NLegs> _q_init;
-        std::vector<int> _leg_map_to_paper;
+        std::array<KDL::JntArray, NLegs> _q_out;
+        std::array<KDL::Frame, NLegs> _frame;
+        std::vector<int>
+            _leg_map_to_paper;
+
+        Eigen::Matrix<float, 3, NLegs> _r;
+        Eigen::Matrix<float, 3, NLegs> _r_tilde;
 
     private:
         SafetyConstraint _constraint;
@@ -194,7 +205,7 @@ namespace closed_loop_cpg_controller_velocity {
         Y.resize(NLegs, 0.0);
         Yprev.resize(NLegs, 0.0);
         Ycommand.resize(NLegs, 0.0);
-        end_effectors.resize(NLegs, tf::Transform());
+        end_effectors_transform.resize(NLegs, tf::Transform());
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
         std::string chain_start = "base_link";
@@ -205,7 +216,8 @@ namespace closed_loop_cpg_controller_velocity {
 
         // Construct the objects doing inverse kinematic computations
         for (size_t leg = 0; leg < NLegs; ++leg) {
-            chain_ends.push_back("force_sensor_" + std::to_string(leg));
+            chain_ends.push_back("force_sensor_" + std::to_string(_leg_map_to_paper[leg]));
+            std::cout << "force_sensor_" + std::to_string(_leg_map_to_paper[leg]) << std::endl;
             // This constructor parses the URDF loaded in rosparm urdf_param into the
             // needed KDL structures.
             _tracik_solvers[leg] = std::make_shared<TRAC_IK::TRAC_IK>(
@@ -268,33 +280,23 @@ namespace closed_loop_cpg_controller_velocity {
     void ClCpgControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
     {
         std::vector<double>& imu_quat = *imu_buffer.readFromRT();
-        for (unsigned int j = 0; j < imu_quat.size(); j++) {
-            std::cout << "imu " << j << " : " << imu_quat[j] << std::endl;
-        }
 
-        //TRAC_IK::TRAC_IK tracik_solver("base_link", "force_sensor_0", "robot_description", 0.005, 1e-5);
-        // // Get the KDL chain from URDF
-        // KDL::Chain chain;
-        // bool valid = tracik_solver.getKDLChain(chain);
-        //
-        // // Set up KDL forward kinematics to create goal end effector pose
-        // KDL::ChainFkSolverPos_recursive fk_solver(chain); // Forward kin. solver
         if (imu_quat.size() == 4) {
             //Recover quaternion current orientation
             quat = tf::Quaternion(imu_quat[0], imu_quat[1], imu_quat[2], imu_quat[3]);
             //Recover orientation matrix of the robot in the world frame
             P = tf::Matrix3x3(quat);
-            //Recover the component along  x, which is the heading
-            x_robot_orientation = P.getColumn(0);
-            //Now we take only the x an y components of x_robot_orientation because we are interested in the planar projection of x_robot_orientation in the world (xy) plane
-            float xro = x_robot_orientation.m_floats[0];
-            float yro = x_robot_orientation.m_floats[1];
-            // Now we extract the angle made by the vector [xro;yro] in the world xy plane (we extract the hedaing of the projection of x_robot_orientation on the world xy plane)
-            theta_z = std::atan2(yro, xro);
-            // R = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), theta_z)) * P.transpose();
             P.getRPY(rpy.x, rpy.y, rpy.z);
             R = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), rpy.z)) * P.transpose();
-            std::cout << theta_z << " " << rpy.z << std::endl;
+            // std::cout << " a\n";
+            for (unsigned int i = 0; i < 3; i++) {
+                for (unsigned int j = 0; j < 3; j++) {
+                    _P_eigen(i, j) = P[i].m_floats[j];
+                    _R_eigen(i, j) = R[i].m_floats[j];
+                    // std::cout << "_R_eigen" << _R_eigen(i, j) << std::endl;
+                    // std::cout << "_P_eigen" << _P_eigen(i, j) << std::endl;
+                }
+            }
         }
 
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
@@ -304,24 +306,7 @@ namespace closed_loop_cpg_controller_velocity {
         //Then carry on the cpg control
         else {
 
-            // X[0] = joints[0]->getPosition();
-            // Y[0] = joints[12]->getPosition();
-            //
-            // X[1] = -joints[5]->getPosition();
-            // Y[1] = joints[17]->getPosition();
-            //
-            // X[2] = joints[1]->getPosition();
-            // Y[2] = joints[13]->getPosition();
-            //
-            // X[3] = -joints[4]->getPosition();
-            // Y[3] = joints[16]->getPosition();
-            //
-            // X[4] = joints[2]->getPosition();
-            // Y[4] = joints[14]->getPosition();
-            //
-            // X[5] = -joints[3]->getPosition();
-            // Y[5] = joints[15]->getPosition();
-
+            /* Read the position values from the servos*/
             KDL::JntArray array(3);
             int sign = 1;
             for (unsigned int i = 0; i < NLegs; i++) {
@@ -331,24 +316,33 @@ namespace closed_loop_cpg_controller_velocity {
                 array(0) = sign * joints[i]->getPosition();
                 array(1) = joints[6 + i]->getPosition();
                 array(2) = joints[12 + i]->getPosition();
-                _q_init.at(i) = array;
+                _q_init.at(_leg_map_to_paper[i]) = array;
+                _r(0, i) = end_effectors_transform[i].getOrigin().m_floats[0];
+                _r(1, i) = end_effectors_transform[i].getOrigin().m_floats[1];
+                _r(2, i) = end_effectors_transform[i].getOrigin().m_floats[2];
+                // std::cout << _r(0, i) << " " << _r(1, i) << " " << _r(2, i) << " " << i << " \n";
             }
-            // //LEG 0
-            // array(0) = joints[0]->getPosition();
-            // array(1) = joints[6]->getPosition();
-            // array(2) = joints[12]->getPosition();
-            // _q_init.at(0) = array;
-            // //LEG 1
-            // array(0) = joints[1]->getPosition();
-            // array(1) = joints[7]->getPosition();
-            // array(2) = joints[13]->getPosition();
-            // _q_init.at(1) = array;
-            // //LEG 1
-            // array(0) = joints[2]->getPosition();
-            // array(1) = joints[8]->getPosition();
-            // array(2) = joints[14]->getPosition();
-            // _q_init.at(1) = array;
+            _r_tilde = _P_eigen.transpose() * _R_eigen * _P_eigen * _r;
+            // std ::cout << _r_tilde << std::endl;
+            std::array<KDL::Frame, NLegs> _r_tilde_frame;
+            for (size_t leg = 0; leg < 6; leg++) {
+                _r_tilde_frame.at(leg) = KDL::Frame(KDL::Vector(_r_tilde(0, leg), _r_tilde(1, leg), _r_tilde(2, leg)));
+                // std::cout << _r(0, leg) - _r_tilde(0, leg) << " " << _r(1, leg) - _r_tilde(1, leg) << " " << _r(2, leg) - _r_tilde(2, leg) << " " << leg << " \n";
+            }
 
+            std::array<int, NLegs> status = ClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(_q_init, _r_tilde_frame, _q_out, false);
+
+            for (unsigned int j = 0; j < NLegs; j++) {
+
+                _delta_theta_e(0, j) = _q_init.at(j)(0) - _q_out.at(j)(0);
+                _delta_theta_e(1, j) = _q_init.at(j)(1) - _q_out.at(j)(1);
+                _delta_theta_e(2, j) = _q_init.at(j)(2) - _q_out.at(j)(2);
+                std::cout << "_delta_theta_e(0," << j << ") :" << _delta_theta_e(0, j) << std::endl;
+                std::cout << "_delta_theta_e(1," << j << ") :" << _delta_theta_e(1, j) << std::endl;
+                std::cout << "_delta_theta_e(2," << j << ") :" << _delta_theta_e(2, j) << std::endl;
+                std::cout << status[j] << std::endl;
+                std::cout << "\n";
+            }
             /*compute X,Y derivatives*/
             std::vector<std::pair<float, float>>
                 XYdot = cpg_.computeXYdot(X, Y);
@@ -364,52 +358,13 @@ namespace closed_loop_cpg_controller_velocity {
                     XYdot[i].second = 0.5 * (std::abs(XYdot[i].second) / XYdot[i].second);
                 }
             }
-
-            std::cout << "Pates" << 0 << " X: " << X[0] << " Y: " << Y[0] << std::endl;
-            std::cout << "Xdot : " << XYdot[0].first << " Ydot : " << XYdot[0].second << std::endl;
-            std::cout << "Pates" << 1 << " X: " << X[2] << " Y: " << Y[2] << std::endl;
-            std::cout << "Xdot : " << XYdot[2].first << " Ydot : " << XYdot[2].second << std::endl;
-            std::cout << "Pates" << 2 << " X: " << X[4] << " Y: " << Y[4] << std::endl;
-            std::cout << "Xdot : " << XYdot[4].first << " Ydot : " << XYdot[4].second << std::endl;
-            std::cout << "Pates" << 3 << " X: " << X[5] << " Y: " << Y[5] << std::endl;
-            std::cout << "Xdot : " << XYdot[5].first << " Ydot : " << XYdot[5].second << std::endl;
-            std::cout << "Pates" << 4 << " X: " << X[3] << " Y: " << Y[3] << std::endl;
-            std::cout << "Xdot : " << XYdot[3].first << " Ydot : " << XYdot[3].second << std::endl;
-            std::cout << "Pates" << 5 << " X: " << X[1] << " Y: " << Y[1] << std::endl;
-            std::cout << "Xdot : " << XYdot[1].first << " Ydot : " << XYdot[1].second << std::endl;
-
-            std::cout << "\n";
-
+            /* Send velocity command */
             for (unsigned int i = 0; i < NLegs; i++) {
                 sign = (i < 3) ? 1 : -1;
                 joints[i]->setCommand(sign * XYdot[_leg_map_to_paper[i]].first);
                 joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
                 joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
             }
-
-            // joints[0]->setCommand(1 * XYdot[0].first);
-            // joints[6]->setCommand(1 * XYdot[0].second);
-            // joints[12]->setCommand(1 * XYdot[0].second);
-            //
-            // joints[5]->setCommand(-1 * XYdot[1].first);
-            // joints[11]->setCommand(1 * XYdot[1].second);
-            // joints[17]->setCommand(1 * XYdot[1].second);
-            //
-            // joints[4]->setCommand(-1 * XYdot[3].first);
-            // joints[10]->setCommand(1 * XYdot[3].second);
-            // joints[16]->setCommand(1 * XYdot[3].second);
-            //
-            // joints[1]->setCommand(1 * XYdot[2].first);
-            // joints[7]->setCommand(1 * XYdot[2].second);
-            // joints[13]->setCommand(1 * XYdot[2].second);
-            //
-            // joints[2]->setCommand(1 * XYdot[4].first);
-            // joints[8]->setCommand(1 * XYdot[4].second);
-            // joints[14]->setCommand(1 * XYdot[4].second);
-            //
-            // joints[3]->setCommand(-1 * XYdot[5].first);
-            // joints[9]->setCommand(1 * XYdot[5].second);
-            // joints[15]->setCommand(1 * XYdot[5].second);
         }
         _constraint.enforce(period);
     }
@@ -444,13 +399,9 @@ namespace closed_loop_cpg_controller_velocity {
         for (unsigned int i = 0; i < msg->transforms.size(); i++) {
             tf::transformMsgToTF(msg->transforms[i].transform, transformStamped[i]);
         }
-
-        end_effectors[0] = transformStamped[0] * transformStamped[6] * transformStamped[7] * leg_end_effector_static_transforms;
-        end_effectors[1] = transformStamped[1] * transformStamped[8] * transformStamped[9] * leg_end_effector_static_transforms;
-        end_effectors[2] = transformStamped[2] * transformStamped[10] * transformStamped[11] * leg_end_effector_static_transforms;
-        end_effectors[3] = transformStamped[3] * transformStamped[12] * transformStamped[13] * leg_end_effector_static_transforms;
-        end_effectors[4] = transformStamped[4] * transformStamped[14] * transformStamped[15] * leg_end_effector_static_transforms;
-        end_effectors[5] = transformStamped[5] * transformStamped[16] * transformStamped[17] * leg_end_effector_static_transforms;
+        for (unsigned int j = 0; j < NLegs; j++) {
+            end_effectors_transform[_leg_map_to_paper[j]] = transformStamped[j] * transformStamped[6 + 2 * j] * transformStamped[7 + 2 * j] * leg_end_effector_static_transforms;
+        }
     }
 
     /** Get joint angles from end-effector pose.
