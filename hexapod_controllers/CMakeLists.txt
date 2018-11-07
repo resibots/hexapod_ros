@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   trac_ik_lib
+  tf
 )
 find_package(Boost REQUIRED COMPONENTS date_time)
 find_package(orocos_kdl REQUIRED)
@@ -36,7 +37,9 @@ catkin_package(
     message_runtime
     geometry_msgs
     trac_ik_lib
+    tf
     DEPENDS
+    tf
     Boost
     orocos_kdl
   INCLUDE_DIRS include

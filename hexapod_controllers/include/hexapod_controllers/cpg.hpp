@@ -1,5 +1,6 @@
 #ifndef CPG_H_
 #define CPG_H_
+#include <Eigen/Dense>
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -37,6 +38,7 @@ namespace cpg {
    pairs(xdot,ydot)
    */
         std::vector<std::pair<float, float>> computeXYdot(std::vector<float> X, std::vector<float> Y);
+        std::vector<std::pair<float, float>> computeXYdot(std::vector<float> X, std::vector<float> Y, float integrate_delta_theta, Eigen::Matrix<float, 3, 6> delta_theta_e);
 
         /**
    * \brief Uses Euler integration to obtain x,y from xdot, ydot, xprev, yprev. <br>!!!!! It
@@ -161,6 +163,52 @@ namespace cpg {
             // std::cout << " w * dHx    = " << w_ * dHx << '\n';
             // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
             ydot += lambda_ * Kterm;
+            // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
+            // std::cout << " ydot   = " << ydot << '\n';
+            XYdot.push_back(std::pair<float, float>(xdot, ydot));
+        }
+        return XYdot;
+    }
+
+    /**
+ * \brief compute the derivative of X and Y, the joints angles. It uses Eq 4 of the paper.
+ * \param std::vector<float> X a vector of size legs_number containing the x joints angle (in the
+ axial plane)
+ * \param std::vector<float> Y a vector of size legs_number containing the y joints angle (in the
+ sagittal plane)
+ * \param std::vector<float> cx  x center coordinate of cpgg limit cycle
+ * \param std::vector<float> cy  y center coordinate of cpgg limit cycle
+ * \return std::vector<std::pair<float, float>> XYdot a vector of size legs_number containing the
+ pairs(xdot,ydot)
+ */
+    std::vector<std::pair<float, float>>
+    CPG::computeXYdot(std::vector<float> X, std::vector<float> Y, float integrate_delta_theta, Eigen::Matrix<float, 3, 6> delta_theta_e)
+    {
+        std::vector<std::pair<float, float>> XYdot;
+        float x, y, Hcx, dHx, Hcy, dHy, Hc, xdot, ydot, Kterm;
+
+        for (int i = 0; i < K_.size(); i++) {
+            x = X[i];
+            y = Y[i];
+            Hcx = pow((x - cx_[i]) / a_, d_); /* x part of Hc*/
+            dHx = d_ * pow((1 / a_), d_) * pow(x, d_ - 1); /* x derivative of Hcx*/
+
+            Hcy = pow((y - cy_[i] - integrate_delta_theta) / b_, d_); /* y part of Hc*/
+            dHy = d_ * pow((1 / b_), d_) * pow(y, d_ - 1); /* y derivative of Hcx*/
+
+            Hc = Hcx + Hcy;
+
+            xdot = -w_ * dHy + gammacpg_ * (1 - Hc) * dHx;
+
+            ydot = w_ * dHx + gammacpg_ * (1 - Hc) * dHy;
+
+            Kterm = 0; /* coupling term which needs to be added to ydot*/
+            for (int j = 0; j < K_[i].size(); j++) {
+                Kterm += K_[i][j] * (Y[j] - cy_[j] - integrate_delta_theta);
+            }
+            // std::cout << " w * dHx    = " << w_ * dHx << '\n';
+            // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
+            ydot += lambda_ * Kterm + delta_theta_e(1, i);
             // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
             // std::cout << " ydot   = " << ydot << '\n';
             XYdot.push_back(std::pair<float, float>(xdot, ydot));

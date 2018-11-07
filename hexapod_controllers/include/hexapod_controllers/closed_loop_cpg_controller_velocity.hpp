@@ -39,7 +39,7 @@
 
 #ifndef CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
 #define CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
-
+#define TF_EULER_DEFAULT_ZYX
 #include "cpg.hpp"
 #include <boost/date_time.hpp>
 #include <chrono>
@@ -68,13 +68,13 @@
 #include <trac_ik/trac_ik.hpp>
 
 // Generate a trajectory using KDL
+#include <Eigen/Dense>
 #include <kdl/path_line.hpp>
 #include <kdl/rotational_interpolation_sa.hpp>
 #include <kdl/trajectory_composite.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/velocityprofile_trap.hpp>
-
-#include <Eigen/Dense>
+#include <tf/transform_broadcaster.h>
 
 namespace closed_loop_cpg_controller_velocity {
 
@@ -169,6 +169,7 @@ namespace closed_loop_cpg_controller_velocity {
 
         Eigen::Matrix<float, 3, NLegs> _r;
         Eigen::Matrix<float, 3, NLegs> _r_tilde;
+        float integrate_delta_theta;
 
     private:
         SafetyConstraint _constraint;
@@ -189,6 +190,7 @@ namespace closed_loop_cpg_controller_velocity {
          * \brief callback to recover end effector position
          */
         void tfCB(const tf2_msgs::TFMessageConstPtr& msg);
+        tf::TransformBroadcaster br;
     }; // class ClCpgControllerV
 
     /**
@@ -216,8 +218,8 @@ namespace closed_loop_cpg_controller_velocity {
 
         // Construct the objects doing inverse kinematic computations
         for (size_t leg = 0; leg < NLegs; ++leg) {
-            chain_ends.push_back("force_sensor_" + std::to_string(_leg_map_to_paper[leg]));
-            std::cout << "force_sensor_" + std::to_string(_leg_map_to_paper[leg]) << std::endl;
+            chain_ends.push_back("force_sensor_" + std::to_string(leg));
+            std::cout << "force_sensor_" + std::to_string(leg) << std::endl;
             // This constructor parses the URDF loaded in rosparm urdf_param into the
             // needed KDL structures.
             _tracik_solvers[leg] = std::make_shared<TRAC_IK::TRAC_IK>(
@@ -230,6 +232,7 @@ namespace closed_loop_cpg_controller_velocity {
         _bounds.rot.x(std::numeric_limits<float>::max());
         _bounds.rot.y(std::numeric_limits<float>::max());
         _bounds.rot.z(std::numeric_limits<float>::max());
+        integrate_delta_theta = 0;
 
     } // namespace closed_loop_cpg_controller_velocity
 
@@ -284,17 +287,39 @@ namespace closed_loop_cpg_controller_velocity {
         if (imu_quat.size() == 4) {
             //Recover quaternion current orientation
             quat = tf::Quaternion(imu_quat[0], imu_quat[1], imu_quat[2], imu_quat[3]);
-            //Recover orientation matrix of the robot in the world frame
             P = tf::Matrix3x3(quat);
+
             P.getRPY(rpy.x, rpy.y, rpy.z);
+
+            // tf::Quaternion tmp0(0, -rpy.x, rpy.y);
+            // R = tf::Matrix3x3(tmp0);
+            tf::Quaternion tmp(rpy.z, rpy.x, -rpy.y);
+            P = tf::Matrix3x3(tmp);
+            // tf::Matrix3x3 test = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), -M_PI / 2));
+            // tf::Matrix3x3 test_inv = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), M_PI / 2));
+            // P = test * P;
+            // tf::Matrix3x3 test = tf::Matrix3x3(0, 1, 0, 1, 0, 0, 0, 0, 1);
+            // tf::Matrix3x3 test = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), 3 * M_PI / 2));
+            // P = test * P;
+            tf::Transform transformimu(P, tf::Vector3(0.0, 0.0, 0.0));
+            // transformimu.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+            // transformimu.setRotation(P);
+            br.sendTransform(tf::StampedTransform(transformimu, ros::Time::now(), "base_link", "imu"));
+            //Recover orientation matrix of the robot in the world frame
+
+            // test = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), -M_PI / 2));
+            // P = test * P;
+
+            std::cout << "roll " << rpy.x << std::endl;
+            std::cout << "pitch " << rpy.y << std::endl;
+            std::cout << "yaw " << rpy.z << std::endl;
+
             R = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), rpy.z)) * P.transpose();
             // std::cout << " a\n";
             for (unsigned int i = 0; i < 3; i++) {
                 for (unsigned int j = 0; j < 3; j++) {
                     _P_eigen(i, j) = P[i].m_floats[j];
                     _R_eigen(i, j) = R[i].m_floats[j];
-                    // std::cout << "_R_eigen" << _R_eigen(i, j) << std::endl;
-                    // std::cout << "_P_eigen" << _P_eigen(i, j) << std::endl;
                 }
             }
         }
@@ -311,59 +336,89 @@ namespace closed_loop_cpg_controller_velocity {
             int sign = 1;
             for (unsigned int i = 0; i < NLegs; i++) {
                 sign = (i < 3) ? 1 : -1;
-                X[_leg_map_to_paper[i]] = sign * joints[i]->getPosition();
-                Y[_leg_map_to_paper[i]] = joints[12 + i]->getPosition();
-                array(0) = sign * joints[i]->getPosition();
+                // X[_leg_map_to_paper[i]] = sign * joints[i]->getPosition();
+                // Y[_leg_map_to_paper[i]] = joints[12 + i]->getPosition();
+                array(0) = joints[i]->getPosition();
                 array(1) = joints[6 + i]->getPosition();
                 array(2) = joints[12 + i]->getPosition();
-                _q_init.at(_leg_map_to_paper[i]) = array;
+                _q_init.at(i) = array;
                 _r(0, i) = end_effectors_transform[i].getOrigin().m_floats[0];
                 _r(1, i) = end_effectors_transform[i].getOrigin().m_floats[1];
                 _r(2, i) = end_effectors_transform[i].getOrigin().m_floats[2];
-                // std::cout << _r(0, i) << " " << _r(1, i) << " " << _r(2, i) << " " << i << " \n";
             }
             _r_tilde = _P_eigen.transpose() * _R_eigen * _P_eigen * _r;
-            // std ::cout << _r_tilde << std::endl;
             std::array<KDL::Frame, NLegs> _r_tilde_frame;
+
             for (size_t leg = 0; leg < 6; leg++) {
+                // _r_tilde(2, leg) = _r(2, leg);
+                // std::cout << " rtilde " << _r_tilde(2, leg) << std::endl;
+                // _r_tilde(2, leg) = -std::sqrt(std::abs(_r(0, leg) * _r(0, leg) + _r(1, leg) * _r(1, leg) + _r(2, leg) * _r(2, leg) - _r_tilde(0, leg) * _r_tilde(0, leg) - _r_tilde(1, leg) * _r_tilde(1, leg)));
+                // std::cout << _r_tilde(2, leg) << std::endl;
                 _r_tilde_frame.at(leg) = KDL::Frame(KDL::Vector(_r_tilde(0, leg), _r_tilde(1, leg), _r_tilde(2, leg)));
-                // std::cout << _r(0, leg) - _r_tilde(0, leg) << " " << _r(1, leg) - _r_tilde(1, leg) << " " << _r(2, leg) - _r_tilde(2, leg) << " " << leg << " \n";
             }
 
             std::array<int, NLegs> status = ClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(_q_init, _r_tilde_frame, _q_out, false);
 
             for (unsigned int j = 0; j < NLegs; j++) {
+                // sign = (j < 3) ? 1 : -1;
+                // _delta_theta_e(0, _leg_map_to_paper[j]) = -sign * (_q_init.at(j)(0) - _q_out.at(j)(0));
+                // if (std::abs(_delta_theta_e(0, _leg_map_to_paper[j])) > 0.05) {
+                //     std::cout << "WARNING _delta_theta_e(0, " << _leg_map_to_paper[j] << " ) is not zero. Cx should not change" << std::endl;
+                // }
+                // _delta_theta_e(1, _leg_map_to_paper[j]) = -(_q_init.at(j)(1) - _q_out.at(j)(1));
+                // _delta_theta_e(2, _leg_map_to_paper[j]) = -(_q_init.at(j)(2) - _q_out.at(j)(2));
 
-                _delta_theta_e(0, j) = _q_init.at(j)(0) - _q_out.at(j)(0);
-                _delta_theta_e(1, j) = _q_init.at(j)(1) - _q_out.at(j)(1);
-                _delta_theta_e(2, j) = _q_init.at(j)(2) - _q_out.at(j)(2);
-                std::cout << "_delta_theta_e(0," << j << ") :" << _delta_theta_e(0, j) << std::endl;
-                std::cout << "_delta_theta_e(1," << j << ") :" << _delta_theta_e(1, j) << std::endl;
-                std::cout << "_delta_theta_e(2," << j << ") :" << _delta_theta_e(2, j) << std::endl;
-                std::cout << status[j] << std::endl;
-                std::cout << "\n";
+                // std::cout << "_delta_theta_e(0," << _leg_map_to_paper[j] << ") :" << _delta_theta_e(0, _leg_map_to_paper[j]) << std::endl;
+                // std::cout << "_delta_theta_e(1," << _leg_map_to_paper[j] << ") :" << _delta_theta_e(1, _leg_map_to_paper[j]) << std::endl;
+                // std::cout << "_delta_theta_e(2," << _leg_map_to_paper[j] << ") :" << _delta_theta_e(2, _leg_map_to_paper[j]) << std::endl;
+                // std::cout << "STATUS " << status[j] << std::endl;
+                // std::cout << "\n";
+
+                // std::cout << "_q_out(0," << j << ") :" << _q_out.at(j)(0) << std::endl;
+                // std::cout << "_q_out(1," << j << ") :" << _q_out.at(j)(1) << std::endl;
+                // std::cout << "_q_out(2," << j << ") :" << _q_out.at(j)(2) << std::endl;
+                // std::cout << "STATUS " << status[j] << std::endl;
+                // std::cout << "\n";
+
+                // integrate_delta_theta += _delta_theta_e(1, _leg_map_to_paper[j]) - 0.5 *
+                // integrate_delta_theta; // // integrate_delta_theta = 0; // if
+                // (integrate_delta_theta > 0.6) //     integrate_delta_theta = 0.6; // if
+                // (integrate_delta_theta < -0.6) //     integrate_delta_theta = -0.6;
             }
-            /*compute X,Y derivatives*/
-            std::vector<std::pair<float, float>>
-                XYdot = cpg_.computeXYdot(X, Y);
 
-            for (unsigned int i = 0; i < XYdot.size(); i++) {
-
-                if (std::abs(XYdot[i].first) > 0.5) {
-                    std::cout << (std::abs(XYdot[i].first) / XYdot[i].first) << std::endl;
-                    XYdot[i].first = 0.5 * (std::abs(XYdot[i].first) / XYdot[i].first);
-                }
-
-                if (std::abs(XYdot[i].second) > 0.5) {
-                    XYdot[i].second = 0.5 * (std::abs(XYdot[i].second) / XYdot[i].second);
-                }
-            }
+            // std::cout << "integrate_delta_theta " << integrate_delta_theta << std::endl;
+            // /*compute X,Y derivatives*/
+            // std::vector<std::pair<float, float>>
+            //     XYdot = cpg_.computeXYdot(X, Y, integrate_delta_theta, _delta_theta_e);
+            // // std::vector<std::pair<float, float>>
+            // //     XYdot = cpg_.computeXYdot(X, Y);
+            //
+            // for (unsigned int i = 0; i < XYdot.size(); i++) {
+            //
+            //     if (std::abs(XYdot[i].first) > 0.5) {
+            //         std::cout << (std::abs(XYdot[i].first) / XYdot[i].first) << std::endl;
+            //         XYdot[i].first = 0.5 * (std::abs(XYdot[i].first) / XYdot[i].first);
+            //     }
+            //
+            //     if (std::abs(XYdot[i].second) > 0.5) {
+            //         XYdot[i].second = 0.5 * (std::abs(XYdot[i].second) / XYdot[i].second);
+            //     }
+            // }
             /* Send velocity command */
             for (unsigned int i = 0; i < NLegs; i++) {
                 sign = (i < 3) ? 1 : -1;
-                joints[i]->setCommand(sign * XYdot[_leg_map_to_paper[i]].first);
-                joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
-                joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+                // joints[i]->setCommand(sign * XYdot[_leg_map_to_paper[i]].first);
+                // joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+                // joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+                joints[i]->setCommand(-4 * _q_out.at(i)(0));
+                joints[6 + i]->setCommand(-4 * 1 * _q_out.at(i)(1));
+                joints[12 + i]->setCommand(-4 * 1 * _q_out.at(i)(2));
+                // if (Y[_leg_map_to_paper[i]] > integrate_delta_theta) {
+                // }
+                // else {
+                //     joints[6 + i]->setCommand(0);
+                //     joints[12 + i]->setCommand(0);
+                // }
             }
         }
         _constraint.enforce(period);
@@ -377,7 +432,7 @@ namespace closed_loop_cpg_controller_velocity {
 
         unsigned int count = 0;
         for (unsigned int i = 0; i < n_joints; i++) {
-            joints[i]->setCommand(-0.3 * (joints[i]->getPosition()));
+            joints[i]->setCommand(-0.5 * (joints[i]->getPosition()));
             if (std::abs(joints[i]->getPosition()) < e) {
                 count++; //when the position 0 is reached do count++
             }
@@ -400,7 +455,7 @@ namespace closed_loop_cpg_controller_velocity {
             tf::transformMsgToTF(msg->transforms[i].transform, transformStamped[i]);
         }
         for (unsigned int j = 0; j < NLegs; j++) {
-            end_effectors_transform[_leg_map_to_paper[j]] = transformStamped[j] * transformStamped[6 + 2 * j] * transformStamped[7 + 2 * j] * leg_end_effector_static_transforms;
+            end_effectors_transform[j] = transformStamped[j] * transformStamped[6 + 2 * j] * transformStamped[7 + 2 * j] * leg_end_effector_static_transforms;
         }
     }
 

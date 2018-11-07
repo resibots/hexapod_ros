@@ -28,6 +28,7 @@
   <depend>velocity_controllers</depend>
   <depend>geometry_msgs</depend>
   <depend>trac_ik_lib</depend>
+  <depend>tf</depend>
 
   <export>
     <cpp cflags="-I${prefix}/include"/>
