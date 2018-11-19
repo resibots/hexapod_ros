@@ -18,9 +18,13 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   trac_ik_lib
   tf
+  urdf
+  cmake_modules
 )
 find_package(Boost REQUIRED COMPONENTS date_time)
 find_package(orocos_kdl REQUIRED)
+find_package(TinyXML REQUIRED)
+find_package(TinyXML2 REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 # Declare catkin package
@@ -38,22 +42,32 @@ catkin_package(
     geometry_msgs
     trac_ik_lib
     tf
+    urdf
     DEPENDS
     tf
     Boost
     orocos_kdl
+    TinyXML
+    TinyXML2
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 LIBRARIES trac_ik)
 
 
 
-include_directories(include  ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS})
+include_directories(include  ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS}  ${TinyXML_INCLUDE_DIRS} ${TinyXML2_INCLUDE_DIRS})
+
+# add_library(kdl_parser src/kdl_parser.cpp)
+# target_link_libraries(kdl_parser ${TinyXML_LIBRARIES} ${TinyXML2_LIBRARIES} ${orocos_kdl_LIBRARIES} ${catkin_LIBRARIES})
+
 
 add_library(${PROJECT_NAME}
-  src/open_loop_cpg_controller.cpp
+  src/hexapod_controllers.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES} ${TinyXML_LIBRARIES} ${TinyXML2_LIBRARIES})
+
+
+
 
 #add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${catkin_LIBRARIES})
 

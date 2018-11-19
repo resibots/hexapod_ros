@@ -19,7 +19,7 @@
 
   <!-- launch our hardware interface -->
   <node pkg="dynamixel_control_hw" type="dynamixel_control_p1"
-    name="dynamixel_control" output="screen"/>
+    name="dynamixel_control"  output="screen"/>
 
   <!-- Start a controller for our dummy robot -->
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"

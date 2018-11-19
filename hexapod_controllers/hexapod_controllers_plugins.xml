@@ -28,4 +28,11 @@
         This controller is looking at the command topic for position commands
       </description>
   </class>
+  <class name="hexapod_controllers/HexapodKBLControllerV"
+       type="keep_body_level_velocity_controller::HexapodKBLControllerV"
+        base_class_type="controller_interface::ControllerBase">
+      <description>
+        This controller keeps the body of the hexapod level as much as possible without moving end legs positions
+      </description>
+  </class>
 </library>

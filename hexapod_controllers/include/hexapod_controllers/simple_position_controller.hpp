@@ -53,7 +53,7 @@ namespace simple_position_controller {
     struct NoSafetyConstraints;
 
     /**
-     * \brief Speed command controller for a robotic arm, with safety constraints.
+     * \brief This position controller open a command topic on which it is possible to send position commands
      *
      * This class forwards the command signal down to a set of joints, if they
      * do not infringe some user-defined safety constraints.

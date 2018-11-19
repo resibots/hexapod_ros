@@ -38,7 +38,7 @@ namespace cpg {
    pairs(xdot,ydot)
    */
         std::vector<std::pair<float, float>> computeXYdot(std::vector<float> X, std::vector<float> Y);
-        std::vector<std::pair<float, float>> computeXYdot(std::vector<float> X, std::vector<float> Y, float integrate_delta_theta, Eigen::Matrix<float, 3, 6> delta_theta_e);
+        std::vector<std::pair<float, float>> computeXYdot(std::vector<float> X, std::vector<float> Y, Eigen::Matrix<float, 1, 6> integrate_delta_thetax, Eigen::Matrix<float, 1, 6> integrate_delta_thetay, Eigen::Matrix<float, 3, 6> delta_theta_e);
 
         /**
    * \brief Uses Euler integration to obtain x,y from xdot, ydot, xprev, yprev. <br>!!!!! It
@@ -101,14 +101,22 @@ namespace cpg {
         std::vector<float> cx_;
         /*!   center of cpgg limit cycle*/
         std::vector<float> cy_;
+        std::vector<float> cx0_;
+        /*!   center of cpgg limit cycle*/
+        std::vector<float> cy0_;
         // std::vector<float> cy0 = {0, 0, 0, 0, 0, 0};
     };
-
-    CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.07, float lambda = 0.1, float a = 0.2,
-        float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.001,
+    CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.07, float lambda = 0.14, float a = 0.2,
+        float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
         std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0, 0, 0, 0, 0, 0},
         std::vector<float> cy0 = {M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16,
             M_PI / 16})
+    //
+    // CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.01, float lambda = 0.1, float a = 0.2,
+    //     float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
+    //     std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0, 0, 0, 0, 0, 0},
+    //     std::vector<float> cy0 = {M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16,
+    //         M_PI / 16})
     {
         legs_number_ = legs_number;
         w_ = w;
@@ -122,6 +130,8 @@ namespace cpg {
         K_ = K;
         cx_ = cx0;
         cy_ = cy0;
+        cx0_ = cx0;
+        cy0_ = cy0;
     }
 
     /**
@@ -182,34 +192,49 @@ namespace cpg {
  pairs(xdot,ydot)
  */
     std::vector<std::pair<float, float>>
-    CPG::computeXYdot(std::vector<float> X, std::vector<float> Y, float integrate_delta_theta, Eigen::Matrix<float, 3, 6> delta_theta_e)
+    CPG::computeXYdot(std::vector<float> X, std::vector<float> Y, Eigen::Matrix<float, 1, 6> integrate_delta_thetax, Eigen::Matrix<float, 1, 6> integrate_delta_thetay, Eigen::Matrix<float, 3, 6> delta_theta_e)
     {
         std::vector<std::pair<float, float>> XYdot;
-        float x, y, Hcx, dHx, Hcy, dHy, Hc, xdot, ydot, Kterm;
-
+        float x, y, Hcx, dHx, Hcy, Hcy2x, dHy, Hc, Hc2, xdot, ydot, Kterm;
+        int sign = 1;
+        float cy2 = 0;
+        std::vector<int> leg_map_to_paper = {0, 2, 4, 5, 3, 1};
         for (int i = 0; i < K_.size(); i++) {
+            // std::cout << "delta_theta_e " << delta_theta_e(1, i) << std::endl;
+            cy_[i] = cy0_[i] + 0.1 * integrate_delta_thetay[i];
+            // cx_[i] = cx0_[i] + 0.1 * integrate_delta_thetax[i];
+            // cy2 = cy0_[i] + 0.1 * delta_theta_e(1, i);
+            // cy2 = cy0_[i] + 0.2 * integrate_delta_theta[i];
+            // std::cout << " delta_theta_e " << i << " " << delta_theta_e(1, i) << std::endl;
+            sign = (leg_map_to_paper[i] < 3) ? 1 : -1;
             x = X[i];
             y = Y[i];
             Hcx = pow((x - cx_[i]) / a_, d_); /* x part of Hc*/
             dHx = d_ * pow((1 / a_), d_) * pow(x, d_ - 1); /* x derivative of Hcx*/
 
-            Hcy = pow((y - cy_[i] - integrate_delta_theta) / b_, d_); /* y part of Hc*/
+            Hcy = pow((y - cy_[i]) / b_, d_); /* y part of Hc*/
+            // Hcy2x = pow((y - cy2) / b_, d_); /* y part of Hc*/
+
             dHy = d_ * pow((1 / b_), d_) * pow(y, d_ - 1); /* y derivative of Hcx*/
 
             Hc = Hcx + Hcy;
+            // Hc2 = Hcx + Hcy2x;
 
             xdot = -w_ * dHy + gammacpg_ * (1 - Hc) * dHx;
-
             ydot = w_ * dHx + gammacpg_ * (1 - Hc) * dHy;
 
             Kterm = 0; /* coupling term which needs to be added to ydot*/
             for (int j = 0; j < K_[i].size(); j++) {
-                Kterm += K_[i][j] * (Y[j] - cy_[j] - integrate_delta_theta);
+                Kterm += K_[i][j] * (Y[j] - cy_[i]);
             }
             // std::cout << " w * dHx    = " << w_ * dHx << '\n';
             // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
-            ydot += lambda_ * Kterm + delta_theta_e(1, i);
-            // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
+            ydot += lambda_ * Kterm + 0.1 * delta_theta_e(1, i);
+            //+0.1 * delta_theta_e(1, i); //_e(1, i);
+            // std::cout << "delta_theta_e(1, i)= " << i << " " << delta_theta_e(1, i) << '\n';
+            // std::cout << "integrate_delta_theta[i]= " << i << " " << integrate_delta_theta[i] << '\n';
+            std::cout << " delta_theta_e(1, i) " << i << " = " << delta_theta_e(1, i) << std::endl;
+            std::cout << " xdot " << i << " = " << xdot << '\n';
             // std::cout << " ydot   = " << ydot << '\n';
             XYdot.push_back(std::pair<float, float>(xdot, ydot));
         }

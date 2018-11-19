@@ -55,7 +55,7 @@ dynamixel_control:
     leg_5_2_3:
       id: 26
       offset: 3.14159265359
-  loop_frequency: 100
+  loop_frequency: 1000
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds
   read_timeout: 0.01 # in seconds

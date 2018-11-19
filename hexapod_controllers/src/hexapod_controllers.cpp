@@ -36,6 +36,7 @@
  *********************************************************************/
 
 #include <hexapod_controllers/closed_loop_cpg_controller_velocity.hpp>
+#include <hexapod_controllers/keep_body_level_velocity_controller.hpp>
 #include <hexapod_controllers/open_loop_cpg_controller.hpp>
 #include <hexapod_controllers/open_loop_cpg_controller_velocity.hpp>
 #include <hexapod_controllers/simple_position_controller.hpp>
@@ -55,6 +56,10 @@ namespace closed_loop_cpg_controller_velocity {
 namespace simple_position_controller {
     typedef simple_position_controller::SimplePositionController<NoSafetyConstraints> HexapodSimplePositionController;
 }
+
+namespace keep_body_level_velocity_controller {
+    typedef keep_body_level_velocity_controller::KBLControllerV<NoSafetyConstraints, 6> HexapodKBLControllerV;
+}
 PLUGINLIB_EXPORT_CLASS(open_loop_cpg_controller::HexapodOlCpgController,
     controller_interface::ControllerBase)
 
@@ -65,4 +70,7 @@ PLUGINLIB_EXPORT_CLASS(closed_loop_cpg_controller_velocity::HexapodClCpgControll
     controller_interface::ControllerBase)
 
 PLUGINLIB_EXPORT_CLASS(simple_position_controller::HexapodSimplePositionController,
+    controller_interface::ControllerBase)
+
+PLUGINLIB_EXPORT_CLASS(keep_body_level_velocity_controller::HexapodKBLControllerV,
     controller_interface::ControllerBase)
