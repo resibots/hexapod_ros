@@ -35,10 +35,10 @@
   <xacro:property name="joint_dmp" value="0.25"/>
   <xacro:property name="joint_friction" value="0.183333333"/>
 
-  <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/mini_hexapod_visuals_collisions.xacro" />
 
   <!-- Load xacro modules/parts of the robot -->
   <xacro:include filename="$(find hexapod_description)/urdf/modules/body.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_pexod.xacro" />
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_pexod.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/leg_mini_hexapod.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/legs_mini_hexapod.xacro" />
 </robot>

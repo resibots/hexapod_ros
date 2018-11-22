@@ -56,38 +56,38 @@ dynamixel_control:
   default_command_interface: position
   servos:
     body_leg_0:
-      id: 1
+      id: 7
     leg_0_1_2:
-      id: 11
+      id: 8
     leg_0_2_3:
-      id: 21
+      id: 9
     body_leg_1:
-      id: 2
-    leg_1_1_2:
-      id: 12
-    leg_1_2_3:
-      id: 22
-    body_leg_2:
-      id: 3
-    leg_2_1_2:
-      id: 13
-    leg_2_2_3:
-      id: 23
-    body_leg_3:
       id: 4
-    leg_3_1_2:
-      id: 14
-    leg_3_2_3:
-      id: 24
-    body_leg_4:
-     id: 5
-    leg_4_1_2:
-     id: 15
-    leg_4_2_3:
-     id: 25
-    body_leg_5:
+    leg_1_1_2:
+      id: 5
+    leg_1_2_3:
       id: 6
-    leg_5_1_2:
+    body_leg_2:
+      id: 1
+    leg_2_1_2:
+      id: 2
+    leg_2_2_3:
+      id: 3
+    body_leg_3:
       id: 16
+    leg_3_1_2:
+      id: 17
+    leg_3_2_3:
+      id: 18
+    body_leg_4:
+     id: 13
+    leg_4_1_2:
+     id: 14
+    leg_4_2_3:
+     id: 15
+    body_leg_5:
+      id: 10
+    leg_5_1_2:
+      id: 11
     leg_5_2_3:
-      id: 26
+      id: 12

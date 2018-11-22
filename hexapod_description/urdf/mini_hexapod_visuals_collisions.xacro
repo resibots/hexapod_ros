@@ -95,7 +95,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
       <geometry>
-        <mesh filename="${path_prefix + 'stl/third_link_v4.5.stl'}" scale="0.001 0.001 0.001"/>
+        <mesh filename="${path_prefix + 'stl/third_link_v5.stl'}" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="Red"/>
     </visual>

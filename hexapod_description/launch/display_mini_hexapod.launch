@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Load the URDF -->
+  <include file="$(find hexapod_description)/launch/mini_hexapod.launch" />
+
+  <arg name="model" />
+  <arg name="gui" default="true" />
+  <param name="use_gui" value="$(arg gui)" />
+
+  <!-- Start state publishers -->
+  <node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher"
+    type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="state_publisher" />
+
+  <!-- Start RVIZ -->
+  <node name="rviz" pkg="rviz" type="rviz"
+    args="-d $(find hexapod_description)/config/pexod.rviz" />
+</launch>

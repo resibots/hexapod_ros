@@ -3,13 +3,13 @@
 <launch>
 
   <!-- URDF robot description -->
-  <include file="$(find hexapod_description)/launch/pexod.launch" />
+  <include file="$(find hexapod_description)/launch/mini_hexapod.launch" />
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
   <!-- Parameters for the hardware interface and controllers -->
-  <rosparam file="$(find hexapod_bringup)/config/common.yaml"/>
-  <rosparam file="$(find hexapod_bringup)/config/pexod.yaml"/>
+  <rosparam file="$(find hexapod_bringup)/config/common_mini_hexapod.yaml"/>
+  <rosparam file="$(find hexapod_bringup)/config/mini_hexapod.yaml"/>
 
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
   <!-- <param name="use_gui" value="true"/>
@@ -25,6 +25,7 @@
     /dynamixel_controllers/leg_1_controller
     /dynamixel_controllers/leg_2_controller
     /dynamixel_controllers/leg_3_controller
+    /dynamixel_controllers/leg_4_controller
     /dynamixel_controllers/leg_5_controller" />
     <!-- /dynamixel_controllers/leg_4_controller -->
 </launch>

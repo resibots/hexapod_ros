@@ -3,38 +3,38 @@ dynamixel_control:
 
   servos:
     body_leg_0:
-      offset: 2.74889357189
+      offset: 0.0
     leg_0_1_2:
-      offset: 3.14159265359
+      offset: 0.0
     leg_0_2_3:
-      offset: 3.14159265359
+      offset: 0.0
     body_leg_1:
-      offset: 3.14159265359
+      offset: 0.0
     leg_1_1_2:
-      offset: 3.14159265359
+      offset: 0.0
     leg_1_2_3:
-      offset: 3.14159265359
+      offset: 0.0
     body_leg_2:
-      offset: 3.53429173529
+      offset: 0.0
     leg_2_1_2:
-      offset: 3.14159265359
+      offset: 0.0
     leg_2_2_3:
-      offset: 3.14159265359
+      offset: 0.0
     body_leg_3:
-      offset: 2.74889357189
+      offset: 0.0
     leg_3_1_2:
-      offset: 3.14159265359
+      offset: 0.0
     leg_3_2_3:
-      offset: 3.14159265359
-    # body_leg_4:
-    #   offset: 3.14159265359
-    # leg_4_1_2:
-    #   offset: 3.14159265359
-    # leg_4_2_3:
-    #   offset: 3.14159265359
+      offset: 0.0
+    body_leg_4:
+      offset: 0.0
+    leg_4_1_2:
+      offset: 0.0
+    leg_4_2_3:
+      offset: 0.0
     body_leg_5:
-      offset: 3.53429173529
+      offset: 0.0
     leg_5_1_2:
-      offset: 3.14159265359
+      offset: 0.0
     leg_5_2_3:
-      offset: 3.14159265359
+      offset: 0.0
