@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- XACRO MACRO FOR LEGS LINKS/JOINTS -->
+
+    <xacro:macro name="leg" params="index xPos yPos">
+        <joint name="body_leg_${index}" type="revolute">
+            <parent link="base_link"/>
+            <child link="leg_${index}_1"/>
+            <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
+
+            <!-- Add a small offset angle to match the default position on the robot -->
+            <xacro:if value="${(index+1) % 3 == 0}">
+                <xacro:property name="offset_angle" value= "-0.3"/>
+            </xacro:if>
+            <xacro:if value="${(index+1) % 3 == 1}">
+                <xacro:property name="offset_angle" value= "0.3"/>
+            </xacro:if>
+            <xacro:if value="${(index+1) % 3 == 2}">
+                <xacro:property name="offset_angle" value= "0"/>
+            </xacro:if>
+            <!-- Angle for the legs of the left side -->
+            <xacro:property name="legs_rotation" value="0"/>
+            <xacro:if value="${index > 2}">
+                <xacro:property name="legs_rotation" value="${PI}"/>
+            </xacro:if>
+
+            <origin rpy="0 0 ${offset_angle+legs_rotation}" xyz="${xPos} ${yPos} 0"/>
+
+            <axis xyz="0 0 1"/>
+
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
+        </joint>
+        <link name="leg_${index}_1">
+            <xacro:visuals_collisions_leg_1/>
+            <inertial>
+                <!-- CENTER OF MASS -->
+                <origin rpy="${PI_2} 0 0" xyz="${leg1_width/2} ${leg1_length/2} 0"/>
+                <mass value="${leg1_mass}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg1_mass*(leg1_width*leg1_width+leg1_length*leg1_length)}" ixy="0" ixz="0" iyy="${1/12*leg1_mass*(leg1_width*leg1_width+leg1_length*leg1_length)}" iyz="0" izz="${1/12*leg1_mass*(2*leg1_width*leg1_width)}"/>
+            </inertial>
+        </link>
+        <joint name="leg_${index}_1_2" type="revolute">
+            <parent link="leg_${index}_1"/>
+            <child link="leg_${index}_2"/>
+            <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
+            <origin rpy="0 0 0" xyz="0 ${leg1_length} 0"/>
+            <axis xyz="1 0 0"/>
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
+        </joint>
+        <link name="leg_${index}_2">
+            <xacro:visuals_collisions_leg_2/>
+            <inertial>
+                <!-- CENTER OF MASS -->
+                <origin rpy="${PI_2} 0 0" xyz="${leg2_width/2} ${leg2_length/2} 0"/>
+                <mass value="${leg2_mass}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg2_mass*(leg2_width*leg2_width+leg2_length*leg2_length)}" ixy="0" ixz="0" iyy="${1/12*leg2_mass*(leg2_width*leg2_width+leg2_length*leg2_length)}" iyz="0" izz="${1/12*leg2_mass*(2*leg2_width*leg2_width)}"/>
+            </inertial>
+        </link>
+        <joint name="leg_${index}_2_3" type="revolute">
+            <parent link="leg_${index}_2"/>
+            <child link="leg_${index}_3"/>
+            <limit effort="${joint_eff}" lower="${-joint_lim}" upper="${joint_lim}" velocity="${joint_vel}"/>
+            <origin rpy="0 0 0" xyz="0 ${leg2_length} 0"/>
+            <axis xyz="-1 0 0"/>
+            <dynamics damping="${joint_dmp}" friction="${joint_friction}"/>
+        </joint>
+        <link name="leg_${index}_3">
+            <xacro:visuals_collisions_leg_3/>
+            <inertial>
+                <!-- CENTER OF MASS -->
+                <origin rpy="${PI_2} 0 0" xyz="0 ${leg3_length/2} 0"/>
+                <mass value="${leg3_mass}"/>
+                <!-- box inertia: 1/12*m(y^2+z^2), ... -->
+                <inertia ixx="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" ixy="0" ixz="0" iyy="${1/12*leg3_mass*(leg3_width*leg3_width+leg3_length*leg3_length)}" iyz="0" izz="${1/12*leg3_mass*(2*leg3_width*leg3_width)}"/>
+            </inertial>
+        </link>
+        <transmission name="tran${index}1">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="body_leg_${index}">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}1">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+        <transmission name="tran${index}2">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="leg_${index}_1_2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+        <transmission name="tran${index}3">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="leg_${index}_2_3">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor${index}2">
+                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+  <!-- END OF LEG LINKS/JOINTS -->
+</robot>

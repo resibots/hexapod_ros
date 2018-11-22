@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Load Pexod's URDF -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder $(find hexapod_description)/urdf/mini_hexapod.xacro" />
+</launch>
