@@ -87,7 +87,7 @@ dynamixel_controllers:
       - leg_4_2_3
       - leg_5_2_3
   hexapod_cpg_controller:
-    type: hexapod_controllers/HexapodClCpgControllerV
+    type: hexapod_controllers/HexapodSClCpgControllerV
     joints:
       - body_leg_0
       - body_leg_1

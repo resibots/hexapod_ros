@@ -69,6 +69,11 @@ namespace cpg {
             return cy_;
         };
 
+        void set_cy(std::vector<float> cy)
+        {
+            cy_ = cy;
+        };
+
         void set_rk_dt(float rk_dt)
         {
             rk_dt_ = rk_dt;
@@ -106,17 +111,24 @@ namespace cpg {
         std::vector<float> cy0_;
         // std::vector<float> cy0 = {0, 0, 0, 0, 0, 0};
     };
-    CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.07, float lambda = 0.14, float a = 0.2,
-        float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
-        std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0, 0, 0, 0, 0, 0},
-        std::vector<float> cy0 = {M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16,
-            M_PI / 16})
-    //
-    // CPG::CPG(int legs_number = 6, float w = 0.05, float gammacpg = 0.01, float lambda = 0.1, float a = 0.2,
+
+    // CPG::CPG(int legs_number = 6, float w = 5, float gammacpg = 7, float lambda = 14, float a = 0.2,
+    //     float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.01,
+    //     std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.01, 0.01, 0, 0, 0.01, 0.01},
+    //     std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
+    //     ) // 10 ou 100
+
+    CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.3,
+        float b = 0.6, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
+        std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.01, 0.0, 0.0, 0.01, 0.01, 0},
+        std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
+        ) // 1
+
+    // CPG::CPG(int legs_number = 6, float w = 3 * 5, float gammacpg = 3 * 7, float lambda = 3 * 14, float a = 0.2,
     //     float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
-    //     std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0, 0, 0, 0, 0, 0},
-    //     std::vector<float> cy0 = {M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16, M_PI / 16,
-    //         M_PI / 16})
+    //     std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.1, 0, 0, 0, 0, 0},
+    //     std::vector<float> cy0 = {M_PI / 10, M_PI / 10, M_PI / 10, M_PI / 10, M_PI / 10,
+    //         M_PI / 10}) 1000
     {
         legs_number_ = legs_number;
         w_ = w;
@@ -163,14 +175,16 @@ namespace cpg {
             Hc = Hcx + Hcy;
 
             xdot = -w_ * dHy + gammacpg_ * (1 - Hc) * dHx;
-
+            // std::cout << xdot << std::endl;
             ydot = w_ * dHx + gammacpg_ * (1 - Hc) * dHy;
 
             Kterm = 0; /* coupling term which needs to be added to ydot*/
             for (int j = 0; j < K_[i].size(); j++) {
                 Kterm += K_[i][j] * (Y[j] - cy_[j]);
+                // std::cout << "K_[i][j] " << K_[i][j] << std::endl;
+                // std::cout << " K_[i][j] * (Y[j] - cy_[j])] " << K_[i][j] * (Y[j] - cy_[j]) << std::endl;
             }
-            // std::cout << " w * dHx    = " << w_ * dHx << '\n';
+            std::cout << " w * dHx    = " << w_ * dHx << '\n';
             // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
             ydot += lambda_ * Kterm;
             // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
@@ -227,15 +241,15 @@ namespace cpg {
             for (int j = 0; j < K_[i].size(); j++) {
                 Kterm += K_[i][j] * (Y[j] - cy_[i]);
             }
-            // std::cout << " w * dHx    = " << w_ * dHx << '\n';
-            // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
+            std::cout << " w * dHx    = " << w_ * dHx << '\n';
+            std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
             ydot += lambda_ * Kterm + 0.1 * delta_theta_e(1, i);
             //+0.1 * delta_theta_e(1, i); //_e(1, i);
-            // std::cout << "delta_theta_e(1, i)= " << i << " " << delta_theta_e(1, i) << '\n';
+            std::cout << "delta_theta_e(1, i)= " << i << " " << delta_theta_e(1, i) << '\n';
             // std::cout << "integrate_delta_theta[i]= " << i << " " << integrate_delta_theta[i] << '\n';
-            std::cout << " delta_theta_e(1, i) " << i << " = " << delta_theta_e(1, i) << std::endl;
+            // std::cout << " delta_theta_e(1, i) " << i << " = " << delta_theta_e(1, i) << std::endl;
             std::cout << " xdot " << i << " = " << xdot << '\n';
-            // std::cout << " ydot   = " << ydot << '\n';
+            std::cout << " ydot   = " << ydot << '\n';
             XYdot.push_back(std::pair<float, float>(xdot, ydot));
         }
         return XYdot;

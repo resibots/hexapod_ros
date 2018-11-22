@@ -37,8 +37,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
-#define CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
+#ifndef SIMPLE_CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
+#define SIMPLE_CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
 #define TF_EULER_DEFAULT_ZYX
 #include "cpg.hpp"
 #include <boost/date_time.hpp>
@@ -76,7 +76,7 @@
 #include <kdl/velocityprofile_trap.hpp>
 #include <tf/transform_broadcaster.h>
 
-namespace closed_loop_cpg_controller_velocity {
+namespace simple_closed_loop_cpg_controller_velocity {
 
     struct NoSafetyConstraints;
 
@@ -101,10 +101,10 @@ namespace closed_loop_cpg_controller_velocity {
      * - \b command (std_msgs::Float64MultiArray) : The joint commands to apply.
      */
     template <class SafetyConstraint = NoSafetyConstraints, int NLegs = 6>
-    class ClCpgControllerV : public controller_interface::Controller<hardware_interface::VelocityJointInterface> {
+    class SClCpgControllerV : public controller_interface::Controller<hardware_interface::VelocityJointInterface> {
     public:
-        ClCpgControllerV();
-        ~ClCpgControllerV(){};
+        SClCpgControllerV();
+        ~SClCpgControllerV(){};
 
         /**
          * \brief Tries to recover n_joints JointHandles
@@ -168,6 +168,7 @@ namespace closed_loop_cpg_controller_velocity {
         /* rpy : current roll pitch and yaw, extracted from raw P */
         geometry_msgs::Vector3 rpy;
         /*end_effectors_transform are the transformations between the base_link and the end effectors (tip of the legs)*/
+        geometry_msgs::Vector3 rpy_tmp;
         std::vector<tf::Transform> end_effectors_transform;
         /*leg_end_effector_static_transforms are the end transforms between the last servo and the tip of the leg. Those are constant*/
         tf::Transform leg_end_effector_static_transforms;
@@ -198,6 +199,12 @@ namespace closed_loop_cpg_controller_velocity {
         Eigen::Matrix<float, 1, NLegs> integrate_delta_thetax;
         Eigen::Matrix<float, 1, NLegs> integrate_delta_thetay;
         Eigen::Matrix<float, 3, NLegs> _delta_theta_e;
+        std::vector<float> _kpitch;
+        bool integration_has_diverged;
+        std::vector<float> _kroll;
+        std::vector<float> error;
+        std::vector<float> error_prev;
+        std::vector<float> error_derivated;
 
     private:
         SafetyConstraint _constraint;
@@ -218,25 +225,30 @@ namespace closed_loop_cpg_controller_velocity {
          * \brief callback to recover end effector position
          */
         void tfCB(const tf2_msgs::TFMessageConstPtr& msg);
-    }; // class ClCpgControllerV
+    }; // class SClCpgControllerV
 
     /**
      * \brief Constructor
      */
     template <class SafetyConstraint, int NLegs>
-    ClCpgControllerV<SafetyConstraint, NLegs>::ClCpgControllerV()
+    SClCpgControllerV<SafetyConstraint, NLegs>::SClCpgControllerV()
     {
         e = 0.05;
         has_init = false;
         X.resize(NLegs, 0.0);
         Xprev.resize(NLegs, 0.0);
-        Xcommand.resize(NLegs, 0.01);
+        Xcommand.resize(NLegs, 0.0);
+        // Xcommand = {0.01, 0.0, 0.0, 0.01, 0.01, 0};
         Y.resize(NLegs, 0.0);
-        Yprev.resize(NLegs, 0.0);
-        Ycommand.resize(NLegs, 0.1);
+        Yprev.resize(NLegs, 0);
+        Ycommand.resize(NLegs, 0.0);
         XcommandSmoothed.resize(NLegs, 0.0);
         YcommandSmoothed.resize(NLegs, 0.0);
+
+        _kpitch = {4, 0, -4, -4, 0, 4};
+        _kroll = {4, 4, 4, -4, -4, -4};
         init2 = false;
+        integration_has_diverged = false;
         end_effectors_transform.resize(NLegs, tf::Transform());
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
@@ -284,13 +296,13 @@ namespace closed_loop_cpg_controller_velocity {
         _bounds.rot.z(std::numeric_limits<float>::max());
         _kp = 3;
 
-    } // namespace closed_loop_cpg_controller_velocity
+    } // namespace simple_closed_loop_cpg_controller_velocity
 
     /**
      * \brief Tries to recover n_joints JointHandles
      */
     template <class SafetyConstraint, int NLegs>
-    bool ClCpgControllerV<SafetyConstraint, NLegs>::init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh)
+    bool SClCpgControllerV<SafetyConstraint, NLegs>::init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh)
     {
         // List of controlled joints
         std::string param_name = "joints";
@@ -299,6 +311,9 @@ namespace closed_loop_cpg_controller_velocity {
             return false;
         }
         n_joints = joint_names.size();
+        error.resize(n_joints, 0.0);
+        error_derivated.resize(n_joints, 0.0);
+        error_prev.resize(n_joints, 0.0);
 
         if (n_joints == 0) {
             ROS_ERROR_STREAM("List of joint names is empty.");
@@ -322,9 +337,9 @@ namespace closed_loop_cpg_controller_velocity {
             return false;
         }
         // ros subscriber to recover imu data
-        _sub_imu = nh.subscribe<sensor_msgs::Imu>("/imu/data", 1, &ClCpgControllerV<SafetyConstraint, NLegs>::imuCB, this);
+        _sub_imu = nh.subscribe<sensor_msgs::Imu>("/imu/data", 1, &SClCpgControllerV<SafetyConstraint, NLegs>::imuCB, this);
         // ros subscriber to recover end effector positions (tip of the legs positions)
-        _sub_tf = nh.subscribe<tf2_msgs::TFMessage>("/tf", 1, &ClCpgControllerV<SafetyConstraint, NLegs>::tfCB, this);
+        _sub_tf = nh.subscribe<tf2_msgs::TFMessage>("/tf", 1, &SClCpgControllerV<SafetyConstraint, NLegs>::tfCB, this);
         return true;
     }
 
@@ -332,8 +347,11 @@ namespace closed_loop_cpg_controller_velocity {
      * \brief This function is the control loop itself, called periodically by the controller_manager
      */
     template <class SafetyConstraint, int NLegs>
-    void ClCpgControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
+    void SClCpgControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
     {
+        for (unsigned int i = 0; i < n_joints; i++) {
+            error_prev[i] = error[i];
+        }
         //Read the imu buffer to recover imu data
         std::vector<double>& imu_quat = *imu_buffer.readFromRT();
 
@@ -342,6 +360,7 @@ namespace closed_loop_cpg_controller_velocity {
             quat = tf::Quaternion(imu_quat[0], imu_quat[1], imu_quat[2], imu_quat[3]);
             P = tf::Matrix3x3(quat);
             P.getRPY(rpy.x, rpy.y, rpy.z);
+            std::cout << "PITCH : " << rpy.x << std::endl;
             //Here we use the TF_EULER_DEFAULT_ZYX convention : the yaw is around z, the pitch is around y and the rooll is around x
             //Doing so we have a discrapency between the feedback from the imu and the TF_EULER_DEFAULT_ZYX convention
             //The roll is actually -pitch
@@ -373,82 +392,130 @@ namespace closed_loop_cpg_controller_velocity {
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
         if (has_init == false) {
             initJointPosition();
-            Xcommand = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
-            Ycommand = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
         }
         //Then carry on the cpg control
         else {
 
             /* Read the position values from the servos*/
-            KDL::JntArray array(3); //Contains the 3 joint angles for one leg
             int sign = 1;
+            std::vector<float> cy = cpg_.get_cy();
+            std::vector<float> distances;
             for (unsigned int i = 0; i < NLegs; i++) {
                 sign = (i < 3) ? 1 : -1;
                 X[_leg_map_to_paper[i]] = sign * joints[i]->getPosition();
                 Y[_leg_map_to_paper[i]] = joints[6 + i]->getPosition();
-                array(0) = joints[i]->getPosition();
-                array(1) = joints[6 + i]->getPosition();
-                array(2) = joints[12 + i]->getPosition();
-                _q_init.at(i) = array; // angles for the first leg
-                _r(0, i) = end_effectors_transform[i].getOrigin().m_floats[0]; //x position of the tip of the first leg in the robot body frame
-                _r(1, i) = end_effectors_transform[i].getOrigin().m_floats[1]; //y position of the tip of the first leg in the robot body frame
-                _r(2, i) = end_effectors_transform[i].getOrigin().m_floats[2]; //z position of the tip of the first leg in the robot body frame
-            }
-            _r_tilde = _P_eigen.transpose() * _R_eigen * _P_eigen * _r;
-            std::array<KDL::Frame, NLegs> _r_tilde_frame;
 
-            for (size_t leg = 0; leg < 6; leg++) {
-                // _r_tilde(2, leg) = _r(2, leg);
-                // _r_tilde(2, leg) = -std::sqrt(std::abs(_r(0, leg) * _r(0, leg) + _r(1, leg) * _r(1, leg) + _r(2, leg) * _r(2, leg) - _r_tilde(0, leg) * _r_tilde(0, leg) - _r_tilde(1, leg) * _r_tilde(1, leg)));
-                _r_tilde_frame.at(leg) = KDL::Frame(KDL::Vector(_r_tilde(0, leg), _r_tilde(1, leg), _r_tilde(2, leg)));
-            }
-
-            std::array<int, NLegs> status = ClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(_q_init, _r_tilde_frame, _q_out, false);
-
-            for (unsigned int j = 0; j < NLegs; j++) {
-                sign = (j < 3) ? 1 : -1;
-
-                //qout is actually the  qinit - q_desired
-                _delta_theta_e(0, _leg_map_to_paper[j]) = -_q_out.at(j)(0);
-                _delta_theta_e(1, _leg_map_to_paper[j]) = -_q_out.at(j)(1);
-                _delta_theta_e(2, _leg_map_to_paper[j]) = -_q_out.at(j)(2);
-
-                // integrate_delta_thetax[_leg_map_to_paper[j]] += 0 * (-sign * _q_out.at(j)(0) - 0.05 * integrate_delta_thetax[_leg_map_to_paper[j]]);
-                integrate_delta_thetay[_leg_map_to_paper[j]] += -_q_out.at(j)(1) - 0.05 * integrate_delta_thetay[_leg_map_to_paper[j]];
-
-                // Here a threshold on the integrator is used to prevent a too high xdot and ydot output. (It leads to an unstable servos motion)
-                if (integrate_delta_thetay[_leg_map_to_paper[j]] > 10)
-                    integrate_delta_thetay[_leg_map_to_paper[j]] = 10;
-                if (integrate_delta_thetay[_leg_map_to_paper[j]] < -10)
-                    integrate_delta_thetay[_leg_map_to_paper[j]] = -10;
+                float x = end_effectors_transform[i].getOrigin().m_floats[0]; //x position of the tip of the first leg in the robot body frame
+                float y = end_effectors_transform[i].getOrigin().m_floats[1]; //y position of the tip of the first leg in the robot body frame
+                float z = end_effectors_transform[i].getOrigin().m_floats[2]; //z position of the tip of the first leg in the robot body frame
+                auto qef = end_effectors_transform[i].getRotation();
+                auto Pqef = tf::Matrix3x3(qef);
+                Pqef.getRPY(rpy_tmp.x, rpy_tmp.y, rpy_tmp.z);
+                float d = x * x + z * z + y * y;
+                distances.push_back(d);
+                // std::cout << " x " << x << " y " << y << " z " << z << std::endl;
+                // std::cout << " r " << rpy_tmp.x << " p " << rpy_tmp.y << " y " << rpy_tmp.z << std::endl;
+                std::cout << " p " << rpy_tmp.y << std::endl;
+                // std::cout << "distances " << d << std::endl;
+                // float alpha2 =
+                //cy[_leg_map_to_paper[i]] += 0.0025 * _kpitch[i] * rpy.x - 0.0025 * _kroll[i] * rpy.y - 0.001 * cy[_leg_map_to_paper[i]];
+                //std::cout << 0.025 * _kpitch[i] * rpy.x - 0.025 * _kroll[i] * rpy.y << std::endl;
+                //cpg_.set_cy(cy);
             }
 
-            std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(X, Y, integrate_delta_thetax, integrate_delta_thetay, _delta_theta_e);
-            /* Send velocity command */
-            // std::vector<float> cy = cpg_.get_cy();
-            // int longt = 0;
-            // for (unsigned int i = 0; i < NLegs; i++) {
-            //     if ((Y[_leg_map_to_paper[i]]) > (cy[_leg_map_to_paper[i]] + 0.3)) {
-            //         longt++;
-            //     }
-            // }
+            int longt = 0;
+
+            for (unsigned int i = 0; i < NLegs; i++) {
+                if ((Y[_leg_map_to_paper[i]]) > (cy[_leg_map_to_paper[i]] + 0.3)) {
+                    longt++;
+                }
+            }
+
+            /*compute X,Y derivatives*/
+            std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(Xcommand, Ycommand);
+
+            for (int i = 0; i < XYdot.size(); i++) {
+                /*Integrate XYdot*/
+                std::pair<float, float> xy = cpg_.RK4(Xcommand[i], Ycommand[i], XYdot[i]);
+                Xcommand[i] = xy.first;
+                Ycommand[i] = xy.second;
+                // X[i] = Xcommand[i];
+                // Y[i] = Ycommand[i];
+                // std::cout << "x " << i << " " << xy.first << std::endl;
+                // std::cout << xy.second << std::endl;
+                /*Check if integration hasn't diverged*/
+                if (xy.first > 1) {
+                    Xcommand[i] = 1;
+                }
+                if (xy.first < -1) {
+                    Xcommand[i] = -1;
+                }
+                if (xy.second > 1) {
+                    Ycommand[i] = 1;
+                }
+                if (xy.second < -1) {
+                    Ycommand[i] = -1;
+                }
+                if (std::isnan(xy.first) || std::isnan(xy.second)) {
+                    std::cout << "INTEGRATION HAS DIVERGED : reboot the node and use a bigger loop rate"
+                              << std::endl;
+                    integration_has_diverged = true;
+                }
+            }
 
             for (unsigned int i = 0; i < NLegs; i++) {
                 sign = (i < 3) ? 1 : -1;
-                // XcommandSmoothed[_leg_map_to_paper[i]] = (sign * XYdot[_leg_map_to_paper[i]].first + XcommandSmoothed[_leg_map_to_paper[i]]) / 2;
-                // YcommandSmoothed[_leg_map_to_paper[i]] = (XYdot[_leg_map_to_paper[i]].second + YcommandSmoothed[_leg_map_to_paper[i]]) / 2;
-                joints[i]->setCommand(sign * 1 * XYdot[_leg_map_to_paper[i]].first);
-                joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
-                joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+
+                // if (cy[_leg_map_to_paper[i]] > (Y[_leg_map_to_paper[i]] + e) && (longt == 3)) {
+                //     std::cout << "GoTo level position\n";
+                //     joints[i]->setCommand(sign * 1 * XYdot[_leg_map_to_paper[i]].first);
+                //     joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second + _kpitch[i] * rpy.x);
+                //     joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second + _kpitch[i] * rpy.x);
+                // }
+
+                // joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
+                // joints[6 + i]->setCommand(_kpitch[i] * rpy.x - _kroll[i] * rpy.y);
+                // joints[12 + i]->setCommand(_kpitch[i] * rpy.x - _kroll[i] * rpy.y);
+                // joints[6 + i]->setCommand(-_kroll[i] * rpy.y);
+                // joints[12 + i]->setCommand(-_kroll[i] * rpy.y);
+                if (integration_has_diverged == false) {
+                    error[i] = (joints[i]->getPosition() - sign * Xcommand[_leg_map_to_paper[i]]);
+                    error_derivated[i] = (error[i] - error_prev[i]) / 0.001;
+                    joints[i]->setCommand(-error[i] - 0.01 * error_derivated[i]);
+                    std::cout << "error_derivated[i] : " << error_derivated[i] << std::endl;
+                    // joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
+                    //
+                    // joints[6 + i]->setCommand(0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+
+                    // joints[12 + i]->setCommand(0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+
+                    // joints[6 + i]->setCommand(-4 * (joints[6 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]));
+                    // joints[12 + i]->setCommand(-4 * (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]));
+
+                    // joints[i]->setCommand(sign * 1 * XYdot[_leg_map_to_paper[i]].first);
+                    // joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+                    // joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
+                    // std::cout << "yeah";
+                    error[6 + i] = (joints[6 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
+                    error_derivated[6 + i] = (error[6 + i] - error_prev[6 + i]) / 0.001;
+                    joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i]); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+
+                    error[12 + i] = (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
+                    error_derivated[12 + i] = (error[12 + i] - error_prev[12 + i]) / 0.001;
+                    joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i]); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+                    // 0.3210982387683568
+                    // joints[12 + i]->setCommand(-0.025 * _kroll[i] * rpy.y);
+                    // joints[12 + i]->setCommand(1 * _kpitch[i] * rpy.x - 1 * _kroll[i] * rpy.y);
+                }
             }
         }
         _constraint.enforce(period);
-    } // namespace closed_loop_cpg_controller_velocity
+    } // namespace simple_closed_loop_cpg_controller_velocity
     /**
     * \brief Put the servos at the position 0 at init
     */
     template <class SafetyConstraint, int NLegs>
-    void ClCpgControllerV<SafetyConstraint, NLegs>::initJointPosition()
+    void SClCpgControllerV<SafetyConstraint, NLegs>::initJointPosition()
     {
         unsigned int count = 0;
         for (unsigned int i = 0; i < n_joints; i++) {
@@ -463,13 +530,13 @@ namespace closed_loop_cpg_controller_velocity {
         }
     }
     template <class SafetyConstraint, int NLegs>
-    void ClCpgControllerV<SafetyConstraint, NLegs>::imuCB(const sensor_msgs::ImuConstPtr& msg)
+    void SClCpgControllerV<SafetyConstraint, NLegs>::imuCB(const sensor_msgs::ImuConstPtr& msg)
     {
         imu_buffer.writeFromNonRT({msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w});
     }
 
     template <class SafetyConstraint, int NLegs>
-    void ClCpgControllerV<SafetyConstraint, NLegs>::tfCB(const tf2_msgs::TFMessageConstPtr& msg)
+    void SClCpgControllerV<SafetyConstraint, NLegs>::tfCB(const tf2_msgs::TFMessageConstPtr& msg)
     {
         std::vector<tf::Transform> transformStamped(msg->transforms.size(), tf::Transform());
         for (unsigned int i = 0; i < msg->transforms.size(); i++) {
@@ -492,7 +559,7 @@ namespace closed_loop_cpg_controller_velocity {
           @return status of the computation of each leg; failed if < 0
       **/
     template <class SafetyConstraint, int NLegs>
-    std::array<int, NLegs> ClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(
+    std::array<int, NLegs> SClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(
         const std::array<KDL::JntArray, NLegs>& q_init,
         const std::array<KDL::Frame, NLegs>& frame,
         std::array<KDL::JntArray, NLegs>& q_out,
@@ -527,6 +594,6 @@ namespace closed_loop_cpg_controller_velocity {
     };
     /** \endcond */
 
-} // namespace closed_loop_cpg_controller_velocity
+} // namespace simple_closed_loop_cpg_controller_velocity
 
 #endif
