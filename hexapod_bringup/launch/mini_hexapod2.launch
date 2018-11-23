@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<launch>
+
+
+  <!-- Start a controller for our dummy robot -->
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="/dynamixel_controllers/joint_state_controller
+    /dynamixel_controllers/leg_0_controller
+    /dynamixel_controllers/leg_1_controller
+    /dynamixel_controllers/leg_2_controller
+    /dynamixel_controllers/leg_3_controller
+    /dynamixel_controllers/leg_4_controller
+    /dynamixel_controllers/leg_5_controller" />
+    <!-- /dynamixel_controllers/leg_4_controller -->
+</launch>
