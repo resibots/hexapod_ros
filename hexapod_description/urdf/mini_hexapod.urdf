@@ -26,9 +26,9 @@
   <!-- TORSO -->
   <link name="base_link">
     <visual>
-      <origin rpy="1.57079632679 0 1.57079632679" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/chassis.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.24 0.119 0.04"/>
       </geometry>
       <material name="Yellow"/>
     </visual>
@@ -71,9 +71,9 @@
   </joint>
   <link name="leg_2_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -101,9 +101,9 @@
   </joint>
   <link name="leg_2_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -131,9 +131,9 @@
   </joint>
   <link name="leg_2_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -206,9 +206,9 @@
   </joint>
   <link name="leg_3_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -236,9 +236,9 @@
   </joint>
   <link name="leg_3_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -266,9 +266,9 @@
   </joint>
   <link name="leg_3_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -341,9 +341,9 @@
   </joint>
   <link name="leg_0_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -371,9 +371,9 @@
   </joint>
   <link name="leg_0_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -401,9 +401,9 @@
   </joint>
   <link name="leg_0_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -476,9 +476,9 @@
   </joint>
   <link name="leg_5_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -506,9 +506,9 @@
   </joint>
   <link name="leg_5_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -536,9 +536,9 @@
   </joint>
   <link name="leg_5_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -611,9 +611,9 @@
   </joint>
   <link name="leg_1_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -641,9 +641,9 @@
   </joint>
   <link name="leg_1_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -671,9 +671,9 @@
   </joint>
   <link name="leg_1_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -746,9 +746,9 @@
   </joint>
   <link name="leg_4_1">
     <visual>
-      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.03 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/first_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.044 0.044 0.06"/>
       </geometry>
       <material name="Red"/>
     </visual>
@@ -776,9 +776,9 @@
   </joint>
   <link name="leg_4_2">
     <visual>
-      <origin rpy="0 -1.57079632679 0" xyz="0 0 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0 0.04175 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/second_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.038 0.038 0.0835"/>
       </geometry>
       <material name="Blue"/>
     </visual>
@@ -806,9 +806,9 @@
   </joint>
   <link name="leg_4_3">
     <visual>
-      <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0.0325 0"/>
       <geometry>
-        <mesh filename="package://hexapod_description/stl/third_link_v5.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.054 0.065 0.054"/>
       </geometry>
       <material name="Red"/>
     </visual>

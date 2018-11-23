@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- MATERIALS -->
+  <material name="Blue">
+    <color rgba="0 0 1 1"/>
+    </material>
+
+    <material name="Red">
+      <color rgba="1 0 0 1"/>
+    </material>
+
+    <material name="Green">
+        <color rgba="0 1 0 1"/>
+  </material>
+
+  <material name="Yellow">
+    <color rgba="0.8 0.9 0.3 1"/>
+  </material>
+
+  <material name="LightGrey">
+    <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
+
+  <!-- END OF MATERIALS -->
+
+  <!-- XACRO MACROS FOR VISUALS AND COLLISIONS -->
+
+  <xacro:macro name="visuals_collisions_body" params="">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="Yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${body_length} ${body_width} ${body_height}"/>
+            </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${leg1_width*2.5} ${body_width_extra} ${body_height}"/>
+            </geometry>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="visuals_head" params="">
+    <visual>
+      <origin xyz="${body_length/2.} 0 0" rpy="0 0 ${PI/4}"/>
+      <geometry>
+        <box size="${body_width/3.} ${body_width/3.} ${body_height*0.6}"/>
+      </geometry>
+      <material name="Yellow"/>
+    </visual>
+  </xacro:macro>
+
+  <xacro:macro name="visuals_collisions_leg_1">
+    <visual>
+      <origin xyz="0 ${leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg1_width} ${leg1_width} ${leg1_length}"/>
+        </geometry>
+      <material name="Red"/>
+    </visual>
+    <collision>
+      <origin xyz="0 ${leg1_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg1_width} ${leg1_width} ${leg1_length}"/>
+        </geometry>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="visuals_collisions_leg_2">
+    <visual>
+      <origin xyz="0 ${leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
+        </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 ${leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+        <geometry>
+          <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
+        </geometry>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="visuals_collisions_leg_3">
+    <visual>
+      <origin xyz="0 ${leg3_length/2} 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${leg3_width} ${leg3_length} ${leg3_width}"/>
+        </geometry>
+      <material name="Red"/>
+    </visual>
+    <collision>
+      <origin xyz="0 ${leg3_length/2} 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${leg3_width} ${leg3_length} ${leg3_width}"/>
+        </geometry>
+      <material name="Red"/>
+    </collision>
+    <collision>
+      <origin xyz="0 ${leg3_length-leg3_width/2} ${-(leg3_width+leg3_height-leg3_tip_radius)/2}"
+        rpy="0 0 0"/>
+        <geometry>
+          <box size="${leg3_width} ${leg3_width} ${leg3_height-leg3_tip_radius}"/>
+        </geometry>
+      <material name="Red"/>
+    </collision>
+    <collision>
+      <origin xyz="0 ${leg3_length-leg3_width/2} -${leg3_height}"
+        rpy="${PI_2} 0 0"/>
+            <geometry>
+                <sphere radius="${leg3_tip_radius}"/>
+            </geometry>
+      <material name="Red"/>
+    </collision>
+  </xacro:macro>
+  <!-- END OF XACRO MACROS -->
+
+</robot>
