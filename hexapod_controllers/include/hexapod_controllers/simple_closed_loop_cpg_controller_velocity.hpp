@@ -205,6 +205,7 @@ namespace simple_closed_loop_cpg_controller_velocity {
         std::vector<float> error;
         std::vector<float> error_prev;
         std::vector<float> error_derivated;
+        std::vector<float> error_integrated;
 
     private:
         SafetyConstraint _constraint;
@@ -313,6 +314,7 @@ namespace simple_closed_loop_cpg_controller_velocity {
         n_joints = joint_names.size();
         error.resize(n_joints, 0.0);
         error_derivated.resize(n_joints, 0.0);
+        error_integrated.resize(n_joints, 0.0);
         error_prev.resize(n_joints, 0.0);
 
         if (n_joints == 0) {
@@ -481,8 +483,15 @@ namespace simple_closed_loop_cpg_controller_velocity {
                 if (integration_has_diverged == false) {
                     error[i] = (joints[i]->getPosition() - sign * Xcommand[_leg_map_to_paper[i]]);
                     error_derivated[i] = (error[i] - error_prev[i]) / 0.001;
+                    error_integrated[i] += error[i];
+
+                    // joints[i]->setCommand(-error[i] - 0.01 * error_derivated[i] - 0.01 * error_integrated[i]);
+
                     joints[i]->setCommand(-error[i] - 0.01 * error_derivated[i]);
-                    std::cout << "error_derivated[i] : " << error_derivated[i] << std::endl;
+
+                    // joints[i]->setCommand(-6 * error[i] + sign * XYdot[_leg_map_to_paper[i]].first);
+                    std::cout
+                        << "error_integrated[i] : " << error_integrated[i] << std::endl;
                     // joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
                     //
                     // joints[6 + i]->setCommand(0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
@@ -498,11 +507,19 @@ namespace simple_closed_loop_cpg_controller_velocity {
                     // std::cout << "yeah";
                     error[6 + i] = (joints[6 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
                     error_derivated[6 + i] = (error[6 + i] - error_prev[6 + i]) / 0.001;
-                    joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i]); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+                    error_integrated[6 + i] += error[6 + i];
+                    // joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i] - 0.01 * error_integrated[6 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+                    // joints[6 + i]->setCommand(-6 * error[6 + i] + XYdot[_leg_map_to_paper[i]].second);
+                    joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
 
-                    error[12 + i] = (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
+                    error[12 + i]
+                        = (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
                     error_derivated[12 + i] = (error[12 + i] - error_prev[12 + i]) / 0.001;
-                    joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i]); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+                    error_integrated[12 + i] += error[12 + i];
+                    // joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i] - 0.01 * error_integrated[12 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+                    // joints[12 + i]->setCommand(-6 * error[12 + i] + XYdot[_leg_map_to_paper[i]].second);
+                    joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
+
                     // 0.3210982387683568
                     // joints[12 + i]->setCommand(-0.025 * _kroll[i] * rpy.y);
                     // joints[12 + i]->setCommand(1 * _kpitch[i] * rpy.x - 1 * _kroll[i] * rpy.y);

@@ -118,8 +118,8 @@ namespace cpg {
     //     std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
     //     ) // 10 ou 100
 
-    CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.3,
-        float b = 0.6, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
+    CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.2,
+        float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
         std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.01, 0.0, 0.0, 0.01, 0.01, 0},
         std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
         ) // 1
