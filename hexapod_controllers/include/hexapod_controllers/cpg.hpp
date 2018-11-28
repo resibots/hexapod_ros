@@ -25,7 +25,7 @@ namespace cpg {
     public:
         CPG(int legs_number, float w, float gammacpg, float lambdaa, float a, float b, int d,
             float euler_dt, float rk_dt, std::vector<std::vector<float>> K, std::vector<float> cx0,
-            std::vector<float> cy0);
+            std::vector<float> cy0, float kp, float kd, std::vector<float> kpitch, std::vector<float> kroll);
         /**
    * \brief compute the derivative of X and Y, the joints angles. It uses Eq 4 of the paper.
    * \param std::vector<float> X a vector of size legs_number containing the x joints angle (in the
@@ -58,6 +58,9 @@ namespace cpg {
    * std::pair<float, float> return (x,y)
    */
         std::pair<float, float> RK4(float xprev, float yprev, std::pair<float, float> xydot);
+
+        std::vector<float> computeErrors(float roll, float pitch, std::vector<float> joints);
+        std::pair<std::vector<float>, std::vector<float>> computeCPGcmd();
 
         std::vector<float> get_cx()
         {
@@ -110,6 +113,21 @@ namespace cpg {
         /*!   center of cpgg limit cycle*/
         std::vector<float> cy0_;
         // std::vector<float> cy0 = {0, 0, 0, 0, 0, 0};
+        float safety_pos_thresh_;
+        std::vector<float> Xcommand_;
+        std::vector<float> Ycommand_;
+        bool integration_has_diverged_;
+        std::vector<int> sign_;
+        std::vector<float> error_;
+        std::vector<float> error_prev_;
+        std::vector<float> error_derivated_;
+        std::vector<float> error_integrated_;
+        std::vector<int> leg_map_to_paper_;
+        std::vector<float> kpitch_;
+        std::vector<float> kroll_;
+        float loop_rate_;
+        float kp_;
+        float kd_;
     };
 
     // CPG::CPG(int legs_number = 6, float w = 5, float gammacpg = 7, float lambda = 14, float a = 0.2,
@@ -121,8 +139,8 @@ namespace cpg {
     CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.2,
         float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
         std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.01, 0.0, 0.0, 0.01, 0.01, 0},
-        std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
-        ) // 1
+        std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8}, float kp = 1, float kd = 0.0,
+        std::vector<float> kpitch = {1.4, 0, -1.4, -1.4, 0, 1.4}, std::vector<float> kroll = {1.4, 1.4, 1.4, -1.4, -1.4, -1.4}) // 1
 
     // CPG::CPG(int legs_number = 6, float w = 3 * 5, float gammacpg = 3 * 7, float lambda = 3 * 14, float a = 0.2,
     //     float b = 0.5, int d = 4, float euler_dt = 0.001, float rk_dt = 0.001,
@@ -144,6 +162,24 @@ namespace cpg {
         cy_ = cy0;
         cx0_ = cx0;
         cy0_ = cy0;
+
+        kp_ = kp;
+        kd_ = kd;
+
+        safety_pos_thresh_ = 1;
+        Xcommand_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        Ycommand_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        integration_has_diverged_ = false;
+        error_.resize(legs_number * 3, 0.0);
+        error_derivated_.resize(legs_number * 3, 0.0);
+        error_integrated_.resize(legs_number * 3, 0.0);
+        error_prev_.resize(legs_number * 3, 0.0);
+
+        leg_map_to_paper_ = {0, 2, 4, 5, 3, 1};
+        kpitch_ = kpitch;
+        kroll_ = kroll;
+        sign_ = {1, 1, 1, -1, -1, -1};
+        loop_rate_ = 0.001;
     }
 
     /**
@@ -184,7 +220,7 @@ namespace cpg {
                 // std::cout << "K_[i][j] " << K_[i][j] << std::endl;
                 // std::cout << " K_[i][j] * (Y[j] - cy_[j])] " << K_[i][j] * (Y[j] - cy_[j]) << std::endl;
             }
-            std::cout << " w * dHx    = " << w_ * dHx << '\n';
+            // std::cout << " w * dHx    = " << w_ * dHx << '\n';
             // std::cout << "gammacpg_ * (1 - Hc) * dHy   = " << gammacpg_ * (1 - Hc) * dHy << '\n';
             ydot += lambda_ * Kterm;
             // std::cout << "lambda * Kterm    = " << lambda_ * Kterm << '\n';
@@ -293,6 +329,75 @@ namespace cpg {
         float ycurr = yprev + (rk_dt_ / 6) * (k1_y + 2 * k2_y + 2 * k3_y + k4_y);
 
         return std::pair<float, float>(xcurr, ycurr);
+    }
+
+    std::pair<std::vector<float>, std::vector<float>>
+    CPG::computeCPGcmd()
+    {
+
+        for (unsigned int i = 0; i < error_.size(); i++) {
+            error_prev_[i] = error_[i];
+        }
+
+        /*compute X,Y derivatives*/
+        std::vector<std::pair<float, float>> XYdot = CPG::computeXYdot(Xcommand_, Ycommand_);
+
+        for (int i = 0; i < XYdot.size(); i++) {
+            /*Integrate XYdot*/
+            std::pair<float, float> xy = CPG::RK4(Xcommand_[i], Ycommand_[i], XYdot[i]);
+            Xcommand_[i] = xy.first;
+            Ycommand_[i] = xy.second;
+
+            if (xy.first > safety_pos_thresh_) {
+                Xcommand_[i] = safety_pos_thresh_;
+            }
+            if (xy.first < -safety_pos_thresh_) {
+                Xcommand_[i] = -safety_pos_thresh_;
+            }
+            if (xy.second > safety_pos_thresh_) {
+                Ycommand_[i] = safety_pos_thresh_;
+            }
+            if (xy.second < -safety_pos_thresh_) {
+                Ycommand_[i] = -safety_pos_thresh_;
+            }
+            if (std::isnan(xy.first) || std::isnan(xy.second)) {
+                std::cout << "INTEGRATION HAS DIVERGED : reboot the node and use a bigger loop rate"
+                          << std::endl;
+                integration_has_diverged_ = true;
+            }
+        }
+
+        return std::pair<std::vector<float>, std::vector<float>>(Xcommand_, Ycommand_);
+    }
+
+    std::vector<float>
+    CPG::computeErrors(float roll, float pitch, std::vector<float> joints)
+    {
+        std::vector<float> command_final;
+
+        for (unsigned int i = 0; i < legs_number_; i++) {
+            if (integration_has_diverged_ == false) {
+                error_[i] = (joints[i] - sign_[i] * Xcommand_[leg_map_to_paper_[i]]);
+                error_derivated_[i] = (error_[i] - error_prev_[i]) / loop_rate_;
+                error_integrated_[i] += error_[i];
+
+                command_final.push_back(-kp_ * error_[i] - kd_ * error_derivated_[i]);
+
+                error_[6 + i] = (joints[6 + i] - Ycommand_[leg_map_to_paper_[i]]);
+                error_derivated_[6 + i] = (error_[6 + i] - error_prev_[6 + i]) / loop_rate_;
+                error_integrated_[6 + i] += error_[6 + i];
+
+                command_final.push_back(-kp_ * error_[6 + i] - kd_ * error_derivated_[6 + i] + kpitch_[i] * pitch + kroll_[i] * roll);
+
+                error_[12 + i] = (joints[12 + i] - Ycommand_[leg_map_to_paper_[i]]);
+                error_derivated_[12 + i] = (error_[12 + i] - error_prev_[12 + i]) / loop_rate_;
+                error_integrated_[12 + i] += error_[12 + i];
+
+                command_final.push_back(-kp_ * error_[12 + i] - kd_ * error_derivated_[12 + i] + kpitch_[i] * pitch + kroll_[i] * roll);
+            }
+        }
+
+        return command_final;
     }
 
 } // namespace cpg

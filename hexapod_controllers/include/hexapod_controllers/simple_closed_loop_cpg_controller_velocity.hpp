@@ -253,48 +253,7 @@ namespace simple_closed_loop_cpg_controller_velocity {
         end_effectors_transform.resize(NLegs, tf::Transform());
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
-        integrate_delta_thetax = Eigen::Matrix<float, 1, NLegs>::Zero();
-        integrate_delta_thetay = Eigen::Matrix<float, 1, NLegs>::Zero();
-        // Init the IK solver
-        std::string chain_start
-            = "base_link";
-        std::vector<std::string> chain_ends;
-        std::vector<std::string> chain_ends_fk;
-        float timeout = 0.005;
-        float eps = 1e-5;
-        std::string urdf = "robot_description"; // our urdf is loaded in the /robot_description topic
 
-        // Construct the objects doing inverse kinematic computations
-        for (size_t leg = 0; leg < NLegs; ++leg) {
-            chain_ends.push_back("force_sensor_" + std::to_string(leg));
-            chain_ends_fk.push_back("leg_" + std::to_string(leg) + "_3");
-            std::cout << "force_sensor_" + std::to_string(leg) << std::endl;
-            // This constructor parses the URDF loaded in rosparm urdf_param into the
-            // needed KDL structures.
-            _tracik_solvers[leg] = std::make_shared<TRAC_IK::TRAC_IK>(
-                chain_start, chain_ends_fk[leg], urdf, timeout, eps);
-
-            KDL::Chain chain;
-            _tracik_solvers[leg]->getKDLChain(chain);
-            std::cout << "numb seg : " << chain.getNrOfSegments() << " num joints " << chain.getNrOfJoints();
-            for (int i = 0; i < chain.getNrOfSegments(); i++) {
-                std::cout << " seg name " << chain.getSegment(i).getName() << std::endl;
-            }
-            // for (int i = 0; i < chain.getNrOfJoints(); i++) {
-            //     std::cout << " joint name " << chain.getJoint(i).getName() << std::endl;
-            // }
-            _kdl_fk_solvers.push_back(KDL::ChainFkSolverPos_recursive(chain));
-
-            _tracik_solvers[leg] = std::make_shared<TRAC_IK::TRAC_IK>(
-                chain_start, chain_ends[leg], urdf, timeout, eps);
-        }
-
-        // Set rotational bounds to max, so that the kinematic ignores the rotation
-        // part of the target pose
-        _bounds = KDL::Twist::Zero();
-        _bounds.rot.x(std::numeric_limits<float>::max());
-        _bounds.rot.y(std::numeric_limits<float>::max());
-        _bounds.rot.z(std::numeric_limits<float>::max());
         _kp = 3;
 
     } // namespace simple_closed_loop_cpg_controller_velocity
@@ -362,33 +321,6 @@ namespace simple_closed_loop_cpg_controller_velocity {
             quat = tf::Quaternion(imu_quat[0], imu_quat[1], imu_quat[2], imu_quat[3]);
             P = tf::Matrix3x3(quat);
             P.getRPY(rpy.x, rpy.y, rpy.z);
-            std::cout << "PITCH : " << rpy.x << std::endl;
-            //Here we use the TF_EULER_DEFAULT_ZYX convention : the yaw is around z, the pitch is around y and the rooll is around x
-            //Doing so we have a discrapency between the feedback from the imu and the TF_EULER_DEFAULT_ZYX convention
-            //The roll is actually -pitch
-            //The pitch is the roll
-            //We create a new P which will follow the TF_EULER_DEFAULT_ZYX from ros convention
-            tf::Quaternion tmp(rpy.z, rpy.x, -rpy.y);
-            P = tf::Matrix3x3(tmp);
-            //Create R, the rotation that will bring the hexapod body level
-            //We only want to keep the yaw direction from P and bring the roll and pitch to 0
-            R = tf::Matrix3x3(tf::Quaternion(tf::Vector3(0, 0, 1), rpy.z)) * P.transpose();
-            //Other way to create R :
-            // tf::Quaternion tmp0(0, -rpy.x, rpy.y);
-            // R = tf::Matrix3x3(tmp0);
-            // tf::Quaternion tmp0(0, -rpy.x, rpy.y);
-            // R = tf::Matrix3x3(tmp0);
-
-            //Uncomment to debug imu conventions
-            //tf::Transform transformimu(P, tf::Vector3(0.0, 0.0, 0.0));
-            //br.sendTransform(tf::StampedTransform(transformimu, ros::Time::now(), "base_link", "imu"));
-
-            for (unsigned int i = 0; i < 3; i++) {
-                for (unsigned int j = 0; j < 3; j++) {
-                    _P_eigen(i, j) = P[i].m_floats[j];
-                    _R_eigen(i, j) = R[i].m_floats[j];
-                }
-            }
         }
 
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
@@ -398,132 +330,27 @@ namespace simple_closed_loop_cpg_controller_velocity {
         //Then carry on the cpg control
         else {
 
-            /* Read the position values from the servos*/
-            int sign = 1;
-            std::vector<float> cy = cpg_.get_cy();
-            std::vector<float> distances;
-            for (unsigned int i = 0; i < NLegs; i++) {
-                sign = (i < 3) ? 1 : -1;
-                X[_leg_map_to_paper[i]] = sign * joints[i]->getPosition();
-                Y[_leg_map_to_paper[i]] = joints[6 + i]->getPosition();
-
-                float x = end_effectors_transform[i].getOrigin().m_floats[0]; //x position of the tip of the first leg in the robot body frame
-                float y = end_effectors_transform[i].getOrigin().m_floats[1]; //y position of the tip of the first leg in the robot body frame
-                float z = end_effectors_transform[i].getOrigin().m_floats[2]; //z position of the tip of the first leg in the robot body frame
-                auto qef = end_effectors_transform[i].getRotation();
-                auto Pqef = tf::Matrix3x3(qef);
-                Pqef.getRPY(rpy_tmp.x, rpy_tmp.y, rpy_tmp.z);
-                float d = x * x + z * z + y * y;
-                distances.push_back(d);
-                // std::cout << " x " << x << " y " << y << " z " << z << std::endl;
-                // std::cout << " r " << rpy_tmp.x << " p " << rpy_tmp.y << " y " << rpy_tmp.z << std::endl;
-                std::cout << " p " << rpy_tmp.y << std::endl;
-                // std::cout << "distances " << d << std::endl;
-                // float alpha2 =
-                //cy[_leg_map_to_paper[i]] += 0.0025 * _kpitch[i] * rpy.x - 0.0025 * _kroll[i] * rpy.y - 0.001 * cy[_leg_map_to_paper[i]];
-                //std::cout << 0.025 * _kpitch[i] * rpy.x - 0.025 * _kroll[i] * rpy.y << std::endl;
-                //cpg_.set_cy(cy);
+            /* Read the position values from the servos not used here*/
+            std::vector<float> joint_position;
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joint_position.push_back(joints[i]->getPosition());
             }
 
-            int longt = 0;
+            /*compute CPG cmd*/
+            cpg_.computeCPGcmd();
+            std::vector<float> cmd = cpg_.computeErrors(-rpy.y, rpy.x, joint_position);
 
+            /*send cmd*/
+            int index = 0;
             for (unsigned int i = 0; i < NLegs; i++) {
-                if ((Y[_leg_map_to_paper[i]]) > (cy[_leg_map_to_paper[i]] + 0.3)) {
-                    longt++;
-                }
-            }
-
-            /*compute X,Y derivatives*/
-            std::vector<std::pair<float, float>> XYdot = cpg_.computeXYdot(Xcommand, Ycommand);
-
-            for (int i = 0; i < XYdot.size(); i++) {
-                /*Integrate XYdot*/
-                std::pair<float, float> xy = cpg_.RK4(Xcommand[i], Ycommand[i], XYdot[i]);
-                Xcommand[i] = xy.first;
-                Ycommand[i] = xy.second;
-                // X[i] = Xcommand[i];
-                // Y[i] = Ycommand[i];
-                // std::cout << "x " << i << " " << xy.first << std::endl;
-                // std::cout << xy.second << std::endl;
-                /*Check if integration hasn't diverged*/
-                if (xy.first > 1) {
-                    Xcommand[i] = 1;
-                }
-                if (xy.first < -1) {
-                    Xcommand[i] = -1;
-                }
-                if (xy.second > 1) {
-                    Ycommand[i] = 1;
-                }
-                if (xy.second < -1) {
-                    Ycommand[i] = -1;
-                }
-                if (std::isnan(xy.first) || std::isnan(xy.second)) {
-                    std::cout << "INTEGRATION HAS DIVERGED : reboot the node and use a bigger loop rate"
-                              << std::endl;
-                    integration_has_diverged = true;
-                }
-            }
-
-            for (unsigned int i = 0; i < NLegs; i++) {
-                sign = (i < 3) ? 1 : -1;
-
-                // if (cy[_leg_map_to_paper[i]] > (Y[_leg_map_to_paper[i]] + e) && (longt == 3)) {
-                //     std::cout << "GoTo level position\n";
-                //     joints[i]->setCommand(sign * 1 * XYdot[_leg_map_to_paper[i]].first);
-                //     joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second + _kpitch[i] * rpy.x);
-                //     joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second + _kpitch[i] * rpy.x);
-                // }
-
-                // joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
-                // joints[6 + i]->setCommand(_kpitch[i] * rpy.x - _kroll[i] * rpy.y);
-                // joints[12 + i]->setCommand(_kpitch[i] * rpy.x - _kroll[i] * rpy.y);
-                // joints[6 + i]->setCommand(-_kroll[i] * rpy.y);
-                // joints[12 + i]->setCommand(-_kroll[i] * rpy.y);
-                if (integration_has_diverged == false) {
-                    error[i] = (joints[i]->getPosition() - sign * Xcommand[_leg_map_to_paper[i]]);
-                    error_derivated[i] = (error[i] - error_prev[i]) / 0.001;
-                    error_integrated[i] += error[i];
-
-                    // joints[i]->setCommand(-error[i] - 0.01 * error_derivated[i] - 0.01 * error_integrated[i]);
-
-                    joints[i]->setCommand(-error[i] - 0.01 * error_derivated[i]);
-
-                    // joints[i]->setCommand(-6 * error[i] + sign * XYdot[_leg_map_to_paper[i]].first);
-                    std::cout
-                        << "error_integrated[i] : " << error_integrated[i] << std::endl;
-                    // joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
-                    //
-                    // joints[6 + i]->setCommand(0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-
-                    // joints[12 + i]->setCommand(0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-
-                    // joints[6 + i]->setCommand(-4 * (joints[6 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]));
-                    // joints[12 + i]->setCommand(-4 * (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]));
-
-                    // joints[i]->setCommand(sign * 1 * XYdot[_leg_map_to_paper[i]].first);
-                    // joints[6 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
-                    // joints[12 + i]->setCommand(1 * XYdot[_leg_map_to_paper[i]].second);
-                    // std::cout << "yeah";
-                    error[6 + i] = (joints[6 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
-                    error_derivated[6 + i] = (error[6 + i] - error_prev[6 + i]) / 0.001;
-                    error_integrated[6 + i] += error[6 + i];
-                    // joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i] - 0.01 * error_integrated[6 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-                    // joints[6 + i]->setCommand(-6 * error[6 + i] + XYdot[_leg_map_to_paper[i]].second);
-                    joints[6 + i]->setCommand(-error[6 + i] - 0.01 * error_derivated[6 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-
-                    error[12 + i]
-                        = (joints[12 + i]->getPosition() - Ycommand[_leg_map_to_paper[i]]);
-                    error_derivated[12 + i] = (error[12 + i] - error_prev[12 + i]) / 0.001;
-                    error_integrated[12 + i] += error[12 + i];
-                    // joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i] - 0.01 * error_integrated[12 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-                    // joints[12 + i]->setCommand(-6 * error[12 + i] + XYdot[_leg_map_to_paper[i]].second);
-                    joints[12 + i]->setCommand(-error[12 + i] - 0.01 * error_derivated[12 + i] + 0.35 * _kpitch[i] * rpy.x - 0.35 * _kroll[i] * rpy.y); // + 5 * rpy_tmp.y); // + 0.25 * _kpitch[i] * rpy.x - 0.25 * _kroll[i] * rpy.y);
-
-                    // 0.3210982387683568
-                    // joints[12 + i]->setCommand(-0.025 * _kroll[i] * rpy.y);
-                    // joints[12 + i]->setCommand(1 * _kpitch[i] * rpy.x - 1 * _kroll[i] * rpy.y);
-                }
+                // XcommandSmoothed[_leg_map_to_paper[i]] = (sign * XYdot[_leg_map_to_paper[i]].first + XcommandSmoothed[_leg_map_to_paper[i]]) / 2;
+                // YcommandSmoothed[_leg_map_to_paper[i]] = (XYdot[_leg_map_to_paper[i]].second + YcommandSmoothed[_leg_map_to_paper[i]]) / 2;
+                joints[i]->setCommand(cmd[index]);
+                index++;
+                joints[6 + i]->setCommand(cmd[index]);
+                index++;
+                joints[12 + i]->setCommand(cmd[index]);
+                index++;
             }
         }
         _constraint.enforce(period);
