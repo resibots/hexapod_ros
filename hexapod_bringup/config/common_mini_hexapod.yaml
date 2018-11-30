@@ -1,7 +1,7 @@
 dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
-    publish_rate: 50
+    publish_rate: 100
 
   leg_0_controller:
     type: position_controllers/JointTrajectoryController
@@ -46,11 +46,11 @@ dynamixel_controllers:
       - leg_5_2_3
 
 dynamixel_control:
-  loop_frequency: 50
+  loop_frequency: 100
   cycle_time_error_threshold: 0.1
-  baudrate: 1000000 # in bauds
-  read_timeout: 1 # in seconds
-  scan_timeout: 4 # in seconds
+  baudrate: 115200 # in bauds
+  read_timeout: 0.1 # in seconds
+  scan_timeout: 1 # in seconds
 
   # correspondance between hardware IDs of the actuators and their names in ROS
   default_command_interface: position
