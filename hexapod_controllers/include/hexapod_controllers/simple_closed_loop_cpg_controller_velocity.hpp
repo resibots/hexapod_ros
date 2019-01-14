@@ -90,6 +90,8 @@ namespace simple_closed_loop_cpg_controller_velocity {
      *  Guillaume Sartoretti, Samuel Shaw, Katie Lam, Naixin Fan, Matthew J. Travers, Howie Choset:
      *  Central Pattern Generator With Inertial Feedback for Stable Locomotion and Climbing in Unstructured Terrain. ICRA 2018: 1-5$
      *
+     * This controller uses on board IMU (Xsense)
+     *
      * \tparam T class implementing the safety constraints
      *
      * \section ROS interface
