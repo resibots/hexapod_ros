@@ -46,11 +46,11 @@ dynamixel_controllers:
       - leg_5_2_3
 
 dynamixel_control:
-  loop_frequency: 100
+  loop_frequency: 1000
   cycle_time_error_threshold: 0.1
   baudrate: 115200 # in bauds
-  read_timeout: 0.1 # in seconds
-  scan_timeout: 1 # in seconds
+  read_timeout: 0.02 # in seconds
+  scan_timeout: 0.05 # in seconds
 
   # correspondance between hardware IDs of the actuators and their names in ROS
   default_command_interface: position
@@ -80,14 +80,14 @@ dynamixel_control:
     leg_3_2_3:
       id: 18
     body_leg_4:
-     id: 13
+      id: 13
     leg_4_1_2:
-     id: 14
+      id: 14
     leg_4_2_3:
-     id: 15
+      id: 15
     body_leg_5:
-      id: 10
+     id: 10
     leg_5_1_2:
-      id: 11
+     id: 11
     leg_5_2_3:
-      id: 12
+     id: 12
