@@ -217,7 +217,6 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     for (size_t i = 0; i < 6; i++) {
         _traj_msgs[i].points.clear();
     }
-
     // Calculate points of trajectory
     for (double t = 0.0; t <= duration; t += step) {
         std::vector<double> pos = controller.pos(t);

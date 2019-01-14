@@ -49,7 +49,7 @@ dynamixel_control:
   loop_frequency: 100
   cycle_time_error_threshold: 0.1
   baudrate: 115200 # in bauds
-  read_timeout: 0.1 # in seconds
+  read_timeout: 0.05 # in seconds
   scan_timeout: 1 # in seconds
 
   # correspondance between hardware IDs of the actuators and their names in ROS
