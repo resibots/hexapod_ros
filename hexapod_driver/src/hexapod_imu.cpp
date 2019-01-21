@@ -1,6 +1,6 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <hexapod_controller/hexapod_controller_simple.hpp>
-#include <hexapod_driver/hexapod.hpp>
+#include <hexapod_driver/hexapod_imu.hpp>
 #include <std_srvs/Empty.h>
 #include <tf/transform_listener.h>
 #include <thread>
@@ -67,9 +67,40 @@ void Hexapod::init()
         _reset_filter_pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
             "/set_pose", 1000);
     }
+    //_mode_pub = _nh.advertise<std_msg::Float64>("/mode", 1000);
+    //_time_pub = _nh.advertise<std_msg::Float64>("/time", 1000);
+    //_ctrl_pub = _nh.advertise<std_msg::Float64MultiArray>("/ctrl", 1000);
+    param_name = "mode";
+    if (!nh.getParam(param_name, _mode)) {
+        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+        return false;
+    }
+    param_name = "duration";
+    if (!nh.getParam(param_name, _duration)) {
+        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+        return false;
+    }
+    param_name = "isRunning";
+    if (!nh.getParam(param_name, _isRunning)) {
+        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+        return false;
+    }
 
+    param_name = "ctrl";
+    if (!nh.getParam(param_name, _ctrl)) {
+        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+        return false;
+    }
+
+    param_name = "isRunning";
+    if (!nh.getParam(param_name, _isRunning)) {
+        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+        return false;
+    }
+    _mode_running = nh.subscribe<std_msg::Bool>("/simu_running", 1, &HexapodIMU::mode_running_CB, this);
     // Reset
     ROS_INFO_STREAM("Reset...");
+
     reset();
 
     // Get odom transformation
@@ -77,9 +108,20 @@ void Hexapod::init()
         reset_odom();
     }
 }
-
+void Hexapod::wait()
+{
+    while (_isRunning == 1) {
+        nh.getParam("isRunning", _isRunning);
+    }
+}
 void Hexapod::relax()
 {
+    wait();
+    _mode = relax;
+    _nh.setParam("mode", _mode);
+    _duration = 2.0;
+    _nh.setParam("duration", _duration);
+
     double duration = 2.0;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -110,6 +152,12 @@ void Hexapod::relax()
 
 void Hexapod::reset()
 {
+    wait();
+    _mode = reset;
+    _nh.setParam("mode", _mode);
+    _duration = 0.1;
+    _nh.setParam("duration", _duration);
+
     double duration = 0.1;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -178,6 +226,12 @@ void Hexapod::reset()
 
 void Hexapod::zero()
 {
+    wait();
+    _mode = zero;
+    _nh.setParam("mode", _mode);
+    _duration = 0.1;
+    _nh.setParam("duration", _duration);
+
     double duration = 0.1;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -202,6 +256,15 @@ void Hexapod::zero()
 
 void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
 {
+    wait();
+    _mode = move;
+    _nh.setParam("mode", _mode);
+    _duration = duration;
+    _nh.setParam("duration", _duration);
+    _ctrl = ctrl;
+    _nh.setParam("controle", _ctrl);
+
+    while (_mode_running == true) {};
     // Start from zero
     zero();
 

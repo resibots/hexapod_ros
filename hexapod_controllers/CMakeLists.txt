@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hexapod_controllers)
-
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Load catkin and all dependencies required for this package
@@ -55,7 +55,17 @@ LIBRARIES trac_ik)
 
 
 
-include_directories(include  ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS}  ${TinyXML_INCLUDE_DIRS} ${TinyXML2_INCLUDE_DIRS})
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${orocos_kdl_INCLUDE_DIRS}
+  ${TinyXML_INCLUDE_DIRS}
+  ${TinyXML2_INCLUDE_DIRS}
+  ${RESIBOTS_INCLUDE_DIR}
+  /home/pdesreum/Documents/include/
+)
 
 # add_library(kdl_parser src/kdl_parser.cpp)
 # target_link_libraries(kdl_parser ${TinyXML_LIBRARIES} ${TinyXML2_LIBRARIES} ${orocos_kdl_LIBRARIES} ${catkin_LIBRARIES})

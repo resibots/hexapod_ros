@@ -29,6 +29,15 @@
       This controller sends a CPG in closed loop.Velocity command
     </description>
   </class>
+
+  <class name="hexapod_controllers/HexapodSClControllerV"
+      type="simple_closed_loop_controller_velocity::HexapodSClControllerV"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller sends a sinus / square wave  in closed loop with IMU.Velocity command
+    </description>
+  </class>
+
   <class name="hexapod_controllers/HexapodSimplePositionController"
        type="simple_position_controller::HexapodSimplePositionController"
         base_class_type="controller_interface::ControllerBase">

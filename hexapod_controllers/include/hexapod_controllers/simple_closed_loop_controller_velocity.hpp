@@ -37,10 +37,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef SIMPLE_CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
-#define SIMPLE_CLOSED_LOOP_CPG_CONTROLLER_VELOCITY_H
+#ifndef SIMPLE_CLOSED_LOOP_CONTROLLER_VELOCITY_H
+#define SIMPLE_CLOSED_LOOP_CONTROLLER_VELOCITY_H
 #define TF_EULER_DEFAULT_ZYX
-#include "cpg.hpp"
 #include <boost/date_time.hpp>
 #include <chrono>
 #include <cmath>
@@ -48,6 +47,7 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <hardware_interface/joint_command_interface.h>
+#include <hexapod_controller/hexapod_controller_imu.hpp>
 #include <iostream>
 #include <kdl/chainiksolverpos_nr_jl.hpp>
 #include <math.h>
@@ -76,7 +76,7 @@
 #include <kdl/velocityprofile_trap.hpp>
 #include <tf/transform_broadcaster.h>
 
-namespace simple_closed_loop_cpg_controller_velocity {
+namespace simple_closed_loop_controller_velocity {
 
     struct NoSafetyConstraints;
 
@@ -103,10 +103,10 @@ namespace simple_closed_loop_cpg_controller_velocity {
      * - \b command (std_msgs::Float64MultiArray) : The joint commands to apply.
      */
     template <class SafetyConstraint = NoSafetyConstraints, int NLegs = 6>
-    class SClCpgControllerV : public controller_interface::Controller<hardware_interface::VelocityJointInterface> {
+    class SClControllerV : public controller_interface::Controller<hardware_interface::VelocityJointInterface> {
     public:
-        SClCpgControllerV();
-        ~SClCpgControllerV(){};
+        SClControllerV();
+        ~SClControllerV(){};
 
         /**
          * \brief Tries to recover n_joints JointHandles
@@ -146,8 +146,23 @@ namespace simple_closed_loop_cpg_controller_velocity {
         bool has_init;
         /*! e is the error accepted at init */
         float e;
+
+        int _mode;
+        float _duration;
+        int _isRunning;
+        bool _isFinish;
+        bool _isAvailable;
+        bool _firstTraj;
+        bool _secondTraj;
+        double _time_count;
+        double _current_time;
+        double _loop_frequency;
+        double _t;
+        std::vector<double> _ctrl;
+
         /*!  cpg object go to cpg.hpp for more details*/
         cpg::CPG cpg_;
+        //  hexapod_controller::HexapodControllerImu controller(ctrl, std::vector<int>());
 
         /*!    angles of the soulder joints in the axial plane at init*/
         std::vector<float> X, Xprev, Xcommand, XcommandSmoothed;
@@ -208,14 +223,20 @@ namespace simple_closed_loop_cpg_controller_velocity {
         std::vector<float> error_prev;
         std::vector<float> error_derivated;
         std::vector<float> error_integrated;
+        std::string param_name;
 
     private:
         SafetyConstraint _constraint;
-
+        hexapod_controller::HexapodControllerImu _controller;
         /**
          * \brief Put the servos at the position 0 at init
          */
         void initJointPosition();
+        void zero(float duration);
+        void reset(float duration);
+        void move(float duration, std::vector<double> ctrl);
+        void relax(float duration);
+
         /*!  Subscriber to recover imu data*/
         ros::Subscriber _sub_imu;
         /*!  Subscriber to recover tf data*/
@@ -236,7 +257,7 @@ namespace simple_closed_loop_cpg_controller_velocity {
      * \brief Constructor
      */
     template <class SafetyConstraint, int NLegs>
-    SClCpgControllerV<SafetyConstraint, NLegs>::SClCpgControllerV()
+    SClControllerV<SafetyConstraint, NLegs>::SClControllerV()
     {
         e = 0.05;
         has_init = false;
@@ -258,19 +279,29 @@ namespace simple_closed_loop_cpg_controller_velocity {
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
 
-        _kp = 3;
+        _kp = 1;
 
+        _mode = -1;
+        _duration = 0;
+        _isRunning = false;
+        _isFinish = false;
+        _firstTraj = true;
+        _secondTraj = false;
+        _time_count = 0;
+        _current_time = 0;
+        _loop_frequency = 1000;
+        _t = 0;
     } // namespace simple_closed_loop_cpg_controller_velocity
 
     /**
      * \brief Tries to recover n_joints JointHandles
      */
     template <class SafetyConstraint, int NLegs>
-    bool SClCpgControllerV<SafetyConstraint, NLegs>::init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh)
+    bool SClControllerV<SafetyConstraint, NLegs>::init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle& nh)
     {
         _nh = nh;
         // List of controlled joints
-        std::string param_name = "joints";
+        param_name = "joints";
         if (!nh.getParam(param_name, joint_names)) {
             ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
             return false;
@@ -297,15 +328,38 @@ namespace simple_closed_loop_cpg_controller_velocity {
                 return false;
             }
         }
+
+        param_name = "mode";
+        if (!nh.getParam(param_name, _mode)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+            return false;
+        }
+        param_name = "duration";
+        if (!nh.getParam(param_name, _duration)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+            return false;
+        }
+        param_name = "isRunning";
+        if (!nh.getParam(param_name, _isRunning)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+            return false;
+        }
+
+        param_name = "ctrl";
+        if (!nh.getParam(param_name, _ctrl)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
+            return false;
+        }
+
         // Safety Constraint
         if (!_constraint.init(joints, nh)) {
             ROS_ERROR_STREAM("Initialisation of the safety contraint failed");
             return false;
         }
         // ros subscriber to recover imu data
-        _sub_imu = nh.subscribe<sensor_msgs::Imu>("/imu/data", 1, &SClCpgControllerV<SafetyConstraint, NLegs>::imuCB, this);
+        _sub_imu = nh.subscribe<sensor_msgs::Imu>("/imu/data", 1, &SClControllerV<SafetyConstraint, NLegs>::imuCB, this);
         // ros subscriber to recover end effector positions (tip of the legs positions)
-        _sub_tf = nh.subscribe<tf2_msgs::TFMessage>("/tf", 1, &SClCpgControllerV<SafetyConstraint, NLegs>::tfCB, this);
+        _sub_tf = nh.subscribe<tf2_msgs::TFMessage>("/tf", 1, &SClControllerV<SafetyConstraint, NLegs>::tfCB, this);
         return true;
     }
 
@@ -313,8 +367,28 @@ namespace simple_closed_loop_cpg_controller_velocity {
      * \brief This function is the control loop itself, called periodically by the controller_manager
      */
     template <class SafetyConstraint, int NLegs>
-    void SClCpgControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
+    void SClControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
     {
+        _current_time = _time_count * _loop_frequency;
+        int prev_mode = _mode;
+        param_name = "mode";
+        if (!_nh.getParam(param_name, _mode)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << _nh.getNamespace() << ").");
+        }
+
+        param_name = "duration";
+        if (!_nh.getParam(param_name, _duration)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << _nh.getNamespace() << ").");
+        }
+        param_name = "isRunning";
+        if (!_nh.getParam(param_name, _isRunning)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << _nh.getNamespace() << ").");
+        }
+
+        param_name = "ctrl";
+        if (!_nh.getParam(param_name, _ctrl)) {
+            ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << _nh.getNamespace() << ").");
+        }
         for (unsigned int i = 0; i < n_joints; i++) {
             error_prev[i] = error[i];
         }
@@ -328,74 +402,272 @@ namespace simple_closed_loop_cpg_controller_velocity {
             P.getRPY(rpy.x, rpy.y, rpy.z);
         }
 
+        if (_mode != prev_mode) {
+            _isRunning = true;
+            _nh.setParam("isRunning", _isRunning);
+            _firstTraj = true;
+        }
+
+        switch (_mode) {
+        case 0:
+            std::cout << "zero " << std::endl;
+            zero(_duration);
+            break;
+        case 1:
+            std::cout << "reset " << std::endl;
+            reset(_duration);
+            break;
+        case 2:
+            std::cout << "move " << std::endl;
+            move(_duration, _ctrl);
+            break;
+        case 3:
+            std::cout << "relax " << std::endl;
+            relax(_duration);
+            break;
+        }
+
         //Set the servo positions to 0 at the beginning because the init and starting function are not called long enough to do that
-        if (has_init == false) {
-            initJointPosition();
-        }
-        //Then carry on the cpg control
-        else {
+        // if (has_init == false) {
+        //     initJointPosition();
+        //     //_controller.set_parameters(_ctrl);
+        // }
+        // //Then carry on the imu control
+        // else {
+        //
+        //     std::vector<float> joint_position;
+        //     std::vector<float> joint_position_map;
+        //
+        //     bool is_broken = false; // We suppose at first that no leg is missing
+        //     int i_broken = 0;
+        //     /* Read the position values from the servos not used here*/
+        //     for (unsigned int i = 0; i < n_joints; i++) {
+        //         joint_position.push_back(joints[i]->getPosition());
+        //     }
+        //     /* remap the position values from the servos */
+        //     for (size_t i = 0; i < 6; i++) {
+        //         is_broken = false;
+        //         //Check if the i th  leg is broker
+        //         for (size_t j : _broken_legs) {
+        //             if (i == j) {
+        //                 is_broken = true;
+        //             }
+        //         }
+        //         if (is_broken == false) {
+        //             //if the leg is not broken fill in the joint_position in the right orger
+        //             joint_position_map[3 * i] = joint_position[3 * i_broken]; //joint_position[i] is the first servo of leg i (shoulder joint)
+        //             joint_position_map[3 * i + 1] = joint_position[3 * i_broken + 6]; //joint_position[i+6] is the second servo of leg i
+        //             joint_position_map[3 * i + 2] = joint_position[3 * i_broken + 12]; //joint_position[i+12] is the third servo of leg i
+        //             i_broken++;
+        //         }
+        //     }
+        //     auto angles = _controller.pos(ros::Time);
+        //     for (size_t i = 0; i < angles.size(); i++)
+        //         _target_positions(i + 6) = ((i % 3 == 1) ? 1.0 : -1.0) * angles[i];
+        //     std::vector<float> cmd;
+        //     /*compute CPG cmd*/
+        //
+        //     cpg_.computeCPGcmd();
+        //     cmd = cpg_.computeErrors(-rpy.y, rpy.x, joint_position);
+        //
+        //     //  cmd.resize(3 * NLegs, 0.0);
+        //
+        //     /*send cmd*/
+        //     int index = 0;
+        //     for (unsigned int i = 0; i < NLegs; i++) {
+        //         // XcommandSmoothed[_leg_map_to_paper[i]] = (sign * XYdot[_leg_map_to_paper[i]].first + XcommandSmoothed[_leg_map_to_paper[i]]) / 2;
+        //         // YcommandSmoothed[_leg_map_to_paper[i]] = (XYdot[_leg_map_to_paper[i]].second + YcommandSmoothed[_leg_map_to_paper[i]]) / 2;
+        //         joints[i]->setCommand(cmd[index]);
+        //         index++;
+        //         joints[6 + i]->setCommand(cmd[index]);
+        //         index++;
+        //         joints[12 + i]->setCommand(cmd[index]);
+        //         index++;
+        //     }
+        // }
+        _time_count++;
 
-            /* Read the position values from the servos not used here*/
-            std::vector<float> joint_position;
-            for (unsigned int i = 0; i < n_joints; i++) {
-                joint_position.push_back(joints[i]->getPosition());
-            }
-            std::vector<float> cmd;
-            /*compute CPG cmd*/
-            float mode = 0;
-            std::string param_name = "/mode";
-            _nh.getParam(param_name, mode);
-            std::cout << mode << std::endl;
-            if (mode == 1) {
-
-                cpg_.computeCPGcmd();
-                cmd = cpg_.computeErrors(-rpy.y, rpy.x, joint_position);
-            }
-
-            else {
-                cmd.resize(3 * NLegs, 0.0);
-            }
-            /*send cmd*/
-            int index = 0;
-            for (unsigned int i = 0; i < NLegs; i++) {
-                // XcommandSmoothed[_leg_map_to_paper[i]] = (sign * XYdot[_leg_map_to_paper[i]].first + XcommandSmoothed[_leg_map_to_paper[i]]) / 2;
-                // YcommandSmoothed[_leg_map_to_paper[i]] = (XYdot[_leg_map_to_paper[i]].second + YcommandSmoothed[_leg_map_to_paper[i]]) / 2;
-                joints[i]->setCommand(cmd[index]);
-                index++;
-                joints[6 + i]->setCommand(cmd[index]);
-                index++;
-                joints[12 + i]->setCommand(cmd[index]);
-                index++;
-            }
-        }
         _constraint.enforce(period);
     } // namespace simple_closed_loop_cpg_controller_velocity
+
+    template <class SafetyConstraint, int NLegs>
+    void SClControllerV<SafetyConstraint, NLegs>::zero(float duration)
+    {
+
+        if (_isRunning == true) {
+            unsigned int count = 0;
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
+                if (std::abs(joints[i]->getPosition()) < e) {
+                    count++; //when the position 0 is reached do count++
+                }
+                if (count == n_joints) {
+                    _isRunning = false;
+                    _nh.setParam("isRunning", _isRunning);
+                }
+            }
+        }
+        else {
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(0);
+            }
+        }
+    }
+
+    template <class SafetyConstraint, int NLegs>
+    void SClControllerV<SafetyConstraint, NLegs>::reset(float duration)
+    {
+        if (_isRunning == true) {
+
+            unsigned int count = 0;
+            if (_firstTraj == true) {
+                for (unsigned int i = 0; i < NLegs; i++) {
+                    joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                    joints[i + 6]->setCommand(_kp * (M_PI_2 - joints[i + 6]->getPosition()));
+                    joints[i + 12]->setCommand(_kp * ((256 * M_PI / 2048.0) - joints[i + 12]->getPosition()));
+                    for (unsigned int j = 0; j < NLegs; j++) {
+                        if ((std::abs(joints[j]->getPosition()) < e) && (std::abs(M_PI_2 - joints[j + 6]->getPosition()) < e) && (std::abs((256 * M_PI / 2048.0) - joints[j + 12]->getPosition()) < e)) {
+                            count++; //when the position 0 is reached do count++
+                            std::cout << count << std::endl;
+                        }
+                    }
+                    if (count == NLegs) {
+                        _firstTraj = false;
+                        _secondTraj = true;
+                    }
+                }
+            }
+            count = 0;
+            if (_secondTraj == true) {
+                for (unsigned int i = 0; i < NLegs; i++) {
+                    joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                    joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                    joints[i + 12]->setCommand(_kp * ((256 * M_PI / 2048.0) - joints[i + 12]->getPosition()));
+                    for (unsigned int j = 0; j < NLegs; j++) {
+                        if ((std::abs(joints[j]->getPosition()) < e) && (std::abs(M_PI_2 - joints[j + 6]->getPosition()) < e) && (std::abs((256 * M_PI / 2048.0) - joints[j + 12]->getPosition()) < e)) {
+                            count++; //when the position 0 is reached do count++
+                        }
+                    }
+                    if (count == n_joints) {
+                        _secondTraj = false;
+                        _isRunning = false;
+                        _nh.setParam("isRunning", _isRunning);
+                    }
+                }
+            }
+        }
+        else {
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(0);
+            }
+        }
+    }
+
+    template <class SafetyConstraint, int NLegs>
+    void SClControllerV<SafetyConstraint, NLegs>::move(float duration, std::vector<double> ctrl)
+    {
+        if (_isRunning == true) {
+            _t += 0.1;
+            ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+            unsigned int count = 0;
+            hexapod_controller::HexapodControllerImu _controller(ctrl, std::vector<int>());
+            std::vector<double> pos = _controller.pos(_t);
+
+            for (unsigned int i = 0; i < NLegs; i++) {
+                joints[i]->setCommand(_kp * (pos[3 * i] - joints[i]->getPosition()));
+                joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+                joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+
+                for (unsigned int j = 0; j < NLegs; j++) {
+                    if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                        count++; //when the position 0 is reached do count++
+                        std::cout << count << std::endl;
+                    }
+                }
+            }
+            if (_t > 5) {
+                _isRunning = false;
+                _nh.setParam("isRunning", _isRunning);
+                _t = 0;
+            }
+        }
+
+    } // namespace simple_closed_loop_controller_velocity
+
+    template <class SafetyConstraint, int NLegs>
+    void SClControllerV<SafetyConstraint, NLegs>::relax(float duration)
+    {
+        duration = 2;
+        if (_t > duration) {
+            _t = duration;
+        }
+        if (_isRunning == true) {
+            unsigned int count = 0;
+            double a = (duration - _t) / duration;
+            double b = _t / duration;
+            _t += 0.001;
+            for (unsigned int i = 0; i < NLegs; i++) {
+                joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                joints[i + 6]->setCommand(_kp * ((a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.2)) - joints[i + 6]->getPosition()));
+                joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                for (unsigned int j = 0; j < NLegs; j++) {
+                    if ((std::abs(joints[j]->getPosition()) < e) && (std::abs((a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.2)) - joints[j + 6]->getPosition()) < e) && (std::abs(0 - joints[j + 12]->getPosition()) < e)) {
+                        count++; //when the position 0 is reached do count++
+                        std::cout << count << std::endl;
+                    }
+                }
+                if (count == NLegs) {
+                    _isRunning = false;
+                    _nh.setParam("isRunning", _isRunning);
+                    _t = 0;
+                }
+            }
+        }
+        else {
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(0);
+                _t = 0;
+            }
+        }
+    }
     /**
     * \brief Put the servos at the position 0 at init
     */
     template <class SafetyConstraint, int NLegs>
-    void SClCpgControllerV<SafetyConstraint, NLegs>::initJointPosition()
+    void SClControllerV<SafetyConstraint, NLegs>::initJointPosition()
     {
-        unsigned int count = 0;
-        for (unsigned int i = 0; i < n_joints; i++) {
-            joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
-            if (std::abs(joints[i]->getPosition()) < e) {
-                count++; //when the position 0 is reached do count++
+
+        if (_isRunning == 0) {
+            unsigned int count = 0;
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(-_kp * (joints[i]->getPosition()));
+                if (std::abs(joints[i]->getPosition()) < e) {
+                    count++; //when the position 0 is reached do count++
+                }
+                if (count == n_joints) {
+                    has_init = true;
+                    _isRunning = 1;
+                    for (unsigned int i = 0; i < n_joints; i++) {
+                        joints[i]->setCommand(0);
+                    }
+                    //When every servo is around the 0 position stop the init phase and go on with cpg control
+                }
             }
-            if (count == n_joints) {
-                has_init = true;
-                //When every servo is around the 0 position stop the init phase and go on with cpg control
+        }
+        else {
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(0);
             }
         }
     }
     template <class SafetyConstraint, int NLegs>
-    void SClCpgControllerV<SafetyConstraint, NLegs>::imuCB(const sensor_msgs::ImuConstPtr& msg)
+    void SClControllerV<SafetyConstraint, NLegs>::imuCB(const sensor_msgs::ImuConstPtr& msg)
     {
         imu_buffer.writeFromNonRT({msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w});
     }
 
     template <class SafetyConstraint, int NLegs>
-    void SClCpgControllerV<SafetyConstraint, NLegs>::tfCB(const tf2_msgs::TFMessageConstPtr& msg)
+    void SClControllerV<SafetyConstraint, NLegs>::tfCB(const tf2_msgs::TFMessageConstPtr& msg)
     {
         std::vector<tf::Transform> transformStamped(msg->transforms.size(), tf::Transform());
         for (unsigned int i = 0; i < msg->transforms.size(); i++) {
@@ -418,7 +690,7 @@ namespace simple_closed_loop_cpg_controller_velocity {
           @return status of the computation of each leg; failed if < 0
       **/
     template <class SafetyConstraint, int NLegs>
-    std::array<int, NLegs> SClCpgControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(
+    std::array<int, NLegs> SClControllerV<SafetyConstraint, NLegs>::cartesian_to_joint(
         const std::array<KDL::JntArray, NLegs>& q_init,
         const std::array<KDL::Frame, NLegs>& frame,
         std::array<KDL::JntArray, NLegs>& q_out,
@@ -434,7 +706,6 @@ namespace simple_closed_loop_cpg_controller_velocity {
 
         return status;
     }
-
     /** \cond HIDDEN_SYMBOLS */
     struct NoSafetyConstraints {
         bool init(const std::vector<std::shared_ptr<hardware_interface::JointHandle>>& joints,
@@ -453,6 +724,6 @@ namespace simple_closed_loop_cpg_controller_velocity {
     };
     /** \endcond */
 
-} // namespace simple_closed_loop_cpg_controller_velocity
+} // namespace simple_closed_loop_controller_velocity
 
 #endif

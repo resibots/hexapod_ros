@@ -1,5 +1,5 @@
-#ifndef HEXAPOD_DRIVER_HEXAPOD_HPP
-#define HEXAPOD_DRIVER_HEXAPOD_HPP
+#ifndef HEXAPOD_DRIVER_HEXAPOD_IMU_HPP
+#define HEXAPOD_DRIVER_HEXAPOD_IMU_HPP
 
 #include <actionlib/client/simple_action_client.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
@@ -8,12 +8,10 @@
 
 namespace hexapod_ros {
 
-    class Hexapod {
+    class HexapodIMU {
     public:
-        using trajectory_client = actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction>;
-
-        Hexapod(ros::NodeHandle nh, std::string ns = "/dynamixel_controllers");
-        ~Hexapod();
+        HexapodIMU(ros::NodeHandle nh, std::string ns = "/dynamixel_controllers");
+        ~HexapodIMU();
 
         void init();
 
@@ -49,7 +47,6 @@ namespace hexapod_ros {
         void _pos_update();
         void _send_trajectories(double duration);
         void _send_trajectory(size_t i, double duration);
-
         // ROS node handle
         ros::NodeHandle _nh;
         // Store the values of parameters for this ROS node
@@ -60,8 +57,20 @@ namespace hexapod_ros {
         std::vector<trajectory_msgs::JointTrajectory> _traj_msgs;
         // ROS Publisher for robot_localization Filter
         ros::Publisher _reset_filter_pub;
+
         // TF position
         tf::StampedTransform _pos, _init_pos;
+        float _duration;
+        float _mode;
+        bool _isRunning;
+        std::vector<double> _ctrl;
+        enum _mode {
+            zero,
+            reset,
+            move,
+            relax
+        };
+        mode _mode;
     };
 } // namespace hexapod_ros
 
