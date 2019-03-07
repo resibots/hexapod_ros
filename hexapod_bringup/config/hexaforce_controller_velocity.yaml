@@ -55,11 +55,11 @@ dynamixel_control:
     leg_5_2_3:
       id: 26
       offset: 3.14159265359
-  loop_frequency: 1000
-  cycle_time_error_threshold: 0.1
+  loop_frequency: 100
+  cycle_time_error_threshold: 0.05
   baudrate: 1000000 # in bauds
   read_timeout: 0.01 # in seconds
-  scan_timeout: 0.01 # in seconds
+  scan_timeout: 0.0005 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
   default_command_interface: velocity
 
@@ -87,6 +87,10 @@ dynamixel_controllers:
       - leg_4_2_3
       - leg_5_2_3
   hexapod_controller:
+    mode: -1
+    isRunning: 0
+    duration: 0
+    ctrl: [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
     type: hexapod_controllers/HexapodSClControllerV
     joints:
       - body_leg_0
@@ -107,7 +111,3 @@ dynamixel_controllers:
       - leg_3_2_3
       - leg_4_2_3
       - leg_5_2_3
-    mode: -1
-    isRunning: 0
-    duration: 0
-    ctrl: [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]

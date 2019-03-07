@@ -155,7 +155,8 @@ namespace simple_closed_loop_controller_velocity {
         bool _firstTraj;
         bool _secondTraj;
         double _time_count;
-        double _current_time;
+        ros::Time _current_time;
+        ros::Time _prev_time;
         double _loop_frequency;
         double _t;
         std::vector<double> _ctrl;
@@ -279,7 +280,7 @@ namespace simple_closed_loop_controller_velocity {
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
 
-        _kp = 1;
+        _kp = 2;
 
         _mode = -1;
         _duration = 0;
@@ -288,7 +289,7 @@ namespace simple_closed_loop_controller_velocity {
         _firstTraj = true;
         _secondTraj = false;
         _time_count = 0;
-        _current_time = 0;
+        _current_time = ros::Time::now();
         _loop_frequency = 1000;
         _t = 0;
     } // namespace simple_closed_loop_cpg_controller_velocity
@@ -369,7 +370,10 @@ namespace simple_closed_loop_controller_velocity {
     template <class SafetyConstraint, int NLegs>
     void SClControllerV<SafetyConstraint, NLegs>::update(const ros::Time& /*time*/, const ros::Duration& period)
     {
-        _current_time = _time_count * _loop_frequency;
+        _prev_time = _current_time;
+        _current_time = ros::Time::now();
+        //std::cout << "time : " << _current_time - _prev_time << std::endl;
+        //  _current_time = _time_count * _loop_frequency;
         int prev_mode = _mode;
         param_name = "mode";
         if (!_nh.getParam(param_name, _mode)) {
@@ -407,22 +411,22 @@ namespace simple_closed_loop_controller_velocity {
             _nh.setParam("isRunning", _isRunning);
             _firstTraj = true;
         }
-
+        //  std::cout << _mode << std::endl;
         switch (_mode) {
         case 0:
-            std::cout << "zero " << std::endl;
+            //    std::cout << "zero " << std::endl;
             zero(_duration);
             break;
         case 1:
-            std::cout << "reset " << std::endl;
+            //    std::cout << "reset " << std::endl;
             reset(_duration);
             break;
         case 2:
-            std::cout << "move " << std::endl;
+            //    std::cout << "move " << std::endl;
             move(_duration, _ctrl);
             break;
         case 3:
-            std::cout << "relax " << std::endl;
+            //    std::cout << "relax " << std::endl;
             relax(_duration);
             break;
         }
@@ -528,7 +532,7 @@ namespace simple_closed_loop_controller_velocity {
                     for (unsigned int j = 0; j < NLegs; j++) {
                         if ((std::abs(joints[j]->getPosition()) < e) && (std::abs(M_PI_2 - joints[j + 6]->getPosition()) < e) && (std::abs((256 * M_PI / 2048.0) - joints[j + 12]->getPosition()) < e)) {
                             count++; //when the position 0 is reached do count++
-                            std::cout << count << std::endl;
+                            //  std::cout << count << std::endl;
                         }
                     }
                     if (count == NLegs) {
@@ -566,32 +570,57 @@ namespace simple_closed_loop_controller_velocity {
     template <class SafetyConstraint, int NLegs>
     void SClControllerV<SafetyConstraint, NLegs>::move(float duration, std::vector<double> ctrl)
     {
+
+        _prev_time = _current_time;
+        _current_time = ros::Time::now();
+        //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
         if (_isRunning == true) {
-            _t += 0.1;
-            ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+            //  _t = current_tine
+            _t += 0.05;
+            //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
             unsigned int count = 0;
             hexapod_controller::HexapodControllerImu _controller(ctrl, std::vector<int>());
+            //  _controller.computeErrors(rpy.x,rpy.y);
             std::vector<double> pos = _controller.pos(_t);
+            //  std::cout << "time : " << _t << std::endl;
+            if (_t > duration) {
+                _isRunning = false;
+                _nh.setParam("isRunning", _isRunning);
+                _t = 0;
+                for (unsigned int i = 0; i < NLegs; i++) {
 
+                    joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                    joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                    joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                    for (unsigned int j = 0; j < NLegs; j++) {
+                        if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                            count++; //when the position 0 is reached do count++
+                            //  std::cout << count << std::endl;
+                        }
+                    }
+                }
+            }
             for (unsigned int i = 0; i < NLegs; i++) {
                 joints[i]->setCommand(_kp * (pos[3 * i] - joints[i]->getPosition()));
                 joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
                 joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
-
+                //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
                 for (unsigned int j = 0; j < NLegs; j++) {
                     if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
                         count++; //when the position 0 is reached do count++
-                        std::cout << count << std::endl;
+                        //  std::cout << count << std::endl;
                     }
                 }
             }
-            if (_t > 5) {
-                _isRunning = false;
-                _nh.setParam("isRunning", _isRunning);
-                _t = 0;
+        }
+        else {
+            for (unsigned int i = 0; i < n_joints; i++) {
+                joints[i]->setCommand(0);
             }
         }
-
     } // namespace simple_closed_loop_controller_velocity
 
     template <class SafetyConstraint, int NLegs>
@@ -613,7 +642,7 @@ namespace simple_closed_loop_controller_velocity {
                 for (unsigned int j = 0; j < NLegs; j++) {
                     if ((std::abs(joints[j]->getPosition()) < e) && (std::abs((a * M_PI_4 / 6.0 + b * (M_PI_2 * 1.2)) - joints[j + 6]->getPosition()) < e) && (std::abs(0 - joints[j + 12]->getPosition()) < e)) {
                         count++; //when the position 0 is reached do count++
-                        std::cout << count << std::endl;
+                        //  std::cout << count << std::endl;
                     }
                 }
                 if (count == NLegs) {

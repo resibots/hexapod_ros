@@ -178,7 +178,7 @@ void Hexapod::reset()
 
 void Hexapod::zero()
 {
-    double duration = 0.1;
+    double duration = 0.3;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
         _traj_msgs[i].points.clear();
@@ -209,7 +209,7 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
         reset_odom();
     }
     // time step for trajectory
-    double step = 0.001;
+    double step = 0.03; //0.001
 
     // Initialize controller
     hexapod_controller::HexapodControllerSimple controller(ctrl, std::vector<int>());
@@ -220,31 +220,31 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     }
 
     // Calculate points of trajectory
-    for (double f = 0; f <= 5; f += 0.02) {
+    //for (double f = 0; f <= 5; f += 0.02) {
 
-        for (double t = 0.0; t <= 0.02; t += step) {
-            std::vector<double> pos = controller.pos(t + f);
+    for (double t = 0.0; t <= duration; t += step) {
+        std::vector<double> pos = controller.pos(t);
 
-            for (size_t i = 0; i < 6; i++) {
-                trajectory_msgs::JointTrajectoryPoint point;
-                point.positions.clear();
-
-                // Should update HexapodControllerSimple to output proper angles
-                point.positions.push_back(-pos[i * 3]);
-                point.positions.push_back(pos[i * 3 + 1]);
-                point.positions.push_back(-pos[i * 3 + 2]);
-
-                point.time_from_start = ros::Duration(t);
-
-                _traj_msgs[i].points.push_back(point);
-            }
-        }
-        _send_trajectories(0.02);
         for (size_t i = 0; i < 6; i++) {
-            _traj_msgs[i].points.clear();
+            trajectory_msgs::JointTrajectoryPoint point;
+            point.positions.clear();
+
+            // Should update HexapodControllerSimple to output proper angles
+            point.positions.push_back(-pos[i * 3]);
+            point.positions.push_back(pos[i * 3 + 1]);
+            point.positions.push_back(-pos[i * 3 + 2]);
+
+            point.time_from_start = ros::Duration(t);
+
+            _traj_msgs[i].points.push_back(point);
+            //  }
         }
+        //    _send_trajectories(duration);
+        //    for (size_t i = 0; i < 6; i++) {
+        //        _traj_msgs[i].points.clear();
+        //    }
     }
-    //  _send_trajectories(duration);
+    _send_trajectories(duration);
 
     // Go back to zero
     zero();
@@ -369,7 +369,7 @@ void Hexapod::_send_trajectory(size_t i, double duration)
     control_msgs::FollowJointTrajectoryGoal goal;
     goal.trajectory = _traj_msgs[i];
     _traj_clients[i]->sendGoal(goal);
-    _traj_clients[i]->waitForResult(ros::Duration(duration + 0.005));
+    _traj_clients[i]->waitForResult(ros::Duration(duration + 100));
     //  _traj_clients[i]->waitForResult(ros::Duration(duration + 0.5));
     if (_traj_clients[i]->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
         ROS_WARN_STREAM("Trajectory execution for leg_"

@@ -56,27 +56,39 @@ include_directories(
 )
 
 # Basic example
-add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp)
+add_executable(hexapod_driver src/hexapod_driver.cpp src/hexapod.cpp src/hexapod_imu_velocity.cpp src/hexapod_imu_position.cpp)
 target_link_libraries(hexapod_driver ${catkin_LIBRARIES})
 add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
 
 # Hexapod control library
-add_library(hexapod_control src/hexapod.cpp)
+add_library(hexapod_control src/hexapod.cpp src/hexapod_imu_velocity.cpp src/hexapod_imu_position.cpp)
 target_link_libraries(hexapod_control ${catkin_LIBRARIES})
 add_dependencies(hexapod_control ${catkin_EXPORTED_TARGETS})
+
+# Hexapod control library with imu and velocity controller
+add_library(hexapod_control_imu src/hexapod_imu_velocity.cpp)
+target_link_libraries(hexapod_control_imu ${catkin_LIBRARIES})
+add_dependencies(hexapod_control_imu ${catkin_EXPORTED_TARGETS})
+
+# Hexapod control library with imu and velocity controller
+add_library(hexapod_control_imu_position src/hexapod_imu_position.cpp)
+target_link_libraries(hexapod_control_imu_position ${catkin_LIBRARIES})
+add_dependencies(hexapod_control_imu_position ${catkin_EXPORTED_TARGETS})
 
 # Add cartesian controllers if found
 if (${orocos_kdl_FOUND} AND ${trac_ik_lib_FOUND})
   add_executable(hexapod_driver_cartesian
     src/hexapod_driver_cartesian.cpp
     src/hexapod.cpp
+    src/hexapod_imu_velocity.cpp
+    src/hexapod_imu_position.cpp
     src/hexapod_cartesian.cpp
   )
   target_link_libraries(hexapod_driver_cartesian ${catkin_LIBRARIES})
   add_dependencies(hexapod_driver_cartesian ${catkin_EXPORTED_TARGETS})
 
-  add_library(hexapod_control_cartesian  src/hexapod.cpp src/hexapod_cartesian.cpp)
+  add_library(hexapod_control_cartesian  src/hexapod.cpp src/hexapod_imu_position.cpp src/hexapod_imu_velocity.cpp src/hexapod_cartesian.cpp)
   target_link_libraries(hexapod_control_cartesian ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
   add_dependencies(hexapod_control_cartesian ${catkin_EXPORTED_TARGETS})
 endif()
@@ -86,6 +98,14 @@ install(TARGETS hexapod_driver
 )
 
 install(TARGETS hexapod_control
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(TARGETS hexapod_control_imu
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(TARGETS hexapod_control_imu_position
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 

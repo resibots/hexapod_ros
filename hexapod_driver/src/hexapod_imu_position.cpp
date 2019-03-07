@@ -1,6 +1,6 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <hexapod_controller/hexapod_controller_simple.hpp>
-#include <hexapod_driver/hexapod_imu.hpp>
+#include <hexapod_controller/hexapod_controller_imu_position.hpp>
+#include <hexapod_driver/hexapod_imu_position.hpp>
 #include <std_srvs/Empty.h>
 #include <tf/transform_listener.h>
 #include <thread>
@@ -8,20 +8,20 @@
 #include <iostream>
 using namespace hexapod_ros;
 
-Hexapod::Hexapod(ros::NodeHandle nh, std::string ns) : _nh(nh), _namespace(ns)
+HexapodIMUPos::HexapodIMUPos(ros::NodeHandle nh, std::string ns) : _nh(nh), _namespace(ns)
 {
     if (_namespace[0] != '/')
         _namespace = "/" + _namespace;
     init();
 }
 
-Hexapod::~Hexapod()
+HexapodIMUPos::~HexapodIMUPos()
 {
     ROS_INFO_STREAM("Relaxing...");
     relax();
 }
 
-void Hexapod::init()
+void HexapodIMUPos::init()
 {
     // Private node handle
     ros::NodeHandle n_p("~");
@@ -67,40 +67,9 @@ void Hexapod::init()
         _reset_filter_pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
             "/set_pose", 1000);
     }
-    //_mode_pub = _nh.advertise<std_msg::Float64>("/mode", 1000);
-    //_time_pub = _nh.advertise<std_msg::Float64>("/time", 1000);
-    //_ctrl_pub = _nh.advertise<std_msg::Float64MultiArray>("/ctrl", 1000);
-    param_name = "mode";
-    if (!nh.getParam(param_name, _mode)) {
-        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
-        return false;
-    }
-    param_name = "duration";
-    if (!nh.getParam(param_name, _duration)) {
-        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
-        return false;
-    }
-    param_name = "isRunning";
-    if (!nh.getParam(param_name, _isRunning)) {
-        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
-        return false;
-    }
 
-    param_name = "ctrl";
-    if (!nh.getParam(param_name, _ctrl)) {
-        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
-        return false;
-    }
-
-    param_name = "isRunning";
-    if (!nh.getParam(param_name, _isRunning)) {
-        ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: " << nh.getNamespace() << ").");
-        return false;
-    }
-    _mode_running = nh.subscribe<std_msg::Bool>("/simu_running", 1, &HexapodIMU::mode_running_CB, this);
     // Reset
     ROS_INFO_STREAM("Reset...");
-
     reset();
 
     // Get odom transformation
@@ -108,20 +77,9 @@ void Hexapod::init()
         reset_odom();
     }
 }
-void Hexapod::wait()
-{
-    while (_isRunning == 1) {
-        nh.getParam("isRunning", _isRunning);
-    }
-}
-void Hexapod::relax()
-{
-    wait();
-    _mode = relax;
-    _nh.setParam("mode", _mode);
-    _duration = 2.0;
-    _nh.setParam("duration", _duration);
 
+void HexapodIMUPos::relax()
+{
     double duration = 2.0;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -150,14 +108,8 @@ void Hexapod::relax()
     ros::Duration(0.5).sleep();
 }
 
-void Hexapod::reset()
+void HexapodIMUPos::reset()
 {
-    wait();
-    _mode = reset;
-    _nh.setParam("mode", _mode);
-    _duration = 0.1;
-    _nh.setParam("duration", _duration);
-
     double duration = 0.1;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -224,14 +176,8 @@ void Hexapod::reset()
     _send_trajectories(duration);
 }
 
-void Hexapod::zero()
+void HexapodIMUPos::zero()
 {
-    wait();
-    _mode = zero;
-    _nh.setParam("mode", _mode);
-    _duration = 0.1;
-    _nh.setParam("duration", _duration);
-
     double duration = 0.1;
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -254,17 +200,8 @@ void Hexapod::zero()
     _send_trajectories(duration);
 }
 
-void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
+void HexapodIMUPos::move(std::vector<double> ctrl, double duration, bool reset)
 {
-    wait();
-    _mode = move;
-    _nh.setParam("mode", _mode);
-    _duration = duration;
-    _nh.setParam("duration", _duration);
-    _ctrl = ctrl;
-    _nh.setParam("controle", _ctrl);
-
-    while (_mode_running == true) {};
     // Start from zero
     zero();
 
@@ -275,7 +212,7 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     double step = 0.001;
 
     // Initialize controller
-    hexapod_controller::HexapodControllerSimple controller(ctrl, std::vector<int>());
+    hexapod_controller::HexapodControllerImuPos controller(ctrl, std::vector<int>());
 
     // Clear message points
     for (size_t i = 0; i < 6; i++) {
@@ -286,13 +223,14 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     for (double f = 0; f <= 5; f += 0.02) {
 
         for (double t = 0.0; t <= 0.02; t += step) {
+            //    controller.computeErrors(roll, pitch);
             std::vector<double> pos = controller.pos(t + f);
 
             for (size_t i = 0; i < 6; i++) {
                 trajectory_msgs::JointTrajectoryPoint point;
                 point.positions.clear();
 
-                // Should update HexapodControllerSimple to output proper angles
+                // Should update HexapodControllerImuPos to output proper angles
                 point.positions.push_back(-pos[i * 3]);
                 point.positions.push_back(pos[i * 3 + 1]);
                 point.positions.push_back(-pos[i * 3 + 2]);
@@ -313,7 +251,7 @@ void Hexapod::move(std::vector<double> ctrl, double duration, bool reset)
     zero();
 }
 
-void Hexapod::reset_odom()
+void HexapodIMUPos::reset_odom()
 {
     // reset visual odometry
     if (_odom_enable) {
@@ -366,7 +304,7 @@ void Hexapod::reset_odom()
     }
 }
 
-tf::Transform Hexapod::transform()
+tf::Transform HexapodIMUPos::transform()
 {
     if (!_odom_enable && !_mocap_odom_enable)
         ROS_ERROR_STREAM("Mocap and odom are disabled so Hexapod::transform should "
@@ -376,7 +314,7 @@ tf::Transform Hexapod::transform()
     return _init_pos.inverse() * _pos;
 }
 
-void Hexapod::_pos_update()
+void HexapodIMUPos::_pos_update()
 {
     tf::TransformListener listener;
     ros::Time start_t = ros::Time::now();
@@ -400,7 +338,7 @@ void Hexapod::_pos_update()
     }
 }
 
-void Hexapod::_send_trajectories(double duration)
+void HexapodIMUPos::_send_trajectories(double duration)
 {
     std::vector<std::thread> threads;
 
@@ -417,7 +355,7 @@ void Hexapod::_send_trajectories(double duration)
         }
 
         threads.push_back(
-            std::thread(&Hexapod::_send_trajectory, this, i, duration));
+            std::thread(&HexapodIMUPos::_send_trajectory, this, i, duration));
     }
 
     for (size_t i = 0; i < threads.size(); i++) {
@@ -425,7 +363,7 @@ void Hexapod::_send_trajectories(double duration)
     }
 }
 
-void Hexapod::_send_trajectory(size_t i, double duration)
+void HexapodIMUPos::_send_trajectory(size_t i, double duration)
 {
     _traj_msgs[i].header.stamp = ros::Time::now();
 

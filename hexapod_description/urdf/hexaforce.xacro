@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="pexod" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="hexaforce" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:arg name="path_generation" default="package" />
   <xacro:property name="path_generation" value="$(arg path_generation)" />
