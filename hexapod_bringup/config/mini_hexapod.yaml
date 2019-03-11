@@ -1,5 +1,5 @@
 dynamixel_control:
-  serial_interface: /dev/ttyACM1
+  serial_interface: /dev/ttyUSB0
 
   servos:
     body_leg_0:
@@ -20,12 +20,12 @@ dynamixel_control:
       offset: 3.19395
     leg_2_2_3:
       offset: 3.07178
-    body_leg_3:
-      offset: 3.01942
-    leg_3_1_2:
-      offset: 1.53589
-    leg_3_2_3:
-      offset: 4.48549
+    # body_leg_3:
+    #   offset: 3.01942
+    # leg_3_1_2:
+    #   offset: 1.53589
+    # leg_3_2_3:
+    #   offset: 4.48549
     body_leg_4:
       offset: 3.10668
     leg_4_1_2:
