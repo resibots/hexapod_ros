@@ -16,13 +16,13 @@ dynamixel_controllers:
       - body_leg_1
       - leg_1_1_2
       - leg_1_2_3
-
-  leg_2_controller:
-    type: position_controllers/JointTrajectoryController
-    joints:
-      - body_leg_2
-      - leg_2_1_2
-      - leg_2_2_3
+  #
+  # leg_2_controller:
+  #   type: position_controllers/JointTrajectoryController
+  #   joints:
+  #     - body_leg_2
+  #     - leg_2_1_2
+  #     - leg_2_2_3
 
   # leg_3_controller:
   #   type: position_controllers/JointTrajectoryController
@@ -31,19 +31,19 @@ dynamixel_controllers:
   #     - leg_3_1_2
   #     - leg_3_2_3
 
-  leg_4_controller:
-    type: position_controllers/JointTrajectoryController
-    joints:
-      - body_leg_4
-      - leg_4_1_2
-      - leg_4_2_3
-
-  leg_5_controller:
-    type: position_controllers/JointTrajectoryController
-    joints:
-      - body_leg_5
-      - leg_5_1_2
-      - leg_5_2_3
+  # leg_4_controller:
+  #   type: position_controllers/JointTrajectoryController
+  #   joints:
+  #     - body_leg_4
+  #     - leg_4_1_2
+  #     - leg_4_2_3
+  #
+  # leg_5_controller:
+  #   type: position_controllers/JointTrajectoryController
+  #   joints:
+  #     - body_leg_5
+  #     - leg_5_1_2
+  #     - leg_5_2_3
 
 dynamixel_control:
   loop_frequency: 50
@@ -67,27 +67,27 @@ dynamixel_control:
       id: 5
     leg_1_2_3:
       id: 6
-    body_leg_2:
-      id: 1
-    leg_2_1_2:
-      id: 2
-    leg_2_2_3:
-      id: 3
-    # body_leg_3:
-    #   id: 16
-    # leg_3_1_2:
-    #   id: 17
-    # leg_3_2_3:
-    #   id: 18
-    body_leg_4:
-      id: 13
-    leg_4_1_2:
-      id: 14
-    leg_4_2_3:
-      id: 15
-    body_leg_5:
-     id: 10
-    leg_5_1_2:
-     id: 11
-    leg_5_2_3:
-     id: 12
+    # body_leg_2:
+    #   id: 1
+    # leg_2_1_2:
+    #   id: 2
+    # leg_2_2_3:
+    #   id: 3
+    # # body_leg_3:
+    # #   id: 16
+    # # leg_3_1_2:
+    # #   id: 17
+    # # leg_3_2_3:
+    # #   id: 18
+    # body_leg_4:
+    #   id: 13
+    # leg_4_1_2:
+    #   id: 14
+    # leg_4_2_3:
+    #   id: 15
+    # body_leg_5:
+    #  id: 10
+    # leg_5_1_2:
+    #  id: 11
+    # leg_5_2_3:
+    #  id: 12

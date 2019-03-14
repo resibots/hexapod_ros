@@ -62,7 +62,7 @@ add_dependencies(hexapod_driver ${catkin_EXPORTED_TARGETS})
 
 
 # Hexapod control library
-add_library(hexapod_control src/hexapod.cpp)
+add_library(hexapod_control src/hexapod.cpp src/hexapod_cpg.cpp)
 target_link_libraries(hexapod_control ${catkin_LIBRARIES})
 add_dependencies(hexapod_control ${catkin_EXPORTED_TARGETS})
 
