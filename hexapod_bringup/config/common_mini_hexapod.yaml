@@ -17,6 +17,34 @@ dynamixel_controllers:
       - leg_1_1_2
       - leg_1_2_3
 
+  leg_2_controller:
+    type: position_controllers/JointTrajectoryController
+    joints:
+      - body_leg_2
+      - leg_2_1_2
+      - leg_2_2_3
+
+  leg_3_controller:
+    type: position_controllers/JointTrajectoryController
+    joints:
+      - body_leg_3
+      - leg_3_1_2
+      - leg_3_2_3
+
+  leg_4_controller:
+    type: position_controllers/JointTrajectoryController
+    joints:
+      - body_leg_4
+      - leg_4_1_2
+      - leg_4_2_3
+
+  leg_5_controller:
+    type: position_controllers/JointTrajectoryController
+    joints:
+      - body_leg_5
+      - leg_5_1_2
+      - leg_5_2_3
+
 dynamixel_control:
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
