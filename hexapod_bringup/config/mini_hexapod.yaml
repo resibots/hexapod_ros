@@ -14,27 +14,27 @@ dynamixel_control:
       offset: 3.22886
     leg_1_2_3:
       offset: 4.81711
-    # body_leg_2:
-    #   offset: 3.24631
-    # leg_2_1_2:
-    #   offset: 3.19395
-    # leg_2_2_3:
-    #   offset: 3.07178
-    # # body_leg_3:
-    # #   offset: 3.01942
-    # # leg_3_1_2:
-    # #   offset: 1.53589
-    # # leg_3_2_3:
-    # #   offset: 4.48549
-    # body_leg_4:
-    #   offset: 3.10668
-    # leg_4_1_2:
-    #   offset: 3.10668
-    # leg_4_2_3:
-    #   offset: 4.62512
-    # body_leg_5:
-    #   offset: 3.24631
-    # leg_5_1_2:
-    #   offset: 3.10668
-    # leg_5_2_3:
-    #   offset: 3.05433
+    body_leg_2:
+      offset: 3.24631
+    leg_2_1_2:
+      offset: 3.19395
+    leg_2_2_3:
+      offset: 3.07178
+    body_leg_3:
+      offset: 3.01942
+    leg_3_1_2:
+      offset: 1.53589
+    leg_3_2_3:
+      offset: 4.48549
+    body_leg_4:
+      offset: 3.10668
+    leg_4_1_2:
+      offset: 3.10668
+    leg_4_2_3:
+      offset: 4.62512
+    body_leg_5:
+      offset: 3.24631
+    leg_5_1_2:
+      offset: 3.10668
+    leg_5_2_3:
+      offset: 3.05433
