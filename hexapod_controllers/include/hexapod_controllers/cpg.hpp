@@ -136,8 +136,8 @@ namespace cpg {
     //     std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8} // namespace cpg
     //     ) // 10 ou 100
 
-    CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.2,
-        float b = 0.5, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
+    CPG::CPG(int legs_number = 6, float w = 0.5, float gammacpg = 0.7, float lambda = 0.14, float a = 0.4,
+        float b = 0.65, int d = 2, float euler_dt = 0.001, float rk_dt = 0.1,
         std::vector<std::vector<float>> K = createK(), std::vector<float> cx0 = {0.01, 0.0, 0.0, 0.01, 0.01, 0},
         std::vector<float> cy0 = {-M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8, -M_PI / 8}, float kp = 1, float kd = 0.0,
         std::vector<float> kpitch = {1.4, 0, -1.4, -1.4, 0, 1.4}, std::vector<float> kroll = {1.4, 1.4, 1.4, -1.4, -1.4, -1.4}) // 1
@@ -166,7 +166,7 @@ namespace cpg {
         kp_ = kp;
         kd_ = kd;
 
-        safety_pos_thresh_ = 1;
+        safety_pos_thresh_ = 20;
         Xcommand_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         Ycommand_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         integration_has_diverged_ = false;

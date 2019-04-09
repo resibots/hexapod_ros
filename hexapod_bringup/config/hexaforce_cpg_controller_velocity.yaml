@@ -1,5 +1,5 @@
 dynamixel_control:
-  serial_interface: /dev/usb2ax0
+  serial_interface: /dev/ttyUSB1
   servos:
     body_leg_0:
       id: 1
@@ -57,7 +57,7 @@ dynamixel_control:
       offset: 3.14159265359
   loop_frequency: 1000
   cycle_time_error_threshold: 0.1
-  baudrate: 1000000 # in bauds
+  baudrate: 3000000 # in bauds
   read_timeout: 0.01 # in seconds
   scan_timeout: 0.01 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
@@ -87,7 +87,7 @@ dynamixel_controllers:
       - leg_4_2_3
       - leg_5_2_3
   hexapod_cpg_controller:
-    type: hexapod_controllers/HexapodSClCpgControllerV
+    type: hexapod_controllers/HexapodOlCpgControllerV
     joints:
       - body_leg_0
       - body_leg_1

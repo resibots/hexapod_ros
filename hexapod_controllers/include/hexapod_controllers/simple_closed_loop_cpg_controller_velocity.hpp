@@ -49,7 +49,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <iostream>
-#include <kdl/chainiksolverpos_nr_jl.hpp>
+
 #include <math.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <ros/node_handle.h>

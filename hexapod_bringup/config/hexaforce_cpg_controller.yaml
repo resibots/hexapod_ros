@@ -57,7 +57,7 @@ dynamixel_control:
       offset: 3.14159265359
   loop_frequency: 100
   cycle_time_error_threshold: 0.1
-  baudrate: 1000000 # in bauds
+  baudrate: 3000000 # in bauds
   read_timeout: 0.01 # in seconds
   scan_timeout: 0.01 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
