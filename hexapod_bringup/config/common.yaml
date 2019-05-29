@@ -1,7 +1,7 @@
 dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
-    publish_rate: 50
+    publish_rate: 1000
 
   leg_0_controller:
     type: position_controllers/JointTrajectoryController
@@ -46,9 +46,9 @@ dynamixel_controllers:
       - leg_5_2_3
 
 dynamixel_control:
-  loop_frequency: 100
-  cycle_time_error_threshold: 0.02
-  baudrate: 1000000 # in bauds
+  loop_frequency: 3000
+  cycle_time_error_threshold: 0.001
+  baudrate: 3000000 # in bauds
   read_timeout: 0.01 # in seconds
   scan_timeout: 0.005 # in seconds
 

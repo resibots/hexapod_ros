@@ -26,5 +26,7 @@
     /dynamixel_controllers/leg_2_controller
     /dynamixel_controllers/leg_3_controller
     /dynamixel_controllers/leg_5_controller" />
-    <!-- /dynamixel_controllers/leg_4_controller -->
+    <!--
+    /dynamixel_controllers/leg_1_controller
+    /dynamixel_controllers/leg_4_controller -->
 </launch>
