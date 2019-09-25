@@ -48,6 +48,7 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <hardware_interface/joint_command_interface.h>
+#include <hexapod_controller/hexapod_controller_simple.hpp>
 #include <iostream>
 #include <kdl/chainiksolverpos_nr_jl.hpp>
 #include <math.h>
@@ -55,6 +56,7 @@
 #include <ros/node_handle.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <stdio.h>
 #include <string>
@@ -156,6 +158,7 @@ namespace keep_body_level_velocity_controller {
         cpg::CPG cpg_;
         /*!    imu buffer  to get imu data from a topic ros*/
         realtime_tools::RealtimeBuffer<std::vector<double>> imu_buffer;
+        realtime_tools::RealtimeBuffer<std::vector<double>> joy_buffer;
         /*!    tf buffer  to get tf data from a topic ros*/
         realtime_tools::RealtimeBuffer<std::vector<double>> tf_buffer;
         /* quat is used to recover the data from the imu as quaternions */
@@ -200,6 +203,13 @@ namespace keep_body_level_velocity_controller {
         KDL::Tree _my_tree;
         // std::array<std::shared_ptr<KDL::ChainIkSolverPos_NR>, NLegs> _kdl_ik_solvers;
 
+        bool _isRunning;
+        std::vector<double> _ctrl;
+
+        ros::Time _current_time;
+        ros::Time _prev_time;
+        double _t;
+
     private:
         SafetyConstraint _constraint;
 
@@ -209,17 +219,25 @@ namespace keep_body_level_velocity_controller {
         void initJointPosition();
         /*!  Subscriber to recover imu data*/
         ros::Subscriber _sub_imu;
+        ros::Subscriber _sub_joy;
+
         /*!  Subscriber to recover tf data*/
         ros::Subscriber _sub_tf;
         /**
          * \brief callback to recover imu data
          */
         void imuCB(const sensor_msgs::ImuConstPtr& msg);
+        void joyCB(const sensor_msgs::Joy::ConstPtr& msg);
         /**
          * \brief callback to recover end effector position
          */
         void tfCB(const tf2_msgs::TFMessageConstPtr& msg);
 
+        void move(float duration, std::vector<double> ctrl);
+        void move_back(float duration, std::vector<double> ctrl);
+        void move_left(float duration, std::vector<double> ctrl);
+        void turn_left(float duration, std::vector<double> ctrl);
+        void turn_right(float duration, std::vector<double> ctrl);
     }; // class KBLControllerV
 
     /**
@@ -228,12 +246,13 @@ namespace keep_body_level_velocity_controller {
     template <class SafetyConstraint, int NLegs>
     KBLControllerV<SafetyConstraint, NLegs>::KBLControllerV()
     {
+      _isRunning = false;
         e = 0.05;
         has_init = false;
         end_effectors_transform.resize(NLegs, tf::Transform());
         leg_end_effector_static_transforms = tf::Transform(tf::Quaternion(0.707106781188, 0.707106781185, -7.31230107717e-14, -7.3123010772e-14), tf::Vector3(0.0, 0.03825, -0.115));
         _leg_map_to_paper = {0, 2, 4, 5, 3, 1};
-
+        _ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
         // Init the IK solver
         std::string chain_start = "base_link";
         std::vector<std::string> chain_ends;
@@ -311,8 +330,12 @@ namespace keep_body_level_velocity_controller {
         }
         // ros subscriber to recover imu data
         _sub_imu = nh.subscribe<sensor_msgs::Imu>("/imu/data", 1, &KBLControllerV<SafetyConstraint, NLegs>::imuCB, this);
+
+        _sub_joy = nh.subscribe<sensor_msgs::Joy>("/joy", 1, &KBLControllerV<SafetyConstraint, NLegs>::joyCB, this);
         // ros subscriber to recover end effector positions (tip of the legs positions)
         _sub_tf = nh.subscribe<tf2_msgs::TFMessage>("/tf", 1, &KBLControllerV<SafetyConstraint, NLegs>::tfCB, this);
+
+        _isRunning = true;
 
         return true;
     }
@@ -325,6 +348,9 @@ namespace keep_body_level_velocity_controller {
     {
         //Read the imu buffer to recover imu data
         std::vector<double>& imu_quat = *imu_buffer.readFromRT();
+
+        std::vector<double>& joy_cmd = *joy_buffer.readFromRT();
+        std::cout << "Joy command : "<< std::endl;
 
         if (imu_quat.size() == 4) {
             //Recover current orientation
@@ -394,7 +420,32 @@ namespace keep_body_level_velocity_controller {
                 joints[6 + i]->setCommand(-_kp * 1 * _q_out.at(i)(1));
                 joints[12 + i]->setCommand(-_kp * 1 * _q_out.at(i)(2));
             }
+
+            if(joy_cmd.size()>2)
+            {
+              std::cout << joy_cmd[0] << " ; " << joy_cmd[1] << std::endl;
+              if(joy_cmd[1] ==  1 )
+              {
+                move(2,_ctrl);
+              }
+              if(joy_cmd[1] ==  -1 )
+              {
+                move_back(2,_ctrl);
+              }
+              if(joy_cmd[0] ==  1 )
+              {
+                turn_left(2,_ctrl);
+              }
+              if(joy_cmd[0] ==  -1 )
+              {
+                turn_right(2,_ctrl);
+              }
+            }
+
+
         }
+
+
         _constraint.enforce(period);
     }
     /**
@@ -415,11 +466,342 @@ namespace keep_body_level_velocity_controller {
             }
         }
     }
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::move(float duration, std::vector<double> ctrl)
+    {
+      _prev_time = _current_time;
+      _current_time = ros::Time::now();
+      //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
+      if (_isRunning == true) {
+          //  _t = current_tine
+          _t += 0.01;
+          //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+          unsigned int count = 0;
+          hexapod_controller::HexapodControllerSimple _controller(ctrl, std::vector<int>());
+          //  _controller.computeErrors(rpy.x,rpy.y);
+          std::vector<double> pos = _controller.pos(_t);
+          //  std::cout << "time : " << _t << std::endl;
+          if (_t > duration) {
+              _isRunning = false;
+
+              _t = 0;
+              for (unsigned int i = 0; i < NLegs; i++) {
+
+                  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                  for (unsigned int j = 0; j < NLegs; j++) {
+                      if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                          count++; //when the position 0 is reached do count++
+                          //  std::cout << count << std::endl;
+                      }
+                  }
+              }
+          }
+          for (unsigned int i = 0; i < NLegs; i++) {
+              joints[i]->setCommand(_kp * (pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+      }
+      else {
+          for (unsigned int i = 0; i < n_joints; i++) {
+              joints[i]->setCommand(0);
+          }
+      }
+      _isRunning = true;
+    }
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::move_back(float duration, std::vector<double> ctrl)
+    {
+      _prev_time = _current_time;
+      _current_time = ros::Time::now();
+      //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
+      if (_isRunning == true) {
+          //  _t = current_tine
+          _t += 0.01;
+          //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+          unsigned int count = 0;
+          hexapod_controller::HexapodControllerSimple _controller(ctrl, std::vector<int>());
+          //  _controller.computeErrors(rpy.x,rpy.y);
+          std::vector<double> pos = _controller.pos(_t);
+          //  std::cout << "time : " << _t << std::endl;
+          if (_t > duration) {
+              _isRunning = false;
+
+              _t = 0;
+              for (unsigned int i = 0; i < NLegs; i++) {
+
+                  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                  for (unsigned int j = 0; j < NLegs; j++) {
+                      if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                          count++; //when the position 0 is reached do count++
+                          //  std::cout << count << std::endl;
+                      }
+                  }
+              }
+          }
+          for (unsigned int i = 0; i < NLegs; i++) {
+              joints[i]->setCommand(_kp * (-pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+      }
+      else {
+          for (unsigned int i = 0; i < n_joints; i++) {
+              joints[i]->setCommand(0);
+          }
+      }
+      _isRunning = true;
+    }
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::move_left(float duration, std::vector<double> ctrl)
+    {
+      _prev_time = _current_time;
+      _current_time = ros::Time::now();
+      //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
+      if (_isRunning == true) {
+          //  _t = current_tine
+          _t += 0.01;
+          //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+          unsigned int count = 0;
+          hexapod_controller::HexapodControllerSimple _controller(ctrl, std::vector<int>());
+          //  _controller.computeErrors(rpy.x,rpy.y);
+          std::vector<double> pos = _controller.pos(_t);
+          //  std::cout << "time : " << _t << std::endl;
+          if (_t > duration) {
+              _isRunning = false;
+
+              _t = 0;
+              for (unsigned int i = 0; i < NLegs; i++) {
+
+                  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                  for (unsigned int j = 0; j < NLegs; j++) {
+                      if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                          count++; //when the position 0 is reached do count++
+                          //  std::cout << count << std::endl;
+                      }
+                  }
+              }
+          }
+          for (unsigned int i = 0; i < NLegs-3; i++) {
+              joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2]-0.1 - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+          for (unsigned int i = 3; i < NLegs; i++) {
+              joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2]+0.1 - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+      }
+      else {
+          for (unsigned int i = 0; i < n_joints; i++) {
+              joints[i]->setCommand(0);
+          }
+      }
+      _isRunning = true;
+    }
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::turn_left(float duration, std::vector<double> ctrl)
+    {
+      _prev_time = _current_time;
+      _current_time = ros::Time::now();
+      //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
+      if (_isRunning == true) {
+          //  _t = current_tine
+          _t += 0.01;
+          //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+          unsigned int count = 0;
+          hexapod_controller::HexapodControllerSimple _controller(ctrl, std::vector<int>());
+          //  _controller.computeErrors(rpy.x,rpy.y);
+          std::vector<double> pos = _controller.pos(_t);
+          //  std::cout << "time : " << _t << std::endl;
+          if (_t > duration) {
+              _isRunning = false;
+
+              _t = 0;
+              for (unsigned int i = 0; i < NLegs; i++) {
+
+                  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                  for (unsigned int j = 0; j < NLegs; j++) {
+                      if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                          count++; //when the position 0 is reached do count++
+                          //  std::cout << count << std::endl;
+                      }
+                  }
+              }
+          }
+          for (unsigned int i = 0; i < NLegs-3; i++) {
+              joints[i]->setCommand(_kp * (-pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+          for (unsigned int i = 3; i < NLegs; i++) {
+              joints[i]->setCommand(_kp * (pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+      }
+      else {
+          for (unsigned int i = 0; i < n_joints; i++) {
+              joints[i]->setCommand(0);
+          }
+      }
+      _isRunning = true;
+    }
+
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::turn_right(float duration, std::vector<double> ctrl)
+    {
+      _prev_time = _current_time;
+      _current_time = ros::Time::now();
+      //  std::cout << "time : " << _current_time - _prev_time << std::endl;
+
+      if (_isRunning == true) {
+          //  _t = current_tine
+          _t += 0.01;
+          //ctrl = {1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0.5, 0.5, 0.25, 0.75, 0.5, 1, 0, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5, 1, 0.5, 0.5, 0.25, 0.25, 0.5, 1, 0, 0.5, 0.25, 0.75, 0.5};
+          unsigned int count = 0;
+          hexapod_controller::HexapodControllerSimple _controller(ctrl, std::vector<int>());
+          //  _controller.computeErrors(rpy.x,rpy.y);
+          std::vector<double> pos = _controller.pos(_t);
+          //  std::cout << "time : " << _t << std::endl;
+          if (_t > duration) {
+              _isRunning = false;
+
+              _t = 0;
+              for (unsigned int i = 0; i < NLegs; i++) {
+
+                  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+                  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+                  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+                  for (unsigned int j = 0; j < NLegs; j++) {
+                      if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                          count++; //when the position 0 is reached do count++
+                          //  std::cout << count << std::endl;
+                      }
+                  }
+              }
+          }
+          for (unsigned int i = 0; i < NLegs-3; i++) {
+              joints[i]->setCommand(_kp * (pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+          for (unsigned int i = 3; i < NLegs; i++) {
+              joints[i]->setCommand(_kp * (-pos[3 * i] - joints[i]->getPosition()));
+              joints[i + 6]->setCommand(_kp * (pos[3 * i + 1] - joints[i + 6]->getPosition()));
+              joints[i + 12]->setCommand(_kp * (pos[3 * i + 2] - joints[i + 12]->getPosition()));
+              //  joints[i]->setCommand(_kp * (0 - joints[i]->getPosition()));
+              //  joints[i + 6]->setCommand(_kp * (0 - joints[i + 6]->getPosition()));
+              //  joints[i + 12]->setCommand(_kp * (0 - joints[i + 12]->getPosition()));
+              for (unsigned int j = 0; j < NLegs; j++) {
+                  if ((std::abs(pos[3 * i] - joints[j]->getPosition()) < e) && (std::abs(pos[3 * i + 1] - joints[j + 6]->getPosition()) < e) && (std::abs(pos[3 * i + 2] - joints[j + 12]->getPosition()) < e)) {
+                      count++; //when the position 0 is reached do count++
+                      //  std::cout << count << std::endl;
+                  }
+              }
+          }
+      }
+      else {
+          for (unsigned int i = 0; i < n_joints; i++) {
+              joints[i]->setCommand(0);
+          }
+      }
+      _isRunning = true;
+    }
+
     template <class SafetyConstraint, int NLegs>
     void KBLControllerV<SafetyConstraint, NLegs>::imuCB(const sensor_msgs::ImuConstPtr& msg)
     {
         imu_buffer.writeFromNonRT({msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w});
     }
+
+    template <class SafetyConstraint, int NLegs>
+    void KBLControllerV<SafetyConstraint, NLegs>::joyCB(const sensor_msgs::Joy::ConstPtr& msg)
+    {
+        joy_buffer.writeFromNonRT({msg->axes[0], msg->axes[1], msg->axes[2]});
+    }
+
 
     template <class SafetyConstraint, int NLegs>
     void KBLControllerV<SafetyConstraint, NLegs>::tfCB(const tf2_msgs::TFMessageConstPtr& msg)
