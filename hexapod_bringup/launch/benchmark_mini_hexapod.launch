@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- URDF robot description -->
+  <include file="$(find hexapod_description)/launch/mini_hexapod.launch" />
+  <!-- <param name="robot_description" command="cat $(find hexapod_bringup)/mini_hexapod.urdf"/> -->
+  <!-- Publish robot's state in the tf tree -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+    name="robot_state_publisher" />
+
+  <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find hexapod_bringup)/config/benchmark_controller_mini_hexapod.yaml"/>
+
+  <!-- To move the dummy robot with a gui, bypassing the controller manager -->
+  <!-- <param name="use_gui" value="true"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher"
+    name="dummy_robot" /> -->
+
+  <!-- launch our hardware interface -->
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_p2"
+    name="dynamixel_control" output="screen"/>
+
+  <!-- Start a controller for our dummy robot -->
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="/dynamixel_controllers/joint_state_controller
+                          /dynamixel_controllers/benchmark_controller" />
+
+</launch>

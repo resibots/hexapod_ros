@@ -1,0 +1,91 @@
+dynamixel_control:
+  serial_interface: /dev/ttyUSB0
+  servos:
+    body_leg_0:
+      id: 7
+      offset: 3.08923
+    leg_0_1_2:
+      id: 8
+      offset: 3.19395
+    leg_0_2_3:
+      id: 9
+      offset: 4.74729
+    body_leg_1:
+      id: 4
+      offset: 3.03687
+    leg_1_1_2:
+      id: 5
+      offset: 3.22886
+    leg_1_2_3:
+      id: 6
+      offset: 4.81711
+    body_leg_2:
+      id: 1
+      offset: 3.24631
+    leg_2_1_2:
+      id: 2
+      offset: 3.19395
+    leg_2_2_3:
+      id: 3
+      offset: 3.07178
+    body_leg_3:
+      id: 16
+      offset: 3.01942
+    leg_3_1_2:
+      id: 17
+      offset: 1.53589
+    leg_3_2_3:
+      id: 18
+      offset: 4.48549
+    body_leg_4:
+      id: 13
+      offset: 3.10668
+    leg_4_1_2:
+      id: 14
+      offset: 3.10668
+    leg_4_2_3:
+      id: 15
+      offset: 4.62512
+    body_leg_5:
+      id: 10
+      offset: 3.24631
+    leg_5_1_2:
+      id: 11
+      offset: 3.10668
+    leg_5_2_3:
+      id: 12
+      offset: 3.05433
+
+  loop_frequency: 100
+  cycle_time_error_threshold: 0.1
+  baudrate: 1000000 # in bauds
+  read_timeout: 0.01 # in seconds
+  scan_timeout: 0.01 # in seconds
+  # correspondance between hardware IDs of the actuators and their names in ROS
+  default_command_interface: position
+
+dynamixel_controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+  benchmark_controller:
+    type: hexapod_controllers/HexapodBenchmarkController
+    joints:
+      - body_leg_0
+      - body_leg_1
+      - body_leg_2
+      - body_leg_3
+      - body_leg_4
+      - body_leg_5
+      - leg_0_1_2
+      - leg_1_1_2
+      - leg_2_1_2
+      - leg_3_1_2
+      - leg_4_1_2
+      - leg_5_1_2
+      - leg_0_2_3
+      - leg_1_2_3
+      - leg_2_2_3
+      - leg_3_2_3
+      - leg_4_2_3
+      - leg_5_2_3

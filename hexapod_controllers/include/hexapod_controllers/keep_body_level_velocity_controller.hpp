@@ -426,19 +426,19 @@ namespace keep_body_level_velocity_controller {
               std::cout << joy_cmd[0] << " ; " << joy_cmd[1] << std::endl;
               if(joy_cmd[1] ==  1 )
               {
-                move(2,_ctrl);
+                move(1,_ctrl);
               }
               if(joy_cmd[1] ==  -1 )
               {
-                move_back(2,_ctrl);
+                move_back(1,_ctrl);
               }
               if(joy_cmd[0] ==  1 )
               {
-                turn_left(2,_ctrl);
+                turn_left(1,_ctrl);
               }
               if(joy_cmd[0] ==  -1 )
               {
-                turn_right(2,_ctrl);
+                turn_right(1,_ctrl);
               }
             }
 

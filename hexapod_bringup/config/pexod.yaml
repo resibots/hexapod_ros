@@ -8,12 +8,12 @@ dynamixel_control:
       offset: 3.14159265359
     leg_0_2_3:
       offset: 3.14159265359
-    body_leg_1:
-      offset: 3.14159265359
-    leg_1_1_2:
-      offset: 3.14159265359
-    leg_1_2_3:
-      offset: 3.14159265359
+    # body_leg_1:
+    #   offset: 3.14159265359
+    # leg_1_1_2:
+    #   offset: 3.14159265359
+    # leg_1_2_3:
+    #   offset: 3.14159265359
     body_leg_2:
       offset: 3.53429173529
     leg_2_1_2:
