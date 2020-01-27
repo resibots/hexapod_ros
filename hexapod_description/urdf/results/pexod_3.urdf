@@ -94,57 +94,57 @@
   </joint>
   <link name="leg_2_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0230020675425 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.046004135085" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0230020675425 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.046004135085"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0230020675425 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="3.85845001554e-05" ixy="0" ixz="0" iyy="3.85845001554e-05" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_2_2_3" type="revolute">
     <parent link="leg_2_2"/>
     <child link="leg_2_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="-1.57079632679 0 0" xyz="0 0.085 0"/>
+    <origin rpy="-1.57079632679 0 0" xyz="0 0.046004135085 0"/>
     <axis xyz="-1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_2_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0366504370572 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076809151591 0"/>
       <geometry>
-        <cylinder length="0.0733008741144" radius="0.025"/>
+        <cylinder length="0.153618303182" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0608008741144 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.141118303182 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0366504370572 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076809151591 0"/>
       <geometry>
-        <box size="0.025 0.025 0.0733008741144"/>
+        <box size="0.025 0.025 0.153618303182"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0608008741144 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.141118303182 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -152,10 +152,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0366504370572 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076809151591 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="1.99933938198e-05" ixy="0" ixz="0" iyy="1.99933938198e-05" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="8.07452769084e-05" ixy="0" ixz="0" iyy="8.07452769084e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <joint name="body_leg_3" type="revolute">
@@ -203,57 +203,57 @@
   </joint>
   <link name="leg_3_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0456845350604 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.0913690701209" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0456845350604 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.0913690701209"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0456845350604 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="0.000134140706946" ixy="0" ixz="0" iyy="0.000134140706946" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_3_2_3" type="revolute">
     <parent link="leg_3_2"/>
     <child link="leg_3_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="1.57079632679 0 0" xyz="0 -0.085 0"/>
+    <origin rpy="1.57079632679 0 0" xyz="0 -0.0913690701209 0"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_3_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.118380753523 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0535642351105 0"/>
       <geometry>
-        <cylinder length="0.236761507046" radius="0.025"/>
+        <cylinder length="0.107128470221" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.224261507046 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.094628470221 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.118380753523 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0535642351105 0"/>
       <geometry>
-        <box size="0.025 0.025 0.236761507046"/>
+        <box size="0.025 0.025 0.107128470221"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.224261507046 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.094628470221 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -261,10 +261,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.118380753523 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0535642351105 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000188936704062" ixy="0" ixz="0" iyy="0.000188936704062" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="4.0338363773e-05" ixy="0" ixz="0" iyy="4.0338363773e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <joint name="body_leg_0" type="revolute">
@@ -312,57 +312,57 @@
   </joint>
   <link name="leg_0_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.033577809589 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.0671556191779" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.033577809589 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.0671556191779"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.033577809589 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="7.52847835366e-05" ixy="0" ixz="0" iyy="7.52847835366e-05" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_0_2_3" type="revolute">
     <parent link="leg_0_2"/>
     <child link="leg_0_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="-1.57079632679 0 0" xyz="0 0.085 0"/>
+    <origin rpy="-1.57079632679 0 0" xyz="0 0.0671556191779 0"/>
     <axis xyz="-1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_0_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0298296548885 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0599755212525 0"/>
       <geometry>
-        <cylinder length="0.059659309777" radius="0.025"/>
+        <cylinder length="0.119951042505" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.047159309777 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.107451042505 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0298296548885 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0599755212525 0"/>
       <geometry>
-        <box size="0.025 0.025 0.059659309777"/>
+        <box size="0.025 0.025 0.119951042505"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.047159309777 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.107451042505 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -370,10 +370,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0298296548885 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0599755212525 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="1.39474441436e-05" ixy="0" ixz="0" iyy="1.39474441436e-05" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="5.00441753268e-05" ixy="0" ixz="0" iyy="5.00441753268e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <joint name="body_leg_5" type="revolute">
@@ -421,57 +421,57 @@
   </joint>
   <link name="leg_5_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0533236091355 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.106647218271" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0533236091355 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.106647218271"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0533236091355 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="0.000180528980529" ixy="0" ixz="0" iyy="0.000180528980529" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_5_2_3" type="revolute">
     <parent link="leg_5_2"/>
     <child link="leg_5_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="1.57079632679 0 0" xyz="0 -0.085 0"/>
+    <origin rpy="1.57079632679 0 0" xyz="0 -0.106647218271 0"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_5_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.07227713778 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.070585788019 0"/>
       <geometry>
-        <cylinder length="0.14455427556" radius="0.025"/>
+        <cylinder length="0.141171576038" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.13205427556 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.128671576038 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.07227713778 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.070585788019 0"/>
       <geometry>
-        <box size="0.025 0.025 0.14455427556"/>
+        <box size="0.025 0.025 0.141171576038"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.13205427556 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.128671576038 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -479,10 +479,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.07227713778 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.070585788019 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="7.17364619423e-05" ixy="0" ixz="0" iyy="7.17364619423e-05" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="6.85147129368e-05" ixy="0" ixz="0" iyy="6.85147129368e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <joint name="body_leg_1" type="revolute">
@@ -530,57 +530,57 @@
   </joint>
   <link name="leg_1_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0500630152865 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.100126030573" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0500630152865 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.100126030573"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 0.0500630152865 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="0.000159853403974" ixy="0" ixz="0" iyy="0.000159853403974" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_1_2_3" type="revolute">
     <parent link="leg_1_2"/>
     <child link="leg_1_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="-1.57079632679 0 0" xyz="0 0.085 0"/>
+    <origin rpy="-1.57079632679 0 0" xyz="0 0.100126030573 0"/>
     <axis xyz="-1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_1_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0449356745952 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076879779578 0"/>
       <geometry>
-        <cylinder length="0.0898713491903" radius="0.025"/>
+        <cylinder length="0.153759559156" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0773713491903 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.141259559156 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0449356745952 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076879779578 0"/>
       <geometry>
-        <box size="0.025 0.025 0.0898713491903"/>
+        <box size="0.025 0.025 0.153759559156"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0773713491903 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.141259559156 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -588,10 +588,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.0449356745952 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 0.076879779578 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="2.90061980176e-05" ixy="0" ixz="0" iyy="2.90061980176e-05" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="8.08900067728e-05" ixy="0" ixz="0" iyy="8.08900067728e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <joint name="body_leg_4" type="revolute">
@@ -639,57 +639,57 @@
   </joint>
   <link name="leg_4_2">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.048367467687 0"/>
       <geometry>
-        <cylinder length="0.085" radius="0.02"/>
+        <cylinder length="0.096734935374" radius="0.02"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.048367467687 0"/>
       <geometry>
-        <box size="0.02 0.02 0.085"/>
+        <box size="0.02 0.02 0.096734935374"/>
       </geometry>
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.0425 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.01 -0.048367467687 0"/>
       <mass value="0.184"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="0.000116916666667" ixy="0" ixz="0" iyy="0.000116916666667" iyz="0" izz="1.22666666667e-05"/>
+      <inertia ixx="0.000149617265068" ixy="0" ixz="0" iyy="0.000149617265068" iyz="0" izz="1.22666666667e-05"/>
     </inertial>
   </link>
   <joint name="leg_4_2_3" type="revolute">
     <parent link="leg_4_2"/>
     <child link="leg_4_3"/>
     <limit effort="30.0" lower="-0.78539816339" upper="0.78539816339" velocity="7.0"/>
-    <origin rpy="1.57079632679 0 0" xyz="0 -0.085 0"/>
+    <origin rpy="1.57079632679 0 0" xyz="0 -0.096734935374 0"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.0"/>
   </joint>
   <link name="leg_4_3">
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.081975629545 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0630369731285 0"/>
       <geometry>
-        <cylinder length="0.16395125909" radius="0.025"/>
+        <cylinder length="0.126073946257" radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <visual>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.15145125909 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.113573946257 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
       <material name="Red"/>
     </visual>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.081975629545 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0630369731285 0"/>
       <geometry>
-        <box size="0.025 0.025 0.16395125909"/>
+        <box size="0.025 0.025 0.126073946257"/>
       </geometry>
     </collision>
     <collision>
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.15145125909 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.113573946257 0"/>
       <geometry>
         <sphere radius="0.025"/>
       </geometry>
@@ -697,10 +697,10 @@
     </collision>
     <inertial>
       <!-- CENTER OF MASS -->
-      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.081975629545 0"/>
+      <origin rpy="1.57079632679 0 0" xyz="0.0125 -0.0630369731285 0"/>
       <mass value="0.04"/>
       <!-- box inertia: 1/12*m(y^2+z^2), ... -->
-      <inertia ixx="9.1683384524e-05" ixy="0" ixz="0" iyy="9.1683384524e-05" iyz="0" izz="4.16666666667e-06"/>
+      <inertia ixx="5.5065466416e-05" ixy="0" ixz="0" iyy="5.5065466416e-05" iyz="0" izz="4.16666666667e-06"/>
     </inertial>
   </link>
   <!-- END OF LEG LINKS/JOINTS -->

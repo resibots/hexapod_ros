@@ -55,18 +55,18 @@
     </collision>
   </xacro:macro>
 
-  <xacro:macro name="visuals_collisions_leg_2" params="revert">
+  <xacro:macro name="visuals_collisions_leg_2" params="revert mid_leg_lenght">
     <visual>
-      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="${leg2_width/2} ${revert*mid_leg_lenght/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <cylinder radius="${leg2_width}" length="${leg2_length}"/>
+                <cylinder radius="${leg2_width}" length="${mid_leg_lenght}"/>
             </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
-      <origin xyz="${leg2_width/2} ${revert*leg2_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="${leg2_width/2} ${revert*mid_leg_lenght/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <box size="${leg2_width} ${leg2_width} ${leg2_length}"/>
+                <box size="${leg2_width} ${leg2_width} ${mid_leg_lenght}"/>
             </geometry>
     </collision>
   </xacro:macro>

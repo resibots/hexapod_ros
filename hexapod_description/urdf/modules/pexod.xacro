@@ -17,7 +17,7 @@
   <xacro:property name="leg1_mass" value="0.02"/>
 
   <xacro:property name="leg2_width" value="0.02"/>
-  <xacro:property name="leg2_length" value="0.085"/>
+  <!-- <xacro:property name="leg2_length" value="0.085"/> -->
   <xacro:property name="leg2_dist" value="0.2"/>
   <xacro:property name="leg2_mass" value="0.184"/>
 
@@ -32,13 +32,19 @@
   <xacro:property name="joint_vel" value="7.0"/>
   <xacro:property name="joint_dmp" value="0.0"/>
 
+  <xacro:property name="end_leg_lenght_0" value="0.1710724238"/>
+  <xacro:property name="end_leg_lenght_1" value="0.112832676842"/>
+  <xacro:property name="end_leg_lenght_2" value="0.118580396678"/>
+  <xacro:property name="end_leg_lenght_3" value="0.17121455382"/>
+  <xacro:property name="end_leg_lenght_4" value="0.132714081127"/>
+  <xacro:property name="end_leg_lenght_5" value="0.133089883124"/>
 
-  <xacro:property name="end_leg_lenght_0" value="0.195760642442"/>
-  <xacro:property name="end_leg_lenght_1" value="0.174571041985"/>
-  <xacro:property name="end_leg_lenght_2" value="0.173437213848"/>
-  <xacro:property name="end_leg_lenght_3" value="0.0445569955162"/>
-  <xacro:property name="end_leg_lenght_4" value="0.0405299416947"/>
-  <xacro:property name="end_leg_lenght_5" value="0.05605478672"/>
+  <xacro:property name="mid_leg_lenght_0" value="0.0606450913199"/>
+  <xacro:property name="mid_leg_lenght_1" value="0.06653684716"/>
+  <xacro:property name="mid_leg_lenght_2" value="0.0988183427764"/>
+  <xacro:property name="mid_leg_lenght_3" value="0.0916923999471"/>
+  <xacro:property name="mid_leg_lenght_4" value="0.0713142195319"/>
+  <xacro:property name="mid_leg_lenght_5" value="0.121756106183"/>
 
 
   <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
