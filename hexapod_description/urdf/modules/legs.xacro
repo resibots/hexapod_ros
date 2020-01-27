@@ -10,14 +10,14 @@
 
     <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
     <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/> -->
-    <xacro:leg index="2" xPos="${body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
-    <xacro:leg index="3" xPos="${body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
+    <xacro:leg index="2" xPos="${body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1" end_leg_lenght="${end_leg_lenght_2}"/>
+    <xacro:leg index="3" xPos="${body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1" end_leg_lenght="${end_leg_lenght_3}"/>
 
 
-    <xacro:leg index="0" xPos="${-body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1"/>
-    <xacro:leg index="5" xPos="${-body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1"/>
+    <xacro:leg index="0" xPos="${-body_length/2-leg1_width/2}" yPos="${body_length/4}" sign="1" end_leg_lenght="${end_leg_lenght_0}"/>
+    <xacro:leg index="5" xPos="${-body_length/2-leg1_width/2}" yPos="${-body_length/4}" sign="-1" end_leg_lenght="${end_leg_lenght_5}"/>
 
-    <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1"/>
-    <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1"/>
+    <xacro:leg index="1" xPos="${-leg1_width/2}" yPos="${body_width/2}" sign="1" end_leg_lenght="${end_leg_lenght_1}"/>
+    <xacro:leg index="4" xPos="${-leg1_width/2}" yPos="${-body_width/2}" sign="-1" end_leg_lenght="${end_leg_lenght_4}"/>
   <!-- END OF LEG LINKS/JOINTS -->
 </robot>

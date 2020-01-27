@@ -3,6 +3,6 @@
 
   <!-- <xacro:include filename="$(find pexod_description)/urdf/pexod_control.xacro" /> -->
 
-  <xacro:include filename="$(find hexapod_description)/urdf/modules/robot.xacro" />
+  <xacro:include filename="$(find hexapod_description)/urdf/modules/pexod.xacro" />
 
 </robot>

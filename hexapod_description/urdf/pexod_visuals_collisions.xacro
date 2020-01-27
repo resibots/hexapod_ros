@@ -4,23 +4,19 @@
 
   <!-- MATERIALS -->
   <material name="Blue">
-    <color rgba="0.8 0.8 0.8 1.0"/>
-    </material>
-
-    <material name="Red">
-      <color rgba="0.8 0.8 0.8 1.0"/>
-    </material>
-
-    <material name="Green">
-        <color rgba="0.8 0.8 0.8 1.0"/>
+    <color rgba="0 0 1 1"/>
   </material>
-
+  <material name="Red">
+    <color rgba="1 0 0 1"/>
+  </material>
+  <material name="Green">
+    <color rgba="0 1 0 1"/>
+  </material>
   <material name="Yellow">
-    <color rgba="0.8 0.8 0.8 1.0"/>
-    </material>
-
-    <material name="LightGrey">
-      <color rgba="0.8 0.8 0.8 1.0"/>
+    <color rgba="1 1 0 1"/>
+  </material>
+  <material name="LightGrey">
+    <color rgba="0.6 0.6 0.6 1.0"/>
   </material>
 
     <!-- END OF MATERIALS -->
@@ -75,47 +71,29 @@
     </collision>
   </xacro:macro>
 
-  <xacro:macro name="visuals_collisions_leg_3" params="revert index">
-    <!-- <xacro:if value="${index == 5 or index == 4 or index == 3 or index == 2 or index == 0}"> -->
+  <xacro:macro name="visuals_collisions_leg_3" params="revert index end_leg_lenght">
       <visual>
-        <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+        <origin xyz="${leg3_width/2} ${revert*end_leg_lenght/2} 0" rpy="${PI_2} 0 0"/>
               <geometry>
-                <cylinder radius="${leg3_width}" length="${leg3_length}"/>
+                <cylinder radius="${leg3_width}" length="${end_leg_lenght}"/>
               </geometry>
         <material name="Red"/>
       </visual>
       <visual>
-        <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
-              <geometry>
-                  <sphere radius="${leg3_width}"/>
-              </geometry>
-        <material name="Red"/>
-      </visual>
-    <!-- </xacro:if>
-    <xacro:if value="${index == 1}">
-      <visual>
-        <origin xyz="${leg3_width/4} ${revert*leg3_length/4} 0" rpy="${PI_2} 0 0"/>
-              <geometry>
-                <cylinder radius="${leg3_width}" length="${leg3_length/2.0}"/>
-              </geometry>
-        <material name="Red"/>
-      </visual>
-      <visual>
-        <origin xyz="${leg3_width/4} ${revert*leg3_length/2.0-revert*leg3_width/4} 0" rpy="${PI_2} 0 0"/>
+        <origin xyz="${leg3_width/2} ${revert*end_leg_lenght-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
               <geometry>
                   <sphere radius="${leg3_width}"/>
               </geometry>
         <material name="Red"/>
       </visual>
-    </xacro:if> -->
     <collision>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="${leg3_width/2} ${revert*end_leg_lenght/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
-                <box size="${leg3_width} ${leg3_width} ${leg3_length}"/>
+                <box size="${leg3_width} ${leg3_width} ${end_leg_lenght}"/>
             </geometry>
     </collision>
     <collision>
-      <origin xyz="${leg3_width/2} ${revert*leg3_length-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
+      <origin xyz="${leg3_width/2} ${revert*end_leg_lenght-revert*leg3_width/2} 0" rpy="${PI_2} 0 0"/>
             <geometry>
                 <sphere radius="${leg3_width}"/>
             </geometry>

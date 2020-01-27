@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find hexapod_description)/launch/pexod.launch" />
+  <arg name="urdf" default="pexod.xacro"/>
+  <include file="$(find hexapod_description)/launch/pexod.launch" >
+    <arg name="model" value="$(arg urdf)"/>
+  </include>
   <arg name="model" />
   <arg name="gui" default="true" />
   <param name="use_gui" value="$(arg gui)" />

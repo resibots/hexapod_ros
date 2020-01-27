@@ -33,12 +33,12 @@
   <xacro:property name="joint_dmp" value="0.0"/>
 
 
-  <xacro:property name="end_leg_lenght_0" value="0.140"/>
-  <xacro:property name="end_leg_lenght_1" value="0.140"/>
-  <xacro:property name="end_leg_lenght_2" value="0.140"/>
-  <xacro:property name="end_leg_lenght_3" value="0.140"/>
-  <xacro:property name="end_leg_lenght_4" value="0.140"/>
-  <xacro:property name="end_leg_lenght_5" value="0.140"/>
+  <xacro:property name="end_leg_lenght_0" value="0.195760642442"/>
+  <xacro:property name="end_leg_lenght_1" value="0.174571041985"/>
+  <xacro:property name="end_leg_lenght_2" value="0.173437213848"/>
+  <xacro:property name="end_leg_lenght_3" value="0.0445569955162"/>
+  <xacro:property name="end_leg_lenght_4" value="0.0405299416947"/>
+  <xacro:property name="end_leg_lenght_5" value="0.05605478672"/>
 
 
   <xacro:include filename="$(find hexapod_description)/urdf/pexod_visuals_collisions.xacro" />
